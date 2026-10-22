@@ -27,7 +27,7 @@ img { max-width: 100%; }
 </style>
 <script>
 window.PFM_STANDALONE = true;
-window.PFM_VERSION = "1.3.0";
+window.PFM_VERSION = "1.4.0";
 if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
 </script>
 </head>
@@ -60,6 +60,16 @@ body { background: var(--bg); color: var(--ink); font-family: var(--f-body); fon
   padding-block: 14px calc(120px + env(safe-area-inset-bottom, 0px));
 }
 .view { display: flex; flex-direction: column; gap: 26px; }
+html, body { overscroll-behavior-y: none; }
+.app { position: relative; z-index: 1; background: var(--bg); min-height: 100vh; }
+.app.dragging { box-shadow: -18px 0 36px rgba(0, 0, 0, 0.65); will-change: transform; }
+.under { position: fixed; inset: 0; z-index: 0; overflow: hidden; background: var(--bg); pointer-events: none; }
+.under .app { box-shadow: none; min-height: 0; }
+.under-dim { position: absolute; inset: 0; background: #000; z-index: 2; }
+body.swiping .fab { opacity: 0; transition: opacity 0.15s; }
+.splash.static img, .splash.static .quote, .splash.static .splash-go, .splash.static .splash-top { animation: none; }
+.splash.dragging { will-change: transform; transition: none; }
+.sheet.dragging { will-change: transform; }
 .view.enter { animation: slide 0.24s ease-out; }
 @keyframes slide { from { opacity: 0; transform: translateX(18px); } to { opacity: 1; transform: none; } }
 .tn { font-variant-numeric: tabular-nums; }
@@ -265,6 +275,19 @@ tr:last-child td { border-bottom: 0; }
 .kinds details.more summary { display: flex; justify-content: space-between; gap: 10px; color: var(--ink); }
 .kinds details.more summary b { font-variant-numeric: tabular-nums; }
 .tline { display: grid; grid-template-columns: minmax(0, 1fr) 92px; gap: 10px; align-items: end; }
+.tcard { padding: 0; gap: 0; }
+.tc-h { width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 10px; align-items: center; border: 0; background: none; color: var(--ink); text-align: left; padding: 16px; font: inherit; }
+.tc-t { font-family: var(--f-display); font-weight: 800; font-size: 20px; text-transform: uppercase; letter-spacing: 0.02em; line-height: 1.05; }
+.tc-h b { font-variant-numeric: tabular-nums; font-weight: 600; }
+.tc-c { color: var(--muted); transition: transform 0.2s; font-size: 20px; }
+.tc-h[aria-expanded="true"] .tc-c { transform: rotate(90deg); }
+.tc-b { display: flex; flex-direction: column; gap: 12px; padding: 0 16px 16px; }
+.tc-b > p { margin: 0; color: var(--muted); font-size: 14.5px; }
+.copybox { display: flex; flex-direction: column; gap: 6px; border: 1px dashed var(--line); border-radius: 12px; padding: 12px; }
+.copybox code { font-family: inherit; font-size: 14.5px; color: var(--ink); user-select: all; -webkit-user-select: all; }
+.copybox .more { align-self: flex-start; }
+.heroval.pos { color: var(--pos); }
+.heroval.neg { color: var(--neg); }
 /* Full-screen chart */
 .cfoot { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
 .expbtn { flex: none; border: 1px solid var(--line); background: transparent; color: var(--muted); border-radius: 999px; padding: 6px 12px; font-size: 13px; font-weight: 600; white-space: nowrap; }
@@ -399,7 +422,8 @@ tfoot td { font-weight: 700; border-top: 2px solid var(--line); border-bottom: 0
 @media (prefers-reduced-motion: reduce) { .view.enter, .sheet, .splash img, .quote, .splash-go, .splash-top { animation: none; } }
 </style>
 
-<div class="app"><main class="view" id="view"></main></div>
+<div class="app" id="app"><main class="view" id="view"></main></div>
+<div class="under" id="under" aria-hidden="true" hidden></div>
 
 <button class="fab" id="addBtn"><span aria-hidden="true">+</span>Add</button>
 <div class="backdrop" id="backdrop" hidden></div>
@@ -438,6 +462,7 @@ tfoot td { font-weight: 700; border-top: 2px solid var(--line); border-bottom: 0
     <details class="more" id="taxMore">
       <summary id="taxSum">Tax return</summary>
       <div class="field"><label class="label" for="taxKind">Counts in your tax return as</label><select id="taxKind"></select></div>
+      <div class="field" id="taxSubWrap" hidden style="margin-top:12px"><label class="label" for="taxSub">Type</label><select id="taxSub"></select></div>
       <div id="taxFields" hidden>
         <div class="tline" style="margin-top:12px">
           <label class="check"><input type="checkbox" id="taxReceipt"><span>I have the receipt or invoice</span></label>
@@ -663,6 +688,16 @@ tfoot td { font-weight: 700; border-top: 2px solid var(--line); border-bottom: 0
     <div class="btnrow"><button type="submit" class="btn primary" id="bulkSave" style="flex:1">Apply</button></div>
   </form>
 </div>
+<div class="sheet" id="formSheet" role="dialog" aria-modal="true" aria-labelledby="fsTitle" hidden>
+  <form id="fsForm" novalidate>
+    <div class="grip" aria-hidden="true"></div>
+    <div class="sheethead"><h2 id="fsTitle">Edit</h2><button type="button" class="mbtn" data-close aria-label="Close">✕</button></div>
+    <p class="hint" id="fsHint"></p>
+    <div id="fsFields" style="display:flex;flex-direction:column;gap:14px"></div>
+    <div class="err" id="fsErr" role="alert"></div>
+    <div class="btnrow"><button type="submit" class="btn primary" id="fsSave" style="flex:1">Save</button><button type="button" class="btn danger" id="fsDelete" hidden>Delete</button></div>
+  </form>
+</div>
 <div class="sheet" id="planSheet" role="dialog" aria-modal="true" aria-labelledby="planTitle" hidden>
   <form id="planForm" novalidate>
     <div class="grip" aria-hidden="true"></div>
@@ -686,7 +721,7 @@ tfoot td { font-weight: 700; border-top: 2px solid var(--line); border-bottom: 0
   </div>
   <div class="splash-bottom" id="splashBottom">
     <p class="quote" id="splashQuote"><span>Sometimes I feel like giving up.</span><span>Then I remember I have a lot of people to prove wrong.</span></p>
-    <span class="splash-go" id="splashGo">Tap to continue</span>
+    <span class="splash-go" id="splashGo">Tap or swipe up</span>
   </div>
 </div>
 
@@ -1031,7 +1066,7 @@ function buildRecords(imp, existing, learned, today) {
   const axisMoney = (c) => eur0.format(c / 100);
 
   const state = {
-    entries: [], trash: [], settings: { limits: {}, projects: [], rules: {}, catMap: {}, recurring: [], balance: { items: [] }, customCats: { aus: [], ein: [] }, cats: null, renames: {}, tax: { study: "", years: {} }, plan: { items: [] } },
+    entries: [], trash: [], settings: { limits: {}, projects: [], rules: {}, catMap: {}, recurring: [], balance: { items: [] }, customCats: { aus: [], ein: [] }, cats: null, renames: {}, tax: { study: "", years: {}, studies: [] }, plan: { items: [] } },
     q: { text: "", type: "all", f: "any" }, taxYear: null, planId: null,
     year: curYear(), mon: new Date().getMonth() + 1,
     stack: [{ v: "hub" }], homeCat: "All", listFilter: "all", sel: null, armedCat: null, newCatType: "aus", editCat: null,
@@ -1154,16 +1189,25 @@ function buildRecords(imp, existing, learned, today) {
   }
   /* ================= Tax ================= */
   const TAX_KINDS = {
-    study: { label: "Study costs", de: "Studienkosten", hint: "Tuition, semester fee, books, printing, trips to uni, the semester abroad. In a Master (second degree) they count as work-related costs without a cap." },
-    equipment: { label: "Work & study equipment", de: "Arbeitsmittel", hint: "Laptop, tablet, desk, software, specialist books. Used privately too? Enter the share you use for work or study." },
-    travel: { label: "Trips for work or study", de: "Reisekosten", hint: "Tickets and accommodation for business trips, excursions or getting to your semester abroad. Your daily commute is entered in the Tax view instead." },
+    study: { label: "Study costs", de: "Ausbildungskosten", hint: "Fees, travel to uni, books, a laptop for your studies, the semester abroad. Bachelor (first degree): special expenses up to €6,000. Master (second degree): work-related costs without a cap.",
+      subs: { fees: ["Tuition & semester fees", "Ausbildungsgebühren"], travel: ["Travel to uni", "Fahrtkosten"], books: ["Books & learning material", "Fachliteratur und Lernmaterial"], equipment: ["Equipment, e.g. laptop", "Arbeitsmittel"], abroad: ["Semester abroad", "Kosten Auslandssemester"], other: ["Other", "Sonstige Kosten"] } },
+    equipment: { label: "Work equipment", de: "Arbeitsmittel", hint: "Laptop, desk, software, specialist books for your job. Used privately too? Enter the share you use for work." },
+    travel: { label: "Business trips", de: "Reisekosten", hint: "Tickets and hotel for trips your job sends you on. The daily way to work is entered in the Tax view instead." },
     application: { label: "Job applications", de: "Bewerbungskosten", hint: "Photos, printing, postage, travel to interviews." },
     workother: { label: "Other work costs", de: "Sonstige Werbungskosten", hint: "Work clothes, union fees, the work share of your phone or internet." },
-    insurance: { label: "Insurance & pension", de: "Vorsorgeaufwendungen", hint: "Health, care, liability, accident or disability insurance that you pay yourself. For a car, only the liability part (Kfz-Haftpflicht) counts. If your parents pay it, they claim it." },
+    business: { label: "Side business expense", de: "Betriebsausgabe (EÜR)", hint: "Costs of a self-employed gig, e.g. travel or material. They lower the profit in your EÜR." },
+    insurance: { label: "Insurance & pension", de: "Vorsorgeaufwendungen", hint: "Insurance you pay yourself. Health & care count in full; liability, accident and similar only up to a small limit. For a car, only the liability part counts. If your parents pay it, they claim it.",
+      subs: { health: ["Health & care insurance", "Kranken- und Pflegeversicherung"], liability: ["Liability", "Haftpflichtversicherung"], accident: ["Accident", "Unfallversicherung"], disability: ["Disability", "Berufsunfähigkeitsversicherung"], other: ["Other", "Sonstige Versicherung"] } },
     donation: { label: "Donations", de: "Spenden", hint: "Up to €300 per donation the bank statement is enough as proof." },
     health: { label: "Medical costs", de: "Krankheitskosten", hint: "Glasses, dentist, prescribed treatment. Only the part above a personal threshold counts." },
     household: { label: "Household services & tradesmen", de: "Haushaltsnahe Dienstleistungen / Handwerker", hint: "Only the labour part of an invoice, paid by transfer. 20 % of it comes straight off your tax." }
   };
+  const TAX_IN_KINDS = {
+    bizin: { label: "Side business income", de: "Betriebseinnahmen (EÜR)", hint: "Income from gigs you invoice yourself, e.g. event or promo jobs. Goes into Anlage G (or S) with an EÜR." },
+    trainer: { label: "Trainer allowance", de: "Übungsleiterpauschale § 3 Nr. 26", hint: "Coaching, tutoring or instructing for a club or public body. Tax-free up to €3,300 a year (2025: €3,000) – still goes into Anlage S." },
+    honorary: { label: "Volunteer allowance", de: "Ehrenamtspauschale § 3 Nr. 26a", hint: "Other volunteer work for a club. Tax-free up to €960 a year (2025: €840)." }
+  };
+  const taxKindOf = (k) => TAX_KINDS[k] || TAX_IN_KINDS[k];
   const TAX_RULES = [
     ["equipment", /(laptop|notebook|macbook|ipad|tablet|monitor|bildschirm|drucker|printer|tastatur|keyboard|\bmaus\b|mouse|software|microsoft 365|office 365|adobe|schreibtisch|bürostuhl|buerostuhl|office chair|taschenrechner)/],
     ["study", /(semesterbeitrag|semester fee|studiengebühr|studiengebuehr|tuition|universit|hochschule|\buni\b|erasmus|sprachkurs|language course|lehrbuch|fachbuch|skript|repetitorium|prüfungsgebühr|exam fee|copyshop|abschlussarbeit|thesis)/],
@@ -1173,10 +1217,20 @@ function buildRecords(imp, existing, learned, today) {
     ["health", /(zahnarzt|arztpraxis|\barzt\b|physio|optiker|fielmann|brille|kontaktlinse|krankenhaus)/],
     ["household", /(handwerker|putzhilfe|reinigungskraft|hausmeister|schornsteinfeger|umzugsunternehmen)/]
   ];
+  const TAX_IN_RULES = [["trainer", /(übungsleiter|uebungsleiter|trainer|tutor|nachhilfe|kursleiter)/], ["bizin", /(honorar|hostess|promotion|messe|freelance|rechnung)/]];
   const TAX_CAT = { Education: "study", Insurance: "insurance" };
-  function taxSuggest(e) {
-    if (e.type !== "aus" || e.tax || e.taxNo) return null;
+  const TAX_SUB_GUESS = { study: [["fees", /(semesterbeitrag|semester fee|studiengebühr|tuition|gebühr)/], ["books", /(buch|book|skript|copyshop|druck)/], ["travel", /(bahn|ticket|flixbus|zug|fahrt)/], ["equipment", /(laptop|macbook|ipad|tablet|monitor)/], ["abroad", /(erasmus|ausland|abroad)/]],
+    insurance: [["health", /(kranken|pflege|health|\baok\b|techniker|barmer|\bdak\b|\bhkk\b)/], ["liability", /(haftpflicht|liability)/], ["accident", /(unfall|accident)/], ["disability", /(berufsunfähig|berufsunfaehig|disability)/]] };
+  function taxSubGuess(kind, e) {
     const h = `${e.note || ""} ${e.payee || ""} ${e.memo || ""}`.toLowerCase();
+    for (const [sub, re] of TAX_SUB_GUESS[kind] || []) if (re.test(h)) return sub;
+    return TAX_KINDS[kind] && TAX_KINDS[kind].subs ? "other" : "";
+  }
+  function taxSuggest(e) {
+    if (e.tax || e.taxNo) return null;
+    const h = `${e.note || ""} ${e.payee || ""} ${e.memo || ""}`.toLowerCase();
+    if (e.type === "ein") { if (isRefund(e)) return null; for (const [k, re] of TAX_IN_RULES) if (re.test(h)) return k; return null; }
+    if (e.type !== "aus") return null;
     for (const [k, re] of TAX_RULES) if (re.test(h)) return k;
     for (const [c, k] of Object.entries(TAX_CAT)) if (e.cat === rn(c)) return k;
     return null;
@@ -1186,7 +1240,7 @@ function buildRecords(imp, existing, learned, today) {
       Number.isInteger(e.cents) && e.cents > 0 && /^\d{4}-\d{2}-\d{2}$/.test(e.date || "");
   }
   function normEntry(e) {
-    if (e.tax && !(e.type === "aus" && e.tax.kind in TAX_KINDS)) { const { tax: _t, ...r } = e; e = r; }
+    if (e.tax && !((e.type === "aus" && e.tax.kind in TAX_KINDS) || (e.type === "ein" && e.tax.kind in TAX_IN_KINDS))) { const { tax: _t, ...r } = e; e = r; }
     if (e.type === "tr") return { ...e, cat: "Transfer", account: ACC_ALIAS[e.account] || e.account || "Not specified", toAccount: ACC_ALIAS[e.toAccount] || e.toAccount };
     return { ...e, cat: normCat(e.cat, e.type), account: ACC_ALIAS[e.account] || e.account || "Not specified" };
   }
@@ -1208,7 +1262,7 @@ function buildRecords(imp, existing, learned, today) {
     const pl = obj(s.plan);
     const planItems = Array.isArray(pl.items) ? pl.items.filter((i) => i && typeof i.id === "string" && typeof i.name === "string" && Number.isInteger(i.cents) && i.cents > 0).map((i) => ({ ...i, every: [1, 3, 6, 12].includes(i.every) ? i.every : 1 })) : [];
     return { limits: lim, projects, rules: obj(s.rules), catMap: obj(s.catMap), recurring, balance: { items }, customCats: { aus: names(cc.aus), ein: names(cc.ein) }, cats: catsOk ? { aus: names(s.cats.aus), ein: names(s.cats.ein) } : null, renames,
-      tax: { study: ["master", "first", "none"].includes(tx.study) ? tx.study : "", years }, plan: { ...pl, items: planItems } };
+      tax: { study: ["master", "first", "none"].includes(tx.study) ? tx.study : "", years, studies: Array.isArray(tx.studies) ? tx.studies.filter((x) => x && typeof x.id === "string" && (x.kind === "first" || x.kind === "second")) : [] }, plan: { ...pl, items: planItems } };
   }
   async function patchSettings(patch) {
     if (!store) throw new Error("not ready");
@@ -2281,7 +2335,7 @@ function buildRecords(imp, existing, learned, today) {
     const liquid = known.filter((x) => !x.inv).reduce((s, x) => s + x.v, 0), invested = known.filter((x) => x.inv).reduce((s, x) => s + x.v, 0);
     const hasInv = accs.some((x) => x.inv);
     const bal = mt.i - mt.o, plus = ytd.i - ytd.o;
-    const pd = state.settings.plan.items.length ? planData() : null, txs = taxSummary(String(y));
+    const pd = state.settings.plan.items.length ? planData() : null, txs = taxCalc(String(y));
     return `
       <header class="hubhead">
         <div class="brand"><h1 class="wordmark">P<b>F</b>M</h1><span class="label">Personal Finance Management</span></div>
@@ -2303,7 +2357,7 @@ function buildRecords(imp, existing, learned, today) {
       </nav>
       <div class="minitiles">
         <button class="mtile" data-action="nav" data-arg="plan"><span class="tile-t">Independence</span>${pd ? `<span class="tile-v">${Math.round(pd.cov * 100)} %</span><span class="tile-s">paid by yourself</span>` : `<span class="tile-s">What you'd need to earn to pay everything yourself</span>`}</button>
-        <button class="mtile" data-action="nav" data-arg="tax"><span class="tile-t">Tax return</span>${txs.wk + txs.sa ? `<span class="tile-v">${money(txs.wk + txs.sa)}</span><span class="tile-s">deductible in ${y}</span>` : `<span class="tile-s">Collect deductible costs for ${y}</span>`}</button>
+        <button class="mtile" data-action="nav" data-arg="tax"><span class="tile-t">Tax return</span>${txs.hasEmp ? `<span class="tile-v ${txs.refund >= 0 ? "pos" : "neg"}">${signed(txs.refund)}</span><span class="tile-s">estimated ${txs.refund >= 0 ? "refund" : "to pay"} ${y}</span>` : txs.deductible ? `<span class="tile-v">${money(txs.deductible)}</span><span class="tile-s">deductible in ${y}</span>` : `<span class="tile-s">Collect deductible costs for ${y}</span>`}</button>
       </div>
       <section class="accounts" aria-label="Accounts">
         <span class="label">${hasInv ? "Accounts &amp; investments" : "Account balance"}</span>
@@ -2321,7 +2375,7 @@ function buildRecords(imp, existing, learned, today) {
   function hay(e) {
     const p = e.project && projById(e.project), amt = (e.cents / 100).toFixed(2);
     return fold([e.note, e.payee, e.memo, e.cat, e.account, e.toAccount, p && p.name, amt, amt.replace(".", ","), e.date, monthFmt.format(isoDate(e.date)),
-      e.tax && TAX_KINDS[e.tax.kind] ? TAX_KINDS[e.tax.kind].label : "", e.spread && e.spread.months > 1 ? `÷${e.spread.months}` : ""].filter(Boolean).join(" "));
+      e.tax && taxKindOf(e.tax.kind) ? taxKindOf(e.tax.kind).label : "", e.spread && e.spread.months > 1 ? `÷${e.spread.months}` : ""].filter(Boolean).join(" "));
   }
   /* Payments that look like they are meant for half a year, a year or two years but are not spread yet */
   let guessCache = null;
@@ -2403,22 +2457,51 @@ function buildRecords(imp, existing, learned, today) {
   /* ---------- Tax return ---------- */
   const TAX_LIFE = { car: 6, motorbike: 7, bike: 7, ebike: 7, phone: 5, watch: 5, camera: 7, tv: 7, console: 5, furniture: 13, appliance: 10, sports: 7, instrument: 10, valuables: 0, other: 5 };
   const TAX_CHECK = [
-    ["lstb", "Wage tax certificate (Lohnsteuerbescheinigung)", "From your employer, usually by the end of February. ELSTER pre-fills it for you."],
-    ["enrol", "Proof of enrolment + your Bachelor certificate", "Shows that your Master is a second degree – then study costs count as Werbungskosten."],
+    ["lstb", "Wage tax certificates (Lohnsteuerbescheinigung)", "One from every employer, usually by the end of February. ELSTER pre-fills them for you."],
+    ["enrol", "Proof of enrolment", "For each study period. In a Master also your Bachelor certificate – it proves the second degree."],
     ["abroad", "Semester abroad documents", "Learning agreement or transcript, tickets, rent contract abroad and proof that you kept your room in Germany."],
-    ["kv", "Health & care insurance statement", "Your insurer reports the amounts to the tax office – check them. If your parents pay, they claim them."],
-    ["kap", "Annual tax statements of your depots", "Jahressteuerbescheinigung from Trade Republic and your other depot for Anlage KAP. Your exemption orders may add up to €1,000 in total."],
+    ["side", "Side jobs", "Invoices of your gigs and a confirmation for trainer or volunteer allowances (Übungsleiter)."],
+    ["kv", "Health & care insurance statement", "Your insurer reports the amounts to the tax office. If your parents pay, they claim them."],
+    ["kap", "Annual tax statements of your depots", "Jahressteuerbescheinigung from Trade Republic and your other depot for Anlage KAP."],
     ["receipts", "Receipts for everything marked", "Invoices for equipment, books and tickets. A photo in one folder per year is enough."],
-    ["ids", "Tax ID and IBAN", "Your 11-digit Steuer-ID and the account for the refund."],
-    ["elster", "ELSTER account", "Register at elster.de – the activation letter comes by post and takes about two weeks."]
+    ["elster", "ELSTER login or your tax app", "You need your tax ID and the IBAN for the refund."]
   ];
-  const taxCfg = (y) => state.settings.tax.years[y] || {};
-  const wkFlat = (y) => (y >= 2023 ? 123000 : y === 2022 ? 120000 : 100000);
-  function commuteDay(km, y) {
-    if (y >= 2026) return Math.round(km * 38);
-    return Math.round(Math.min(km, 20) * 30 + Math.max(0, km - 20) * (y >= 2022 ? 38 : 35));
+  const TAXR = (y) => ({
+    flat: y >= 2023 ? 123000 : 100000, saver: y >= 2023 ? 100000 : 80100,
+    trainer: y >= 2026 ? 330000 : 300000, honorary: y >= 2026 ? 96000 : 84000,
+    ho: y >= 2023 ? 600 : 500, hoMax: y >= 2023 ? 210 : 120, perDiem: 1400, carKm: 30,
+    soliFree: y >= 2026 ? 20350 : y === 2025 ? 19950 : 18130,
+    kmText: y >= 2026 ? "€0.38 per km one way from the first km" : "€0.30 per km one way, from km 21 €0.38",
+    km: (km) => Math.round(y >= 2026 ? km * 38 : Math.min(km, 20) * 30 + Math.max(0, km - 20) * (y >= 2022 ? 38 : 35))
+  });
+  /* Income tax tariff § 32a EStG (euros in, euros out) for 2024, 2025 and 2026+ */
+  function tariff(zve, y) {
+    zve = Math.floor(Math.max(0, zve));
+    const T = y >= 2026 ? [12348, 17799, 69878, 914.51, 173.1, 1034.87, 11135.63, 19470.38] : y === 2025 ? [12096, 17443, 68480, 932.3, 176.64, 1015.13, 10911.92, 19246.67] : [11784, 17005, 66760, 954.8, 181.19, 991.21, 10636.31, 18971.06];
+    if (zve <= T[0]) return 0;
+    if (zve <= T[1]) { const q = (zve - T[0]) / 1e4; return Math.floor((T[3] * q + 1400) * q); }
+    if (zve <= T[2]) { const q = (zve - T[1]) / 1e4; return Math.floor((T[4] * q + 2397) * q + T[5]); }
+    if (zve <= 277825) return Math.floor(0.42 * zve - T[6]);
+    return Math.floor(0.45 * zve - T[7]);
   }
-  /* Tax depreciation (AfA) of a thing used for work or study: computers in full in the year of purchase, up to €952 incl. VAT (GWG) as well, otherwise monthly over the official useful life */
+  /* Own share of medical costs a single person without children has to carry (zumutbare Belastung, stepwise) */
+  function zumutbar(c) { const g = Math.max(0, c) / 100; return Math.round((Math.min(g, 15340) * 0.05 + Math.max(0, Math.min(g, 51130) - 15340) * 0.06 + Math.max(0, g - 51130) * 0.07) * 100); }
+  const taxCfg = (y) => state.settings.tax.years[y] || {};
+  const taxStudies = () => state.settings.tax.studies || [];
+  function studyAt(date) {
+    const S = taxStudies();
+    for (const x of S) if ((!x.from || date >= x.from) && (!x.to || date <= x.to)) return x.kind;
+    if (S.length) return null;
+    const legacy = state.settings.tax.study;
+    return legacy === "master" ? "second" : legacy === "none" ? null : "first";
+  }
+  function yearStudy(yn) {
+    const a = `${yn}-01-01`, b = `${yn}-12-31`, S = taxStudies(), ov = (x) => (!x.from || x.from <= b) && (!x.to || x.to >= a);
+    if (S.some((x) => x.kind === "second" && ov(x))) return "second";
+    if (S.some((x) => x.kind === "first" && ov(x))) return "first";
+    return S.length ? null : studyAt(b);
+  }
+  /* Tax depreciation (AfA) of a thing used for work or study: computers in full in the year of purchase, up to €952 incl. VAT as well, otherwise monthly over the official useful life */
   function taxDep(a, y, share) {
     if (!a || !a.cost || !share || !/^\d{4}-\d{2}/.test(a.date || "")) return 0;
     const by = Number(a.date.slice(0, 4)), bm = Number(a.date.slice(5, 7)), base = a.cost * share / 100;
@@ -2428,99 +2511,252 @@ function buildRecords(imp, existing, learned, today) {
     const total = life * 12, before = y === by ? 0 : (13 - bm) + 12 * (y - by - 1), inYear = y === by ? 13 - bm : 12;
     return Math.round(base / total * Math.max(0, Math.min(inYear, total - before)));
   }
-  function taxRows(y) {
-    const rows = [], linked = new Set(), yn = Number(y);
+  const MANUAL_KINDS = [].concat(
+    Object.entries(TAX_KINDS.study.subs).map(([k, v]) => [`study:${k}`, `Study · ${v[0]}`]),
+    [["equipment", "Work equipment"], ["travel", "Business trips"], ["application", "Job applications"], ["workother", "Other work costs"]],
+    Object.entries(TAX_KINDS.insurance.subs).map(([k, v]) => [`insurance:${k}`, `Insurance · ${v[0]}`]),
+    [["donation", "Donations"], ["health", "Medical costs"], ["household", "Household services"], ["bizin", "Side business · income"], ["business", "Side business · expense"], ["trainer", "Trainer allowance (income)"], ["honorary", "Volunteer allowance (income)"]]);
+  function taxCalc(y) {
+    y = String(y); const yn = Number(y), R = TAXR(yn), C = taxCfg(y);
+    const rows = [], linked = new Set();
     for (const e of state.entries) {
-      if (e.type !== "aus" || !e.tax || !e.date.startsWith(y + "-")) continue;
-      const share = e.tax.share || 100, a = assetOf(e);
-      if (a && e.tax.kind === "equipment") { linked.add(a.id); rows.push({ e, kind: "equipment", amt: taxDep(a, yn, a.taxShare || share), note: (a.cost > 95200 && a.atype !== "laptop" && a.atype !== "tablet") ? "spread over its useful life" : "" }); continue; }
-      rows.push({ e, kind: e.tax.kind, amt: Math.round(e.cents * share / 100) });
+      if (!e.tax || !e.date.startsWith(y + "-")) continue;
+      if (e.type === "ein") { if (TAX_IN_KINDS[e.tax.kind]) rows.push({ src: "e", e, kind: e.tax.kind, sub: "", amt: e.cents, date: e.date, receipt: true }); continue; }
+      if (e.type !== "aus" || !TAX_KINDS[e.tax.kind]) continue;
+      const share = e.tax.share || 100, a = assetOf(e), equip = e.tax.kind === "equipment" || (e.tax.kind === "study" && e.tax.sub === "equipment");
+      let amt = Math.round(e.cents * share / 100), note = "";
+      if (a && equip) { linked.add(a.id); amt = taxDep(a, yn, a.taxShare || share); if (a.cost > 95200 && a.atype !== "laptop" && a.atype !== "tablet") note = "spread over its useful life"; }
+      rows.push({ src: "e", e, kind: e.tax.kind, sub: e.tax.sub || (TAX_KINDS[e.tax.kind].subs ? "other" : ""), amt, date: e.date, receipt: !!e.tax.receipt, note, share });
     }
     for (const a of state.settings.balance.items) {
       if (a.kind !== "asset" || linked.has(a.id)) continue;
       const tx = a.txId && state.entries.find((x) => x.id === a.txId);
-      const share = a.taxShare || (tx && tx.tax && tx.tax.kind === "equipment" ? tx.tax.share || 100 : 0);
+      const kind = tx && tx.tax && tx.tax.kind === "study" ? "study" : "equipment";
+      const share = a.taxShare || (tx && tx.tax && (tx.tax.kind === "equipment" || tx.tax.sub === "equipment") ? tx.tax.share || 100 : 0);
       const amt = share ? taxDep(a, yn, share) : 0;
-      if (amt) rows.push({ asset: a, kind: "equipment", amt, note: `${share < 100 ? share + " % of " : ""}${money(a.cost)} · bought ${dateFmt.format(isoDate(a.date))}` });
+      if (amt) rows.push({ src: "a", asset: a, kind, sub: kind === "study" ? "equipment" : "", amt, date: a.date, receipt: true, note: `${share < 100 ? share + " % of " : ""}${money(a.cost)} · bought ${dateFmt.format(isoDate(a.date))}` });
     }
-    return rows;
+    for (const m of C.manual || []) rows.push({ src: "m", m, kind: m.kind, sub: m.sub || "", amt: m.cents || 0, date: "", receipt: true });
+    const ys = yearStudy(yn);
+    for (const r of rows) if (r.kind === "study") r.study = r.date ? studyAt(r.date) : ys;
+    const sum = (f) => rows.filter(f).reduce((a, r) => a + r.amt, 0);
+    const places = C.places && C.places.length ? C.places : C.workKm ? [{ id: "legacy", name: "Work", km: C.workKm, days: C.workDays }] : [];
+    const commute = places.reduce((a, p) => a + R.km(p.km || 0) * (p.days || 0), 0);
+    const uni = C.uniKm && C.uniDays ? R.km(C.uniKm) * C.uniDays : 0;
+    const ho = Math.min(R.hoMax, C.hoDays || 0) * R.ho;
+    const equipItem = sum((r) => r.kind === "equipment"), tools = Math.max(equipItem, C.flatTools ? 11000 : 0);
+    const wkOther = sum((r) => ["travel", "application", "workother"].includes(r.kind)) + (C.flatAccount ? 1600 : 0);
+    const studyBy = (kind) => sum((r) => r.kind === "study" && r.study === kind) + (ys === kind ? uni : 0);
+    const study1 = studyBy("first"), study2 = studyBy("second"), studyNone = sum((r) => r.kind === "study" && !r.study);
+    const wk = commute + ho + tools + wkOther + study2;
+    const emps = C.employers || [], E = (k) => emps.reduce((a, x) => a + (x[k] || 0), 0);
+    const gross = E("gross"), flatUsed = Math.min(R.flat, gross), wkUsed = Math.max(wk, flatUsed), incN = gross - wkUsed;
+    const trainerIn = sum((r) => r.kind === "trainer"), honIn = sum((r) => r.kind === "honorary");
+    const sideTaxable = Math.max(0, trainerIn - R.trainer) + Math.max(0, honIn - R.honorary);
+    const bizIn = sum((r) => r.kind === "bizin"), bizOut = sum((r) => r.kind === "business") + (C.perDiemDays || 0) * R.perDiem + Math.round((C.carKm || 0) * R.carKm), profit = bizIn - bizOut;
+    const gde = incN + profit + sideTaxable;
+    const healthOwn = sum((r) => r.kind === "insurance" && r.sub === "health"), insOther = sum((r) => r.kind === "insurance" && r.sub !== "health");
+    const basic = Math.round(E("kvAn") * 0.96) + E("pvAn") + healthOwn;
+    const vors = E("rvAn") + Math.max(basic, Math.min(190000, basic + E("avAn") + insOther));
+    const ausb = Math.min(600000, study1), don = sum((r) => r.kind === "donation");
+    const saOther = Math.max(3600, ausb + don + E("kist"));
+    const med = sum((r) => r.kind === "health"), zum = zumutbar(gde), ab = Math.max(0, med - zum);
+    const hh = sum((r) => r.kind === "household"), hhCredit = Math.min(Math.round(hh * 0.2), 400000);
+    const zve = gde - vors - saOther - ab;
+    const K = C.kap || {}, capIn = K.income || 0, capTax = Math.max(0, capIn - R.saver), base = Math.max(0, zve) / 100;
+    const estA = tariff(base + capTax / 100, yn), estB = tariff(base, yn) + Math.max(0, Math.round(capTax * 0.25) / 100 - (K.foreign || 0) / 100);
+    const useA = K.guenstiger !== false && estA <= estB;
+    const est = Math.max(0, (useA ? estA : estB) - hhCredit / 100);
+    const soliAmt = est <= R.soliFree ? 0 : Math.min(est * 0.055, (est - R.soliFree) * 0.119);
+    const church = E("kist") || K.kist ? est * 0.09 : 0;
+    const due = Math.round((est + soliAmt + church) * 100);
+    const paid = E("lst") + E("soli") + E("kist") + (K.kapest || 0) + (K.soli || 0) + (K.kist || 0);
+    const missing = rows.filter((r) => r.src === "e" && r.e.type === "aus" && !r.receipt).length;
+    return { y, yn, R, C, rows, places, commute, uni, ys, ho, tools, equipItem, wkOther, study1, study2, studyNone, wk, emps, gross, flatUsed, wkUsed, incN, trainerIn, honIn, sideTaxable, bizIn, bizOut, profit, gde,
+      healthOwn, insOther, basic, vors, ausb, don, saOther, med, zum, ab, hh, hhCredit, zve, capIn, capTax, useA, est, due, paid, refund: paid - due, loss: zve < 0 ? -zve : 0, missing, hasEmp: emps.length > 0,
+      deductible: wk + ausb + don + ab + (vors > 0 ? vors : 0) };
   }
-  function taxSummary(y) {
-    y = String(y); const yn = Number(y), cfg = taxCfg(y), study = state.settings.tax.study || "master";
-    const rows = taxRows(y), by = {};
-    for (const r of rows) by[r.kind] = (by[r.kind] || 0) + r.amt;
-    const cWork = cfg.workKm && cfg.workDays ? commuteDay(cfg.workKm, yn) * cfg.workDays : 0, cUni = cfg.uniKm && cfg.uniDays ? commuteDay(cfg.uniKm, yn) * cfg.uniDays : 0;
-    const ho = yn >= 2023 ? Math.min(210, cfg.hoDays || 0) * 600 : 0;
-    const studyWk = study === "master" ? by.study || 0 : 0;
-    const wk = (by.equipment || 0) + (by.travel || 0) + (by.application || 0) + (by.workother || 0) + studyWk + cWork + cUni + ho;
-    const sa = (study === "first" ? Math.min(600000, by.study || 0) : 0) + (by.insurance || 0) + (by.donation || 0);
-    const missing = rows.filter((r) => r.e && !r.e.tax.receipt).length;
-    return { y, rows, by, cWork, cUni, ho, wk, sa, ab: by.health || 0, hh: by.household || 0, flat: wkFlat(yn), missing, study };
+  const taxPatchYear = (y, fn) => { const T = state.settings.tax, cur = T.years[y] || {}; return patchSettings({ tax: { ...T, years: { ...T.years, [y]: fn({ ...cur }) } } }); };
+  const upsertBy = (list, it) => { const l = Array.isArray(list) ? list.slice() : [], i = l.findIndex((x) => x.id === it.id); if (i >= 0) l[i] = it; else l.push(it); return l; };
+  const tid = () => "x" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+  function openEmployer(y, it) {
+    openForm({ title: it ? "Wage tax certificate" : "Add wage tax certificate", hint: "Copy the numbers from your Lohnsteuerbescheinigung – the line number is in brackets. Empty fields count as 0.",
+      values: it || { cls: "1" },
+      fields: [{ k: "name", label: "Employer or job", ph: "e.g. Werkstudent job", max: 40 }, { k: "cls", label: "Tax class", type: "select", opts: [["1", "1 – your main job"], ["6", "6 – a second job at the same time"], ["2", "2"], ["3", "3"], ["4", "4"], ["5", "5"]] },
+        { k: "gross", label: "Gross wage (3)", type: "money", half: true }, { k: "lst", label: "Wage tax (4)", type: "money", half: true },
+        { k: "soli", label: "Soli (5)", type: "money", half: true }, { k: "kist", label: "Church tax (6)", type: "money", half: true },
+        { k: "rvAn", label: "Pension – you (23a)", type: "money", half: true }, { k: "rvAg", label: "Pension – employer (22a)", type: "money", half: true },
+        { k: "kvAn", label: "Health ins. (25)", type: "money", half: true }, { k: "pvAn", label: "Care ins. (26)", type: "money", half: true },
+        { k: "avAn", label: "Unemployment ins. (27)", type: "money" }],
+      validate: (v) => (!v.gross ? "Enter the gross wage (line 3)." : ""),
+      onSave: (v) => taxPatchYear(y, (c) => ({ ...c, employers: upsertBy(c.employers, { ...v, name: v.name || "Job", cls: Number(v.cls) || 1, id: it ? it.id : tid() }) })),
+      onDelete: it ? () => taxPatchYear(y, (c) => ({ ...c, employers: (c.employers || []).filter((x) => x.id !== it.id) })) : null });
+  }
+  function openPlace(y, it) {
+    openForm({ title: it ? "Way to work" : "Add a way to work", hint: `${TAXR(Number(y)).kmText}. Count only the days you actually went there.`,
+      values: it || {},
+      fields: [{ k: "name", label: "Workplace", ph: "e.g. Office", max: 40 }, { k: "km", label: "Km one way", type: "num", ph: "e.g. 10", half: true }, { k: "days", label: "Days there", type: "num", ph: "e.g. 105", half: true }],
+      validate: (v) => (!v.km || !v.days ? "Enter the distance and the number of days." : ""),
+      onSave: (v) => taxPatchYear(y, (c) => { const pl = c.places && c.places.length ? c.places : c.workKm ? [{ id: "legacy", name: "Work", km: c.workKm, days: c.workDays }] : []; const { workKm: _a, workDays: _b, ...rest } = c; return { ...rest, places: upsertBy(pl, { name: v.name || "Work", km: Math.round(v.km), days: Math.min(366, Math.round(v.days)), id: it ? it.id : tid() }) }; }),
+      onDelete: it ? () => taxPatchYear(y, (c) => { const pl = c.places && c.places.length ? c.places : []; const { workKm: _a, workDays: _b, ...rest } = c; return { ...rest, places: pl.filter((x) => x.id !== it.id) }; }) : null });
+  }
+  function openStudy(it) {
+    const T = state.settings.tax;
+    openForm({ title: it ? "Study period" : "Add a study period", hint: "A Bachelor right after school is a first degree. A Master after a Bachelor (or a Bachelor after vocational training) is a second degree.",
+      values: it || { kind: "first" },
+      fields: [{ k: "kind", label: "Kind", type: "select", opts: [["first", "First degree – e.g. Bachelor"], ["second", "Second degree – e.g. Master"]] }, { k: "name", label: "Degree and university", ph: "e.g. Bachelor, University of …", max: 60 },
+        { k: "from", label: "From", type: "date", half: true }, { k: "to", label: "Until (empty if ongoing)", type: "date", half: true }],
+      validate: (v) => (!v.from ? "Pick when it started." : v.to && v.to < v.from ? "The end is before the start." : ""),
+      onSave: (v) => patchSettings({ tax: { ...T, studies: upsertBy(T.studies, { ...v, id: it ? it.id : tid() }).sort((a, b) => a.from.localeCompare(b.from)) } }),
+      onDelete: it ? () => patchSettings({ tax: { ...T, studies: (T.studies || []).filter((x) => x.id !== it.id) } }) : null });
+  }
+  function openManual(y, it, preset) {
+    const val = it ? (it.sub ? `${it.kind}:${it.sub}` : it.kind) : preset || "study:fees";
+    openForm({ title: it ? "Amount" : "Add an amount", hint: "For costs or income that aren't transactions in PFM – e.g. from before you used the app.",
+      values: { kind: val, label: it ? it.label : "", cents: it ? it.cents : 0 },
+      fields: [{ k: "kind", label: "Counts as", type: "select", opts: MANUAL_KINDS }, { k: "label", label: "What", ph: "e.g. Semester fees", max: 60 }, { k: "cents", label: "Amount (€)", type: "money" }],
+      validate: (v) => (!v.cents ? "Enter the amount." : ""),
+      onSave: (v) => { const [kind, sub] = v.kind.split(":"); return taxPatchYear(y, (c) => ({ ...c, manual: upsertBy(c.manual, { id: it ? it.id : tid(), kind, sub: sub || "", label: v.label, cents: v.cents }) })); },
+      onDelete: it ? () => taxPatchYear(y, (c) => ({ ...c, manual: (c.manual || []).filter((x) => x.id !== it.id) })) : null });
+  }
+  function studyText(T) {
+    const subs = TAX_KINDS.study.subs, by = {};
+    for (const r of T.rows) if (r.kind === "study" && r.study === "first") by[r.sub || "other"] = (by[r.sub || "other"] || 0) + r.amt;
+    if (T.ys === "first" && T.uni) by.travel = (by.travel || 0) + T.uni;
+    const eu = (c) => (c / 100).toFixed(2).replace(".", ",");
+    return Object.keys(subs).filter((k) => by[k]).map((k) => `${subs[k][1]}: ${eu(by[k])} €`).join("; ");
   }
   function viewTax() {
-    const ys = new Set(state.entries.map((e) => e.date.slice(0, 4))); ys.add(String(curYear()));
+    const ys = new Set(state.entries.map((e) => e.date.slice(0, 4))); ys.add(String(curYear())); Object.keys(state.settings.tax.years).forEach((k) => ys.add(k));
     const years = [...ys].sort().reverse(), y = state.taxYear && ys.has(state.taxYear) ? state.taxYear : String(curYear());
-    const T = taxSummary(y), cfg = taxCfg(y), yn = Number(y), over = T.wk - T.flat, st = T.study;
-    const kindBlock = (k) => {
-      const rs = T.rows.filter((r) => r.kind === k); if (!rs.length) return "";
-      return `<details class="more"><summary><span>${esc(TAX_KINDS[k].label)} (${rs.length})</span><b>${money(rs.reduce((a, r) => a + r.amt, 0))}</b></summary>${rs.map((r) => r.e
-        ? entryRow(r.e, { cents: r.amt, note: [(r.e.tax.share || 100) < 100 ? `${r.e.tax.share} % of ${money(r.e.cents)}` : "", r.note || "", r.e.tax.receipt ? "" : "no receipt yet"].filter(Boolean).join(" · ") })
-        : `<button class="row nochev" data-action="bal-item" data-arg="${esc(r.asset.id)}">${badge(r.asset.costCat || "Shopping")}<span class="main"><span class="t1">${esc(r.asset.name)}<span class="tag">AfA</span></span><span class="t2">${esc(r.note)}</span></span><span class="val">${money(r.amt)}</span></button>`).join("")}</details>`;
-    };
-    const line = (label, v, sub) => (v ? `<div><span>${esc(label)}${sub ? `<br><span class="hint">${esc(sub)}</span>` : ""}</span><b>${money(v)}</b></div>` : "");
-    const numIn = (k, label, ph) => `<div class="field"><label class="label" for="tx-${k}">${label}</label><input id="tx-${k}" data-action="tax-set" data-arg="${k}" inputmode="decimal" value="${cfg[k] != null ? esc(String(cfg[k])) : ""}" placeholder="${ph}"></div>`;
+    const T = taxCalc(y), C = T.C, R = T.R, open = state.taxOpen || (state.taxOpen = new Set(["jobs"]));
+    const prevY = String(T.yn - 1), P = state.settings.tax.years[prevY];
+    const canCarry = P && !(C.employers || []).length && !(C.places || []).length && ((P.employers || []).length || (P.places || []).length);
+    const sec = (id, title, total, body) => `<section class="card tcard"><button class="tc-h" data-action="tax-sec" data-arg="${id}" aria-expanded="${open.has(id)}"><span class="tc-t">${title}</span><b>${total}</b><span class="tc-c" aria-hidden="true">›</span></button>${open.has(id) ? `<div class="tc-b">${body}</div>` : ""}</section>`;
+    const line = (label, v, sub, neg) => `<div><span>${label}${sub ? `<br><span class="hint">${sub}</span>` : ""}</span><b>${neg ? "−" : ""}${money(v)}</b></div>`;
+    const lineIf = (label, v, sub) => (v ? line(label, v, sub) : "");
+    const rowE = (r) => r.src === "e"
+      ? entryRow(r.e, { cents: r.amt, note: [r.sub && taxKindOf(r.kind).subs ? taxKindOf(r.kind).subs[r.sub][0] : "", r.share && r.share < 100 ? `${r.share} % of ${money(r.e.cents)}` : "", r.note || "", r.e.type === "aus" && !r.receipt ? "no receipt yet" : ""].filter(Boolean).join(" · ") })
+      : r.src === "a" ? `<button class="row nochev" data-action="bal-item" data-arg="${esc(r.asset.id)}">${badge(r.asset.costCat || "Shopping")}<span class="main"><span class="t1">${esc(r.asset.name)}<span class="tag">AfA</span></span><span class="t2">${esc(r.note)}</span></span><span class="val">${money(r.amt)}</span></button>`
+      : `<button class="row nobadge" data-action="tax-man" data-arg="${esc(r.m.id)}"><span class="main"><span class="t1">${esc(r.m.label || (taxKindOf(r.kind) || {}).label || "Amount")}<span class="tag">Added</span></span><span class="t2">${esc((MANUAL_KINDS.find(([k]) => k === (r.sub ? `${r.kind}:${r.sub}` : r.kind)) || [0, ""])[1])}</span></span><span class="val">${money(r.amt)}</span><span class="chev" aria-hidden="true">›</span></button>`;
+    const rowsOf = (f) => T.rows.filter(f).sort((a, b) => b.amt - a.amt).map(rowE).join("");
+    const addAmt = (preset, label) => `<button class="more" data-action="tax-man" data-arg="new:${preset}">+ ${label || "Add an amount"}</button>`;
+    const inNum = (k, label, ph, src) => `<div class="field"><label class="label" for="tx-${k}">${label}</label><input id="tx-${k}" data-action="tax-set" data-arg="${k}" inputmode="decimal" value="${(src || C)[k] != null && (src || C)[k] !== "" ? esc(String((src || C)[k])) : ""}" placeholder="${ph}"></div>`;
+    const inMoney = (k, label) => { const K = C.kap || {}; return `<div class="field"><label class="label" for="kap-${k}">${label}</label><input id="kap-${k}" data-action="tax-kap" data-arg="${k}" inputmode="decimal" value="${K[k] ? toInput(K[k]) : ""}" placeholder="0.00"></div>`; };
+    const flag = (k, label) => `<label class="check"><input type="checkbox" data-action="tax-flag" data-arg="${k}"${C[k] ? " checked" : ""}><span>${label}</span></label>`;
     const sugg = state.entries.filter((e) => e.date.startsWith(y + "-")).map((e) => [e, taxSuggest(e)]).filter((x) => x[1]).sort((a, b) => b[0].cents - a[0].cents);
-    const chk = cfg.check || {};
-    const kmRate = yn >= 2026 ? "€0.38 per km from the first km" : "€0.30 per km, from km 21 €0.38";
+    const chk = C.check || {}, kindStudy = T.ys === "second" ? "Werbungskosten" : T.ys === "first" ? "Sonderausgaben" : "not counted";
+    const hero = T.hasEmp
+      ? `<section class="hero"><span class="label">Estimated ${T.refund >= 0 ? "refund" : "back payment"} ${esc(y)}</span><div class="heroval ${T.refund >= 0 ? "pos" : "neg"}">${heroHTML(T.refund, true)}</div>
+          <div class="herosub">Tax ${money(T.due)} · already paid ${money(T.paid)}${T.loss ? ` · <span class="pos">loss of ${money(T.loss)} carried forward</span>` : ""}</div></section>`
+      : `<section class="hero"><span class="label">Deductible so far ${esc(y)}</span><div class="heroval">${heroHTML(T.wk + T.ausb + T.don + T.ab)}</div><div class="herosub">Add your wage tax certificate under Jobs to see your estimated refund.</div></section>`;
+    const calc = T.hasEmp ? `<details class="more"><summary>How this is calculated</summary><div class="sumlist">
+        ${line("Wages (gross)", T.gross)}${line(T.wk > T.flatUsed ? "− Your work costs" : "− Flat work costs", T.wkUsed, "", true)}
+        ${T.profit ? line("Side business profit", Math.abs(T.profit), "", T.profit < 0) : ""}${T.sideTaxable ? line("Allowances above the tax-free limit", T.sideTaxable) : ""}
+        <div class="tot"><span>Total income</span><b>${signed(T.gde).replace("+", "")}</b></div>
+        ${line("− Pension &amp; insurance", T.vors, "", true)}${line(T.ausb + T.don > 3600 ? "− Study costs, donations" : "− Special expenses (at least €36)", T.saOther, "", true)}${T.ab ? line("− Medical costs above your own share", T.ab, "", true) : ""}
+        <div class="tot"><span>Taxable income</span><b>${money(Math.max(0, T.zve))}</b></div>
+        ${T.capIn ? `<div><span>Capital income above €1,000</span><b>${money(T.capTax)}</b></div><div class="sub"><span>${T.useA ? "Taxed at your personal rate (Günstigerprüfung)" : "Flat 25 % withholding tax"}</span><b></b></div>` : ""}
+        ${line("Income tax &amp; Soli", T.due)}${T.hhCredit ? line("incl. − household services credit", T.hhCredit) : ""}
+        ${line("− Already paid (wage tax, capital gains tax)", T.paid, "", true)}
+        <div class="tot"><span>${T.refund >= 0 ? "Refund" : "To pay"}</span><b>${money(Math.abs(T.refund))}</b></div></div>
+        <p class="hint" style="margin-top:8px">Estimate with the ${esc(y)} tariff for a single person without church tax. The tax office decides.</p></details>` : "";
     return `
       ${backBar()}
       <h1 class="vtitle">Tax return</h1>
       <div class="periodnav"><label><span class="sr">Tax year</span><select class="psel" data-action="taxyear">${years.map((v) => `<option value="${v}"${v === y ? " selected" : ""}>${v}</option>`).join("")}</select></label></div>
-      <section class="hero"><span class="label">Work &amp; study costs ${esc(y)} (Werbungskosten)</span><div class="heroval">${heroHTML(T.wk)}</div>
-        <div class="herosub">${over > 0 ? `<span class="pos">${money(over)} above</span> the flat €1,230 – list every cost, each euro above it lowers your tax` : `The flat ${money(T.flat)} is applied to your wages automatically.${st === "master" ? " Record everything anyway: in a Master, costs above your income are carried forward to the years you earn more." : ""}`}</div></section>
-      <section class="card"><span class="label">Your studies</span>
-        <div class="seg three" role="group" aria-label="Your studies">${[["master", "Master / 2nd degree"], ["first", "First degree"], ["none", "Not studying"]].map(([k, t]) => `<button type="button" data-action="tax-study" data-arg="${k}" aria-pressed="${st === k}">${t}</button>`).join("")}</div>
-        <p>${st === "first" ? "A first degree counts as special expenses (Sonderausgaben), up to €6,000 a year – only useful in years with taxable income." : st === "none" ? "Study costs are ignored." : "A Master after a Bachelor is a second degree: study costs are work-related (Werbungskosten) without a cap. A loss can be carried forward and filed up to 7 years back."}</p></section>
-      <section class="card"><h2>Werbungskosten · Anlage N</h2>
-        <div class="sumlist">
-          ${st === "master" ? line("Study costs", T.by.study) : ""}${line("Work & study equipment", T.by.equipment)}${line("Trips for work or study", T.by.travel)}${line("Job applications", T.by.application)}${line("Other work costs", T.by.workother)}
-          ${line("Commute to work", T.cWork, `${cfg.workKm} km × ${cfg.workDays} days`)}${line("Commute to university", T.cUni, `${cfg.uniKm} km × ${cfg.uniDays} days`)}${line("Home office", T.ho, `${Math.min(210, cfg.hoDays || 0)} days × €6`)}
-          <div class="tot"><span>Total</span><b>${money(T.wk)}</b></div>
-        </div>
-        <div class="kinds">${(st === "master" ? ["study"] : []).concat(["equipment", "travel", "application", "workother"]).map(kindBlock).join("")}</div>
-        ${T.missing ? `<p class="status warn">${T.missing} ${T.missing === 1 ? "cost has" : "costs have"} no receipt ticked yet.</p>` : ""}</section>
-      <section class="card"><h2>Commute &amp; home office ${esc(y)}</h2>
-        <p>One way, shortest road. ${kmRate}. Home office: €6 per day, up to 210 days.</p>
-        <div class="two">${numIn("workKm", "Work: km one way", "e.g. 12")}${numIn("workDays", "Days at work", "e.g. 80")}</div>
-        <div class="two">${numIn("uniKm", "University: km one way", "e.g. 5")}${numIn("uniDays", "Days at uni", "e.g. 90")}</div>
-        <div class="two">${numIn("hoDays", "Home office days", "e.g. 40")}<div></div></div></section>
-      <section class="card"><h2>Other deductions</h2>
-        <div class="sumlist">
-          ${st === "first" ? line("First-degree study costs (max €6,000)", Math.min(600000, T.by.study || 0)) : ""}${line("Insurance & pension · Vorsorgeaufwand", T.by.insurance)}${line("Donations · Sonderausgaben", T.by.donation)}
-          ${line("Medical costs · außergewöhnliche Belastungen", T.ab)}${T.hh ? `<div><span>Household services · §35a<br><span class="hint">≈ ${money(Math.round(T.hh * 0.2))} straight off your tax</span></span><b>${money(T.hh)}</b></div>` : ""}
-          ${T.sa + T.ab + T.hh ? "" : `<div><span class="hint">Nothing marked yet.</span></div>`}
-        </div>
-        <div class="kinds">${(st === "first" ? ["study"] : []).concat(["insurance", "donation", "health", "household"]).map(kindBlock).join("")}</div></section>
-      ${sugg.length ? `<section class="card"><h2>Maybe deductible</h2><p>Found by description or category. Add them or tap “No” to hide them.</p>
-        ${sugg.slice(0, 25).map(([e, k]) => `<div class="sugg"><button class="pmain" data-action="entry" data-arg="${esc(e.id)}"><span class="t1">${esc(e.note || e.cat)}</span><span class="t2">${esc(e.cat)} · ${esc(dateFmt.format(isoDate(e.date)))} · ${money(e.cents)}</span></button>
-          <div class="acts"><button class="pri" data-action="tax-tag" data-arg="${esc(e.id)}|${k}">+ ${esc(TAX_KINDS[k].label)}</button><button data-action="entry" data-arg="${esc(e.id)}">Other…</button><button data-action="tax-no" data-arg="${esc(e.id)}">No</button></div></div>`).join("")}
+      ${hero}${C.filed ? `<p class="hint">Filed ${C.filed.date ? esc(dateFmt.format(isoDate(C.filed.date))) : ""}${C.filed.tool ? " via " + esc(C.filed.tool) : ""}${C.filed.office ? " · " + esc(C.filed.office) : ""}</p>` : ""}${calc}
+      ${canCarry ? `<button class="notice" data-action="tax-carry">Start ${esc(y)} with your jobs and ways to work from ${esc(prevY)} ›</button>` : ""}
+      ${sec("jobs", "Jobs · Anlage N", money(T.gross), `
+        ${T.emps.map((x) => `<button class="row nobadge" data-action="tax-emp" data-arg="${esc(x.id)}"><span class="main"><span class="t1">${esc(x.name || "Job")}<span class="tag">Class ${x.cls || 1}</span></span><span class="t2">Wage tax ${money(x.lst || 0)}${x.rvAn ? ` · pension ${money(x.rvAn)}` : ""}</span></span><span class="val">${money(x.gross || 0)}</span><span class="chev" aria-hidden="true">›</span></button>`).join("") || `<p class="hint">Add one wage tax certificate per employer – it comes by the end of February. During the year you can enter what you expect.</p>`}
+        <button class="more" data-action="tax-emp" data-arg="">+ Wage tax certificate</button>`)}
+      ${sec("wk", "Work costs · Werbungskosten", money(T.wk), `
+        <div class="sumlist">${lineIf("Way to work", T.commute)}${lineIf("Home office", T.ho, `${Math.min(R.hoMax, C.hoDays || 0)} days × ${money(R.ho)}`)}${lineIf(T.tools > T.equipItem ? "Work equipment (flat)" : "Work equipment", T.tools)}${lineIf("Trips, applications, other", T.wkOther)}${lineIf("Master / second degree", T.study2)}
+          <div class="tot"><span>Total</span><b>${money(T.wk)}</b></div></div>
+        <p class="${T.wk > T.flat ? "status ok" : "hint"}">${T.wk > T.flat ? `${money(T.wk - T.flat)} above the flat €1,230 – every cost counts.` : `Below the flat €1,230, which is used automatically for wages. Still worth recording${T.study2 ? " – Master costs above your income are carried forward" : ""}.`}</p>
+        <span class="label">Ways to work · ${esc(R.kmText)}</span>
+        ${T.places.map((p) => `<button class="row nobadge" data-action="tax-place" data-arg="${esc(p.id)}"><span class="main"><span class="t1">${esc(p.name || "Work")}</span><span class="t2">${p.km} km × ${p.days} days</span></span><span class="val">${money(R.km(p.km || 0) * (p.days || 0))}</span><span class="chev" aria-hidden="true">›</span></button>`).join("")}
+        <button class="more" data-action="tax-place" data-arg="">+ Way to work</button>
+        <div class="two">${inNum("hoDays", "Home office days", "e.g. 53")}<div></div></div>
+        ${flag("flatTools", "Flat €110 for work equipment without receipts (if your receipts add up to less)")}
+        ${flag("flatAccount", "Flat €16 account fees")}
+        <div class="kinds">${rowsOf((r) => ["equipment", "travel", "application", "workother"].includes(r.kind) || (r.kind === "study" && r.study === "second"))}</div>
+        ${addAmt("equipment")}`)}
+      ${sec("study", "Studies · Ausbildung", money(T.study1 + T.study2), `
+        ${taxStudies().map((x) => `<button class="row nobadge" data-action="tax-study-edit" data-arg="${esc(x.id)}"><span class="main"><span class="t1">${esc(x.name || (x.kind === "second" ? "Master" : "Bachelor"))}<span class="tag">${x.kind === "second" ? "2nd degree" : "1st degree"}</span></span><span class="t2">${x.from ? esc(dateFmt.format(isoDate(x.from))) : ""} – ${x.to ? esc(dateFmt.format(isoDate(x.to))) : "ongoing"}</span></span><span class="val"></span><span class="chev" aria-hidden="true">›</span></button>`).join("") || `<p class="hint">Add your study periods so PFM knows how to count study costs.</p>`}
+        <button class="more" data-action="tax-study-edit" data-arg="">+ Study period</button>
+        <p>In ${esc(y)} your study costs count as <b>${kindStudy}</b>${T.ys === "first" ? " (up to €6,000, only useful when you have taxable income)" : T.ys === "second" ? " – without a cap, a loss is carried forward" : ""}.</p>
+        <div class="sumlist">${Object.entries(TAX_KINDS.study.subs).map(([k, v]) => { const a2 = T.rows.filter((r) => r.kind === "study" && (r.sub || "other") === k && r.study).reduce((a, r) => a + r.amt, 0) + (k === "travel" && T.ys ? T.uni : 0); return a2 ? line(esc(v[0]), a2, esc(v[1])) : ""; }).join("")}
+          ${T.studyNone ? `<div class="sub"><span>Outside a study period – not counted</span><b>${money(T.studyNone)}</b></div>` : ""}</div>
+        <div class="two">${inNum("uniKm", "Uni: km one way", "e.g. 5")}${inNum("uniDays", "Days at uni", "e.g. 90")}</div>
+        ${T.study1 ? `<div class="copybox"><span class="hint">For ELSTER (Anlage Sonderausgaben → Ausbildung):</span><code>${esc(studyText(T))}</code><button class="more" data-action="tax-copy" data-arg="study">Copy text</button></div>` : ""}
+        <div class="kinds">${rowsOf((r) => r.kind === "study")}</div>
+        ${addAmt("study:fees")}`)}
+      ${sec("side", "Side jobs · Anlage S / G", money(T.trainerIn + T.honIn + T.bizIn), `
+        <div class="sumlist">${lineIf("Trainer allowance", T.trainerIn, `tax-free up to ${money(R.trainer)}`)}${lineIf("Volunteer allowance", T.honIn, `tax-free up to ${money(R.honorary)}`)}
+          ${T.bizIn || T.bizOut ? `${line("Side business income", T.bizIn)}${line("− Business expenses", T.bizOut, "", true)}<div class="tot"><span>Profit (EÜR)</span><b>${signed(T.profit)}</b></div>` : ""}</div>
+        <p class="hint">Mark income from gigs or trainer jobs in the transaction (“Tax return”). For gigs you can add meal allowances (${money(R.perDiem)} per day away more than 8 h) and car km (${money(R.carKm)}/km).</p>
+        <div class="two">${inNum("perDiemDays", "Days away for gigs", "e.g. 4")}${inNum("carKm", "Car km for gigs", "e.g. 406")}</div>
+        <div class="kinds">${rowsOf((r) => ["bizin", "business", "trainer", "honorary"].includes(r.kind))}</div>
+        ${addAmt("bizin")}`)}
+      ${sec("kap", "Investments · Anlage KAP", money(T.capIn), `
+        <p>Copy from the annual tax statements (Jahressteuerbescheinigung) of Trade Republic and your other depot – add them up.</p>
+        <div class="two">${inMoney("income", "Capital income")}${inMoney("allowance", "Exemption used")}</div>
+        <div class="two">${inMoney("kapest", "Capital gains tax")}${inMoney("soli", "Soli")}</div>
+        <div class="two">${inMoney("kist", "Church tax")}${inMoney("foreign", "Foreign tax")}</div>
+        <label class="check"><input type="checkbox" data-action="tax-kap" data-arg="guenstiger"${(C.kap || {}).guenstiger !== false ? " checked" : ""}><span>Günstigerprüfung – tax my capital income at my personal rate if that's lower</span></label>
+        ${T.capIn ? `<p class="hint">${T.capIn <= R.saver ? `Below the €1,000 exemption – the ${money(((C.kap || {}).kapest || 0) + ((C.kap || {}).soli || 0))} withheld come back with your return.` : `${money(T.capTax)} above the €1,000 exemption.`}</p>` : ""}`)}
+      ${sec("ins", "Insurance · Vorsorgeaufwand", money(T.vors), `
+        <div class="sumlist">${lineIf("Pension insurance (your share)", T.emps.reduce((a, x) => a + (x.rvAn || 0), 0), "from your wage tax certificates")}${lineIf("Health &amp; care insurance", T.basic, "from certificates and what you pay yourself")}${lineIf("Other insurance", T.emps.reduce((a, x) => a + (x.avAn || 0), 0) + T.insOther, "unemployment, liability, accident – counts only up to €1,900 incl. health")}
+          <div class="tot"><span>Deductible</span><b>${money(T.vors)}</b></div></div>
+        <div class="kinds">${rowsOf((r) => r.kind === "insurance")}</div>
+        ${addAmt("insurance:liability")}`)}
+      ${sec("other", "Donations, medical, household", money(T.don + T.med + T.hh), `
+        <div class="sumlist">${lineIf("Donations", T.don)}${T.med ? line("Medical costs", T.med, T.ab ? `${money(T.ab)} above your own share of ${money(T.zum)}` : `below your own share of ${money(T.zum)} – no effect`) : ""}${T.hh ? line("Household services", T.hh, `≈ ${money(T.hhCredit)} straight off your tax`) : ""}${T.don + T.med + T.hh ? "" : `<div><span class="hint">Nothing marked yet.</span></div>`}</div>
+        <div class="kinds">${rowsOf((r) => ["donation", "health", "household"].includes(r.kind))}</div>
+        ${addAmt("donation")}`)}
+      ${sugg.length ? `<section class="card"><h2>Maybe for your tax return</h2><p>Found by description or category. Add them or tap “No” to hide them.</p>
+        ${sugg.slice(0, 25).map(([e, k]) => `<div class="sugg"><button class="pmain" data-action="entry" data-arg="${esc(e.id)}"><span class="t1">${esc(e.note || e.cat)}</span><span class="t2">${esc(e.cat)} · ${esc(dateFmt.format(isoDate(e.date)))} · ${e.type === "ein" ? "+" : ""}${money(e.cents)}</span></button>
+          <div class="acts"><button class="pri" data-action="tax-tag" data-arg="${esc(e.id)}|${k}">+ ${esc(taxKindOf(k).label)}</button><button data-action="entry" data-arg="${esc(e.id)}">Other…</button><button data-action="tax-no" data-arg="${esc(e.id)}">No</button></div></div>`).join("")}
         ${sugg.length > 25 ? `<p class="hint">${sugg.length - 25} more – handle these first.</p>` : ""}</section>` : ""}
+      ${T.missing ? `<p class="status warn">${T.missing} marked ${T.missing === 1 ? "cost has" : "costs have"} no receipt ticked yet.</p>` : ""}
       <section class="card"><h2>Checklist ${esc(y)}</h2><div class="ckl">${TAX_CHECK.map(([k, t, d]) => `<label class="check"><input type="checkbox" data-action="tax-check" data-arg="${k}"${chk[k] ? " checked" : ""}><span><b>${esc(t)}</b><small>${esc(d)}</small></span></label>`).join("")}</div></section>
-      <div class="btnrow"><button class="btn primary" data-action="tax-export" style="flex:1">Export list for ${esc(y)} (CSV)</button></div>
-      <p class="hint">Mark costs while you enter them (“Tax return” in each transaction) or here. The list gives you every amount with date and German term for ELSTER or a tax app. Estimates with the rules for ${esc(y)} – not tax advice.</p>`;
+      <div class="btnrow"><button class="btn primary" data-action="tax-export" style="flex:1">Export ${esc(y)} (CSV)</button><button class="btn" data-action="tax-import">Import tax file</button></div>
+      <input type="file" id="taxFile" accept=".json,application/json" hidden>
+      <p class="hint">Everything stays on this iPhone. Estimates with the rules for ${esc(y)} – not tax advice.</p>`;
   }
   function exportTaxCsv(y) {
-    const T = taxSummary(y), q = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`, eu = (c) => (c / 100).toFixed(2).replace(".", ","), d = (iso) => iso.split("-").reverse().join(".");
-    const lines = ["Date;Description;Category;Counts as;German term;Share %;Paid;Deductible;Receipt"];
-    for (const r of T.rows.slice().sort((a, b) => (a.e ? a.e.date : a.asset.date).localeCompare(b.e ? b.e.date : b.asset.date))) {
-      const K = TAX_KINDS[r.kind];
-      if (r.e) lines.push([d(r.e.date), q(r.e.note || r.e.cat), q(r.e.cat), q(K.label), q(K.de + (r.note ? " (AfA)" : "")), r.e.tax.share || 100, eu(r.e.cents), eu(r.amt), r.e.tax.receipt ? "yes" : "no"].join(";"));
-      else lines.push([d(r.asset.date), q(r.asset.name + " (depreciation)"), q(r.asset.costCat || ""), q(K.label), q(K.de + " (AfA)"), r.asset.taxShare || 100, eu(r.asset.cost), eu(r.amt), ""].join(";"));
+    const T = taxCalc(y), q = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`, eu = (c) => (c / 100).toFixed(2).replace(".", ","), d = (iso) => (iso ? iso.split("-").reverse().join(".") : "");
+    const L = ["Section;Date;Description;Counts as;German term;Share %;Paid;Amount;Receipt"];
+    const secOf = (r) => (r.kind === "study" ? (r.study === "second" ? "Anlage N" : "Anlage Sonderausgaben") : ["equipment", "travel", "application", "workother"].includes(r.kind) ? "Anlage N" : ["bizin", "business"].includes(r.kind) ? "Anlage EÜR" : ["trainer", "honorary"].includes(r.kind) ? "Anlage S" : r.kind === "insurance" ? "Anlage Vorsorgeaufwand" : r.kind === "household" ? "Haushaltsnahe Aufwendungen" : r.kind === "health" ? "Außergewöhnliche Belastungen" : "Anlage Sonderausgaben");
+    for (const x of T.emps) L.push([q("Anlage N"), "", q(x.name || "Job"), q(`Wage tax certificate, class ${x.cls || 1}`), q("Bruttoarbeitslohn / Lohnsteuer"), "", eu(x.lst || 0), eu(x.gross || 0), ""].join(";"));
+    for (const r of T.rows.slice().sort((a, b) => (a.date || "").localeCompare(b.date || ""))) {
+      const K = taxKindOf(r.kind) || { label: r.kind, de: "" }, de = r.sub && K.subs && K.subs[r.sub] ? `${K.de} – ${K.subs[r.sub][1]}` : K.de;
+      const label = r.src === "e" ? r.e.note || r.e.cat : r.src === "a" ? `${r.asset.name} (AfA)` : r.m.label || K.label;
+      L.push([q(secOf(r)), d(r.src === "e" ? r.e.date : r.src === "a" ? r.asset.date : ""), q(label), q(K.label), q(de), r.share || 100, eu(r.src === "e" ? r.e.cents : r.src === "a" ? r.asset.cost : r.amt), eu(r.amt), r.src === "e" && r.e.type === "aus" ? (r.receipt ? "yes" : "no") : ""].join(";"));
     }
-    if (T.cWork) lines.push(["", q("Commute to work (Entfernungspauschale)"), "", q("Commute"), q("Wege zur ersten Tätigkeitsstätte"), "", "", eu(T.cWork), ""].join(";"));
-    if (T.cUni) lines.push(["", q("Commute to university (Entfernungspauschale)"), "", q("Commute"), q("Wege zur Hochschule"), "", "", eu(T.cUni), ""].join(";"));
-    if (T.ho) lines.push(["", q("Home office (Tagespauschale)"), "", q("Home office"), q("Homeoffice-Pauschale"), "", "", eu(T.ho), ""].join(";"));
-    offer(`pfm-tax-${y}.csv`, "﻿" + lines.join("\r\n"));
+    for (const p of T.places) L.push([q("Anlage N"), "", q(`${p.name || "Work"}: ${p.km} km × ${p.days} days`), q("Way to work"), q("Entfernungspauschale"), "", "", eu(T.R.km(p.km || 0) * (p.days || 0)), ""].join(";"));
+    if (T.uni) L.push([q(T.ys === "second" ? "Anlage N" : "Anlage Sonderausgaben"), "", q(`Uni: ${T.C.uniKm} km × ${T.C.uniDays} days`), q("Travel to uni"), q("Fahrtkosten Ausbildung"), "", "", eu(T.uni), ""].join(";"));
+    if (T.ho) L.push([q("Anlage N"), "", q(`${Math.min(T.R.hoMax, T.C.hoDays || 0)} home office days`), q("Home office"), q("Tagespauschale"), "", "", eu(T.ho), ""].join(";"));
+    if (T.C.flatTools) L.push([q("Anlage N"), "", q("Flat amount work equipment"), q("Work equipment"), q("Pauschale für Arbeitsmittel"), "", "", eu(11000), ""].join(";"));
+    if (T.C.flatAccount) L.push([q("Anlage N"), "", q("Account fees"), q("Other work costs"), q("Kontoführungsgebühren"), "", "", eu(1600), ""].join(";"));
+    if (T.study1) L.push([q("Anlage Sonderausgaben"), "", q(studyText(T)), q("Study costs text"), q("Art der Aufwendungen"), "", "", eu(T.ausb), ""].join(";"));
+    const K = T.C.kap || {};
+    if (T.capIn) L.push([q("Anlage KAP"), "", q(`KapESt ${eu(K.kapest || 0)} · Soli ${eu(K.soli || 0)} · foreign ${eu(K.foreign || 0)} · exemption used ${eu(K.allowance || 0)}`), q("Capital income"), q("Kapitalerträge"), "", "", eu(T.capIn), ""].join(";"));
+    if (T.hasEmp) L.push([q("Estimate"), "", q(`Taxable income ${eu(Math.max(0, T.zve))} · tax ${eu(T.due)} · paid ${eu(T.paid)}`), q(T.refund >= 0 ? "Estimated refund" : "Estimated back payment"), "", "", "", eu(Math.abs(T.refund)), ""].join(";"));
+    offer(`pfm-tax-${y}.csv`, "﻿" + L.join("\r\n"));
+  }
+  async function importTax(input) {
+    const file = input.files && input.files[0]; input.value = ""; if (!file) return;
+    try {
+      const d = JSON.parse(await file.text());
+      if (!d || d.app !== "pfm-tax" || !d.years || typeof d.years !== "object") { toast("That isn't a PFM tax file"); return; }
+      const T = state.settings.tax, years = { ...T.years };
+      for (const [y, v] of Object.entries(d.years)) if (/^\d{4}$/.test(y) && v && typeof v === "object") years[y] = { ...(years[y] || {}), ...v };
+      const studies = Array.isArray(d.studies) ? d.studies.filter((x) => x && (x.kind === "first" || x.kind === "second")).map((x) => ({ id: typeof x.id === "string" ? x.id : tid(), kind: x.kind, name: String(x.name || "").slice(0, 60), from: x.from || "", to: x.to || "" })) : T.studies;
+      await patchSettings({ tax: { ...T, years, studies } });
+      state.taxYear = Object.keys(d.years).sort().pop(); render(); toast("Tax data imported");
+    } catch { toast("Couldn't read that file"); }
   }
 
   /* ---------- Independence plan ---------- */
@@ -2624,9 +2860,10 @@ function buildRecords(imp, existing, learned, today) {
           <div class="field"><label class="label" for="planHours">Hours a week</label><input id="planHours" data-action="plan-set" data-arg="hours" inputmode="numeric" value="${hours}"></div>
         </div>
         <div class="two" style="margin-top:12px">
-          <div class="field"><label class="label" for="planZus">Health ins. extra %</label><input id="planZus" data-action="plan-set" data-arg="zusatz" inputmode="decimal" value="${P.zusatz != null ? P.zusatz : 2.9}"></div>
+          <div class="field"><label class="label" for="planZus">Zusatzbeitrag %</label><input id="planZus" data-action="plan-set" data-arg="zusatz" inputmode="decimal" value="${P.zusatz != null ? P.zusatz : 2.9}"></div>
           <div class="field"><label class="label" for="planChurch">Church tax</label><select id="planChurch" data-action="plan-set" data-arg="church">${[[0, "None"], [8, "8 % (BY, BW)"], [9, "9 %"]].map(([v, t]) => `<option value="${v}"${(Number(P.church) || 0) === v ? " selected" : ""}>${t}</option>`).join("")}</select></div>
         </div>
+        <p class="hint" style="margin-top:8px">Zusatzbeitrag = the extra contribution of your health insurer on top of the general 14.6 %, e.g. TK 2.69, AOK PLUS 3.10, Barmer 3.29 (average 2026: 2.9). Pension insurance (9.3 % for you) is already included automatically.</p>
         <label class="check" style="margin-top:12px"><input type="checkbox" data-action="plan-set" data-arg="childless"${P.childless !== false ? " checked" : ""}><span>No children (+0.6 % care insurance)</span></label>
         <span class="label" style="display:block;margin-top:14px">Counts as your own income</span>
         <div class="chiprow wrap" style="margin-top:8px">${CATS.ein.map((c) => `<button class="fchip" data-action="plan-inc" data-arg="${esc(c)}" aria-pressed="${D.incCats.includes(c)}">${esc(c)}</button>`).join("")}</div>
@@ -2708,7 +2945,7 @@ function buildRecords(imp, existing, learned, today) {
   window.addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => { charts.forEach((c) => drawChart($(c.id), c)); if (state.full) drawFull(); }, 120); });
 
   /* ================= Actions ================= */
-  function go(v, p) { state.stack[state.stack.length - 1].scroll = window.scrollY; state.stack.push({ v, p }); state.enter = true; state.armedBatch = null; state.sel = null; state.armedTrash = false; state.armedCat = null; render(); window.scrollTo(0, 0); }
+  function go(v, p) { const cur = state.stack[state.stack.length - 1]; cur.scroll = window.scrollY; cur.snap = $("view").innerHTML; cur.snapCls = $("view").className.replace(/\benter\b/, "").trim(); state.stack.push({ v, p }); state.enter = true; state.armedBatch = null; state.sel = null; state.armedTrash = false; state.armedCat = null; render(); window.scrollTo(0, 0); }
   function goBack() {
     if (state.stack.length < 2) return;
     state.stack.pop();
@@ -2718,7 +2955,7 @@ function buildRecords(imp, existing, learned, today) {
     window.scrollTo(0, top.scroll || 0);
   }
   document.addEventListener("click", (ev) => {
-    if (ev.target.closest("[data-close]")) { closeSheets(); return; }
+    if (ev.target.closest("[data-close]")) { closeSheetsAnimated(); return; }
     const a = ev.target.closest("[data-action]");
     if (!a || a.tagName === "SELECT" || a.tagName === "INPUT") return;
     const arg = a.dataset.arg;
@@ -2784,8 +3021,18 @@ function buildRecords(imp, existing, learned, today) {
       case "q-type": state.q.type = arg; render(); break;
       case "q-f": state.q.f = state.q.f === arg ? "any" : arg; state.sel = null; render(); break;
       case "q-clear": state.q.text = ""; render(); { const i = $("q"); if (i) i.focus(); } break;
-      case "tax-study": patchSettings({ tax: { ...state.settings.tax, study: arg } }).catch((err) => toast(writeError(err))); break;
-      case "tax-tag": { const [id, k] = arg.split("|"), e = state.entries.find((x) => x.id === id); if (e && TAX_KINDS[k]) store.put({ ...e, tax: { kind: k, share: 100, receipt: false } }).then(() => toast(`Added as ${TAX_KINDS[k].label}`)).catch((err) => toast(writeError(err))); break; }
+      case "tax-sec": { ev.preventDefault(); const o = state.taxOpen || (state.taxOpen = new Set()); if (o.has(arg)) o.delete(arg); else o.add(arg); render(); break; }
+      case "tax-emp": { const y = state.taxYear || String(curYear()); openEmployer(y, arg ? (taxCfg(y).employers || []).find((x) => x.id === arg) : null); break; }
+      case "tax-place": { const y = state.taxYear || String(curYear()); openPlace(y, arg ? taxCalc(y).places.find((x) => x.id === arg) : null); break; }
+      case "tax-study-edit": openStudy(arg ? taxStudies().find((x) => x.id === arg) : null); break;
+      case "tax-man": { const y = state.taxYear || String(curYear()); if (arg.startsWith("new:")) openManual(y, null, arg.slice(4)); else openManual(y, (taxCfg(y).manual || []).find((x) => x.id === arg)); break; }
+      case "tax-carry": { const y = state.taxYear || String(curYear()), P = taxCfg(String(Number(y) - 1));
+        taxPatchYear(y, (c) => ({ ...c, employers: (P.employers || []).map((x) => ({ id: tid(), name: x.name, cls: x.cls, gross: 0 })), places: (P.places || []).map((x) => ({ ...x, id: tid(), days: 0 })), flatTools: !!P.flatTools, flatAccount: !!P.flatAccount }))
+          .then(() => toast("Copied – fill in this year's numbers")).catch((err) => toast(writeError(err))); break; }
+      case "tax-copy": { const txt = studyText(taxCalc(state.taxYear || String(curYear()))); (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(() => toast("Copied")).catch(() => toast("Couldn't copy – select the text instead")); break; }
+      case "tax-import": { const f = $("taxFile"); if (f) f.click(); break; }
+      case "tax-tag": { const [id, k] = arg.split("|"), e = state.entries.find((x) => x.id === id), K = taxKindOf(k);
+        if (e && K) { const tax = e.type === "ein" ? { kind: k } : { kind: k, share: 100, receipt: false }; if (K.subs) tax.sub = taxSubGuess(k, e); store.put({ ...e, tax }).then(() => toast(`Added as ${K.label}`)).catch((err) => toast(writeError(err))); } break; }
       case "tax-no": { const e = state.entries.find((x) => x.id === arg); if (e) store.put({ ...e, taxNo: true }).catch((err) => toast(writeError(err))); break; }
       case "tax-export": exportTaxCsv(state.taxYear || String(curYear())); break;
       case "plan-basis": case "plan-savings": patchSettings({ plan: { ...state.settings.plan, [a.dataset.action === "plan-basis" ? "basis" : "savings"]: Number(arg) } }).catch((err) => toast(writeError(err))); break;
@@ -2818,10 +3065,18 @@ function buildRecords(imp, existing, learned, today) {
     if (t.id === "openModeSel") { try { localStorage.setItem(OPEN_KEY, t.value); } catch { /* ignore */ } toast("Saved"); return; }
     if (act === "balat") { state.balAt = t.value; render(); return; }
     if (act === "taxyear") { state.taxYear = t.value; render(); return; }
+    if (t.id === "taxFile") return importTax(t);
     if (act === "tax-set") {
-      const y = state.taxYear || String(curYear()), n = parseNum(t.value), T = state.settings.tax, cur = T.years[y] || {};
-      const v = n == null || n < 0 ? null : t.dataset.arg.endsWith("Days") ? Math.min(366, Math.round(n)) : Math.min(500, Math.round(n * 10) / 10);
-      patchSettings({ tax: { ...T, years: { ...T.years, [y]: { ...cur, [t.dataset.arg]: v } } } }).catch((err) => toast(writeError(err)));
+      const y = state.taxYear || String(curYear()), n = parseNum(t.value), k = t.dataset.arg;
+      const v = n == null || n < 0 ? null : k.endsWith("Days") ? Math.min(366, Math.round(n)) : k === "carKm" ? Math.min(100000, Math.round(n)) : Math.min(500, Math.round(n));
+      taxPatchYear(y, (c) => ({ ...c, [k]: v })).catch((err) => toast(writeError(err)));
+      return;
+    }
+    if (act === "tax-flag") { const y = state.taxYear || String(curYear()); taxPatchYear(y, (c) => ({ ...c, [t.dataset.arg]: t.checked })).catch((err) => toast(writeError(err))); return; }
+    if (act === "tax-kap") {
+      const y = state.taxYear || String(curYear()), k = t.dataset.arg;
+      let v; if (k === "guenstiger") v = t.checked; else { const n = parseNum(t.value); v = n == null || n < 0 ? 0 : Math.round(n * 100); }
+      taxPatchYear(y, (c) => ({ ...c, kap: { ...(c.kap || {}), [k]: v } })).catch((err) => toast(writeError(err)));
       return;
     }
     if (act === "tax-check") {
@@ -2858,13 +3113,28 @@ function buildRecords(imp, existing, learned, today) {
   });
   document.addEventListener("input", (ev) => { if (ev.target.id === "q") { state.q.text = ev.target.value; clearTimeout(qTimer); qTimer = setTimeout(updateSearch, 120); } });
   document.addEventListener("keydown", (e) => { if (e.key === "Enter" && e.target && e.target.id === "q") e.target.blur(); });
-  document.addEventListener("keydown", (e) => { if (e.key === "Escape") { if (state.full && SHEETS.every((id) => $(id).hidden)) closeFull(); else closeSheets(); } });
-  $("backdrop").addEventListener("click", closeSheets);
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") { if (state.full && SHEETS.every((id) => $(id).hidden)) closeFull(); else closeSheetsAnimated(); } });
+  $("backdrop").addEventListener("click", closeSheetsAnimated);
   $("addBtn").addEventListener("click", () => openEntry(null));
 
-  function showSheet(id) { $("backdrop").hidden = false; $(id).hidden = false; }
+  function showSheet(id) { sheetTok++; $("backdrop").hidden = false; $(id).hidden = false; }
+  let sheetTok = 0;
+  function sheetOpen() { return SHEETS.map((id) => $(id)).find((el) => el && !el.hidden) || null; }
+  function dismissSheet(sh, fromY) {
+    const b = $("backdrop"), H = sh.offsetHeight || window.innerHeight;
+    if (document.activeElement && sh.contains(document.activeElement)) document.activeElement.blur();
+    sh.style.animation = "none"; sh.style.transition = "none"; sh.style.transform = `translateY(${fromY || 0}px)`;
+    void sh.offsetHeight;
+    sh.style.transition = "transform .24s cubic-bezier(.2,.7,.3,1)"; sh.style.transform = `translateY(${H + 24}px)`;
+    b.style.transition = "opacity .24s ease-out"; b.style.opacity = "0";
+    const tok = ++sheetTok;
+    setTimeout(() => { if (tok === sheetTok) closeSheets(); }, 240);
+  }
+  function closeSheetsAnimated() { const sh = sheetOpen(); if (sh) dismissSheet(sh, 0); else closeSheets(); }
   function closeSheets() {
-    ["entrySheet", "limitSheet", "projectSheet", "recSheet", "balSheet", "bulkSheet", "objSheet", "chooseSheet", "planSheet"].forEach((id) => { $(id).hidden = true; });
+    SHEETS.forEach((id) => { const el = $(id); if (el) { el.style.transform = ""; el.style.transition = ""; el.style.animation = ""; el.classList.remove("dragging"); } });
+    $("backdrop").style.opacity = ""; $("backdrop").style.transition = "";
+    ["entrySheet", "limitSheet", "projectSheet", "recSheet", "balSheet", "bulkSheet", "objSheet", "chooseSheet", "planSheet", "formSheet"].forEach((id) => { $(id).hidden = true; });
     $("backdrop").hidden = true; state.editingId = null; state.limitCat = null; state.projectId = null;
   }
   function parseAmount(raw) { const v = parseNum(raw); if (v == null || v <= 0) return null; const c = Math.round(v * 100); return c > 0 ? c : null; }
@@ -2877,7 +3147,7 @@ function buildRecords(imp, existing, learned, today) {
     $("typeIn").setAttribute("aria-pressed", String(t === "ein"));
     $("typeTr").setAttribute("aria-pressed", String(t === "tr"));
     const tr = t === "tr";
-    $("catWrap").hidden = tr; $("projWrap").hidden = tr; $("spreadWrap").hidden = tr; $("toWrap").hidden = !tr; $("taxMore").hidden = t !== "aus";
+    $("catWrap").hidden = tr; $("projWrap").hidden = tr; $("spreadWrap").hidden = tr; $("toWrap").hidden = !tr; $("taxMore").hidden = tr; fillTaxKinds(t);
     $("accountLabel").textContent = tr ? "From" : "Account";
     $("note").placeholder = tr ? "e.g. Savings plan" : "e.g. Weekly groceries";
     if (tr) { $("catChips").innerHTML = ""; return; }
@@ -2913,8 +3183,9 @@ function buildRecords(imp, existing, learned, today) {
     sm.value = sp ? (known ? String(sp.months) : "custom") : "1";
     $("spreadCustom").value = sp && !known ? String(sp.months) : "";
     const tx = entry && entry.tax;
-    $("taxKind").value = tx ? tx.kind : ""; $("taxShare").value = tx && tx.share && tx.share !== 100 ? String(tx.share) : ""; $("taxReceipt").checked = !!(tx && tx.receipt);
-    $("taxMore").open = !!tx; syncTaxUI();
+    $("taxKind").value = tx && taxKindOf(tx.kind) ? tx.kind : ""; syncTaxUI(); if (tx && tx.sub) $("taxSub").value = tx.sub;
+    $("taxShare").value = tx && tx.share && tx.share !== 100 ? String(tx.share) : ""; $("taxReceipt").checked = !!(tx && tx.receipt);
+    $("taxMore").open = !!tx;
     $("spreadStart").value = sp ? (sp.start || entry.date.slice(0, 7)) : "";
     syncSpreadUI();
     $("makeRecurring").hidden = !entry || !!entry.recurring;
@@ -2958,7 +3229,9 @@ function buildRecords(imp, existing, learned, today) {
     const spm = spreadPick("spreadMonths", "spreadCustom");
     if ($("spreadMonths").value === "custom" && !(spm >= 2 && spm <= 120)) { $("entryErr").textContent = "Enter how many months the cost belongs to – between 2 and 120."; $("spreadCustom").focus(); return; }
     delete entry.tax;
-    if (state.type === "aus" && $("taxKind").value) { const sh = parseInt($("taxShare").value, 10); entry.tax = { kind: $("taxKind").value, share: sh >= 1 && sh <= 100 ? sh : 100, receipt: $("taxReceipt").checked }; }
+    const tk = $("taxKind").value;
+    if (state.type === "aus" && TAX_KINDS[tk]) { const sh = parseInt($("taxShare").value, 10); entry.tax = { kind: tk, share: sh >= 1 && sh <= 100 ? sh : 100, receipt: $("taxReceipt").checked }; if (TAX_KINDS[tk].subs) entry.tax.sub = $("taxSub").value || "other"; }
+    else if (state.type === "ein" && TAX_IN_KINDS[tk]) entry.tax = { kind: tk };
     if (spm > 1) { let st = $("spreadStart").value.trim(); if (!/^\d{4}-\d{2}$/.test(st)) st = date.slice(0, 7); entry.spread = { months: spm, start: st }; }
     $("saveBtn").disabled = true;
     try {
@@ -3193,7 +3466,7 @@ function buildRecords(imp, existing, learned, today) {
     const lines = ["Date;Type;Category;Account;To account;Amount;Description;Project;Tax;Tax share %"].concat(rows.map((e) => {
       const p = e.project && projById(e.project);
       return [e.date.split("-").reverse().join("."), e.type === "ein" ? "Income" : e.type === "tr" ? "Transfer" : "Expense", q(e.cat), q(e.account), q(e.toAccount || ""),
-        ((e.type === "aus" ? -1 : 1) * e.cents / 100).toFixed(2).replace(".", ","), q(e.note), q(p ? p.name : ""), q(e.tax ? TAX_KINDS[e.tax.kind].de : ""), e.tax ? e.tax.share || 100 : ""].join(";");
+        ((e.type === "aus" ? -1 : 1) * e.cents / 100).toFixed(2).replace(".", ","), q(e.note), q(p ? p.name : ""), q(e.tax && taxKindOf(e.tax.kind) ? taxKindOf(e.tax.kind).de : ""), e.tax ? e.tax.share || 100 : ""].join(";");
     }));
     offer(`pfm-${todayISO()}.csv`, "﻿" + lines.join("\r\n"));
   }
@@ -3308,11 +3581,24 @@ function buildRecords(imp, existing, learned, today) {
   }
   const spreadPick = (selId, customId) => { const v = $(selId).value; return v === "custom" ? parseInt($(customId).value, 10) : Number(v); };
   function syncSpreadUI() { const v = $("spreadMonths").value; $("spreadCustom").hidden = v !== "custom"; $("spreadStartWrap").hidden = !(v === "custom" || Number(v) > 1); }
+  function fillTaxKinds(t) {
+    const M = t === "ein" ? TAX_IN_KINDS : TAX_KINDS, cur = $("taxKind").value;
+    $("taxKind").innerHTML = `<option value="">Not relevant</option>` + Object.entries(M).map(([k, v]) => `<option value="${k}">${esc(v.label)}</option>`).join("");
+    $("taxKind").value = M[cur] ? cur : "";
+    syncTaxUI();
+  }
   function syncTaxUI() {
-    const k = $("taxKind").value, K = TAX_KINDS[k];
+    const k = $("taxKind").value, K = state.type === "ein" ? TAX_IN_KINDS[k] : TAX_KINDS[k];
     $("taxSum").textContent = K ? `Tax return · ${K.label}` : "Tax return";
-    $("taxFields").hidden = !K;
-    $("taxHint").textContent = K ? K.hint : "Mark costs you can claim in your tax return. The Tax view in the menu adds them up for each year.";
+    $("taxFields").hidden = !K || state.type !== "aus";
+    const subs = K && K.subs, sw = $("taxSubWrap");
+    sw.hidden = !subs;
+    if (subs) {
+      const cur = $("taxSub").value, e = { note: $("note").value };
+      $("taxSub").innerHTML = Object.entries(subs).map(([s2, v]) => `<option value="${s2}">${esc(v[0])}</option>`).join("");
+      $("taxSub").value = subs[cur] ? cur : taxSubGuess(k, e) || Object.keys(subs)[0];
+    }
+    $("taxHint").textContent = K ? K.hint : state.type === "ein" ? "Mark income from side jobs that belongs in your tax return." : "Mark costs you can claim in your tax return. The Tax view in the menu adds them up for each year.";
   }
   function openRec(r, fromEntry) {
     closeSheets();
@@ -3599,7 +3885,7 @@ function buildRecords(imp, existing, learned, today) {
       if (pj === "__none") delete x.project; else if (pj) x.project = pj;
       if (cat) x.cat = cat;
       if (sp === "1") delete x.spread; else if (sp) x.spread = { months: Number(sp), start: x.date.slice(0, 7) };
-      if (tx === "__none") { delete x.tax; x.taxNo = true; } else if (tx && x.type === "aus") { x.tax = { kind: tx, share: (x.tax && x.tax.share) || 100, receipt: !!(x.tax && x.tax.receipt) }; delete x.taxNo; }
+      if (tx === "__none") { delete x.tax; x.taxNo = true; } else if (tx && x.type === "aus") { x.tax = { kind: tx, share: (x.tax && x.tax.share) || 100, receipt: !!(x.tax && x.tax.receipt) }; if (TAX_KINDS[tx].subs) x.tax.sub = x.tax && x.tax.kind === tx && x.tax.sub ? x.tax.sub : taxSubGuess(tx, x); delete x.taxNo; }
       return x;
     });
     $("bulkSave").disabled = true;
@@ -3864,7 +4150,6 @@ function buildRecords(imp, existing, learned, today) {
   $("objForm").addEventListener("input", updateObjPreview);
   $("objForm").addEventListener("change", updateObjPreview);
   const taxOpts = Object.entries(TAX_KINDS).map(([k, v]) => `<option value="${k}">${esc(v.label)}</option>`).join("");
-  $("taxKind").innerHTML = `<option value="">Not relevant</option>${taxOpts}`;
   $("bulkTax").innerHTML = `<option value="">Keep</option><option value="__none">Not relevant</option>${taxOpts}`;
   $("makeAsset").addEventListener("click", () => { const e = state.entries.find((x) => x.id === state.editingId); if (e) openObj(null, e); });
   $("objForm").addEventListener("submit", async (ev) => {
@@ -3894,6 +4179,52 @@ function buildRecords(imp, existing, learned, today) {
     if (!state.objArmed) { state.objArmed = true; b.classList.add("armed"); b.textContent = "Really delete?"; return; }
     try { await patchSettings({ balance: { items: state.settings.balance.items.filter((x) => x.id !== state.objId) } }); txAssetCache = null; closeSheets(); toast("Deleted"); }
     catch (err) { $("objErr").textContent = writeError(err); }
+  });
+
+  /* ================= Generic form sheet (tax details) ================= */
+  let fsCfg = null;
+  function openForm(cfg) {
+    closeSheets(); fsCfg = cfg; state.fsArmed = false;
+    $("fsTitle").textContent = cfg.title; $("fsHint").textContent = cfg.hint || ""; $("fsHint").hidden = !cfg.hint;
+    const v = cfg.values || {};
+    const fld = (f) => {
+      const id = "fs-" + f.k, val = v[f.k];
+      if (f.type === "check") return `<label class="check"><input type="checkbox" id="${id}"${val ? " checked" : ""}><span>${esc(f.label)}</span></label>`;
+      const lab = `<label class="label" for="${id}">${esc(f.label)}</label>`;
+      if (f.type === "select") return `<div class="field">${lab}<select id="${id}">${f.opts.map(([o, t]) => `<option value="${esc(o)}"${String(val != null && val !== "" ? val : f.def != null ? f.def : "") === String(o) ? " selected" : ""}>${esc(t)}</option>`).join("")}</select></div>`;
+      const iv = val == null || val === "" ? "" : f.type === "money" ? toInput(val) : String(val);
+      const ta = f.type === "date" ? ' type="date"' : f.type === "money" || f.type === "num" ? ' inputmode="decimal"' : "";
+      return `<div class="field">${lab}<input id="${id}"${ta} value="${esc(iv)}" placeholder="${esc(f.ph || "")}"${f.max ? ` maxlength="${f.max}"` : ""}></div>`;
+    };
+    let html = ""; const F = cfg.fields;
+    for (let i = 0; i < F.length; i++) { if (F[i].half && F[i + 1] && F[i + 1].half) { html += `<div class="two">${fld(F[i])}${fld(F[i + 1])}</div>`; i++; } else html += fld(F[i]); }
+    $("fsFields").innerHTML = html;
+    const d = $("fsDelete"); d.hidden = !cfg.onDelete; d.textContent = "Delete"; d.classList.remove("armed");
+    $("fsErr").textContent = "";
+    showSheet("formSheet");
+  }
+  $("fsForm").addEventListener("submit", async (ev) => {
+    ev.preventDefault(); if (!fsCfg) return;
+    const vals = {};
+    for (const f of fsCfg.fields) {
+      const el = $("fs-" + f.k); if (!el) continue;
+      if (f.type === "check") vals[f.k] = el.checked;
+      else if (f.type === "money" || f.type === "num") {
+        const raw = el.value.trim(), n = raw ? parseNum(raw) : 0;
+        if (n == null || n < 0) { $("fsErr").textContent = `Check “${f.label}” – enter a number like 1234.56.`; el.focus(); return; }
+        vals[f.k] = f.type === "money" ? Math.round(n * 100) : n;
+      } else vals[f.k] = el.value.trim();
+    }
+    const err = fsCfg.validate ? fsCfg.validate(vals) : ""; if (err) { $("fsErr").textContent = err; return; }
+    $("fsSave").disabled = true;
+    try { await fsCfg.onSave(vals); closeSheets(); toast("Saved"); }
+    catch (e) { $("fsErr").textContent = writeError(e); }
+    finally { $("fsSave").disabled = false; }
+  });
+  $("fsDelete").addEventListener("click", async () => {
+    const b = $("fsDelete");
+    if (!state.fsArmed) { state.fsArmed = true; b.classList.add("armed"); b.textContent = "Really delete?"; return; }
+    try { await fsCfg.onDelete(); closeSheets(); toast("Deleted"); } catch (e) { $("fsErr").textContent = writeError(e); }
   });
 
   /* ================= Independence plan: items paid by parents ================= */
@@ -4012,45 +4343,118 @@ function buildRecords(imp, existing, learned, today) {
     scrubTo(c, sim.k >= c.points.length - 1 ? null : Math.floor(sim.k));
   });
 
-  /* Swipe from the left edge to go back */
-  const SHEETS = ["entrySheet", "limitSheet", "projectSheet", "recSheet", "balSheet", "bulkSheet", "objSheet", "chooseSheet", "planSheet"];
-  let swipe = null;
-  function swipeReset(v) { v.style.transition = "transform .2s ease-out, opacity .2s ease-out"; v.style.transform = ""; v.style.opacity = ""; }
-  document.addEventListener("touchstart", (e) => {
-    swipe = null;
-    if (e.touches.length !== 1 || state.stack.length < 2 || !splashDone || state.sel || state.full) return;
-    if (SHEETS.some((id) => !$(id).hidden)) return;
-    const t = e.touches[0];
-    if (t.clientX > 30) return;
-    swipe = { x: t.clientX, y: t.clientY, dx: 0, active: false, t0: Date.now() };
-  }, { passive: true });
-  document.addEventListener("touchmove", (e) => {
-    if (!swipe) return;
-    const t = e.touches[0], dx = t.clientX - swipe.x, dy = t.clientY - swipe.y;
-    if (!swipe.active) {
-      if (Math.abs(dy) > 12 && Math.abs(dy) > dx) { swipe = null; return; }
-      if (dx < 10) return;
-      swipe.active = true;
-    }
-    swipe.dx = Math.max(0, dx);
-    const v = $("view");
-    v.style.transition = "none";
-    v.style.transform = `translateX(${swipe.dx}px)`;
-    v.style.opacity = String(1 - Math.min(0.6, swipe.dx / 700));
-    if (e.cancelable) e.preventDefault();
-  }, { passive: false });
-  function swipeEnd() {
-    const s = swipe; swipe = null;
-    if (!s || !s.active) return;
-    const v = $("view"), fast = s.dx > 50 && Date.now() - s.t0 < 280;
-    if (s.dx > window.innerWidth * 0.3 || fast) {
-      v.style.transition = "transform .16s ease-out, opacity .16s ease-out";
-      v.style.transform = `translateX(${window.innerWidth}px)`; v.style.opacity = "0";
-      setTimeout(() => { v.style.transition = "none"; v.style.transform = ""; v.style.opacity = ""; goBack(); }, 160);
-    } else swipeReset(v);
+  /* ================= Gestures ================= */
+  const SHEETS = ["entrySheet", "limitSheet", "projectSheet", "recSheet", "balSheet", "bulkSheet", "objSheet", "chooseSheet", "planSheet", "formSheet"];
+  const easeOut = "cubic-bezier(.2,.7,.3,1)";
+  const vel = (g) => { const n = g.samples.length; if (n < 2) return 0; const a = g.samples[Math.max(0, n - 5)], b = g.samples[n - 1]; return (b.p - a.p) / Math.max(1, b.t - a.t); };
+  const sample = (g, p) => { g.samples.push({ p, t: performance.now() }); if (g.samples.length > 8) g.samples.shift(); };
+  let gest = null, gRaf = 0;
+  const frame = (fn) => { if (!gRaf) gRaf = requestAnimationFrame(() => { gRaf = 0; fn(); }); };
+
+  /* 1. Swipe from the left edge to go back – the page you came from is visible underneath */
+  function backStart() {
+    const prev = state.stack[state.stack.length - 2], u = $("under");
+    u.innerHTML = prev && prev.snap ? `<div class="app" style="transform:translateY(${-(prev.scroll || 0)}px)"><main class="${esc(prev.snapCls || "view")}">${prev.snap}</main></div><div class="under-dim"></div>` : `<div class="under-dim"></div>`;
+    u.hidden = false; document.body.classList.add("swiping"); $("app").classList.add("dragging");
   }
-  document.addEventListener("touchend", swipeEnd);
-  document.addEventListener("touchcancel", () => { const s = swipe; swipe = null; if (s && s.active) swipeReset($("view")); });
+  function backPaint(dx) {
+    const W = window.innerWidth, f = Math.min(1, dx / W), app = $("app"), u = $("under"), inner = u.firstElementChild, dim = u.lastElementChild;
+    app.style.transform = `translate3d(${dx}px,0,0)`;
+    if (inner && inner !== dim) inner.style.translate = `${-0.28 * W * (1 - f)}px 0`;
+    dim.style.opacity = String(0.5 * (1 - f));
+  }
+  function backFinish(go2) {
+    const app = $("app"), u = $("under"), W = window.innerWidth, inner = u.firstElementChild, dim = u.lastElementChild;
+    app.style.transition = `transform .26s ${easeOut}`; dim.style.transition = `opacity .26s ${easeOut}`;
+    if (inner && inner !== dim) inner.style.transition = `translate .26s ${easeOut}`;
+    if (go2) { app.style.transform = `translate3d(${W}px,0,0)`; dim.style.opacity = "0"; if (inner && inner !== dim) inner.style.translate = "0 0"; }
+    else { app.style.transform = "translate3d(0,0,0)"; dim.style.opacity = "0.5"; if (inner && inner !== dim) inner.style.translate = `${-0.28 * W}px 0`; }
+    setTimeout(() => {
+      if (go2) { state.enter = false; goBack(); }
+      app.style.transition = "none"; app.style.transform = ""; app.classList.remove("dragging");
+      u.hidden = true; u.innerHTML = ""; document.body.classList.remove("swiping");
+    }, 270);
+  }
+
+  /* 2. Pull down on the main menu to get back to the start screen; swipe the start screen up to leave it */
+  function splashPaint(y) { const sp = $("splash"); sp.style.transform = `translate3d(0,${y}px,0)`; }
+  function splashShowForPull() {
+    const sp = $("splash");
+    sp.classList.remove("gone"); sp.classList.add("static", "dragging"); sp.style.transition = "none"; sp.style.opacity = "1";
+    sp.hidden = false; splashPaint(-window.innerHeight); placeSplash(true);
+  }
+  function splashSettle(show) {
+    const sp = $("splash"), H = window.innerHeight;
+    sp.classList.remove("dragging"); sp.style.transition = `transform .32s ${easeOut}`;
+    if (show) { splashPaint(0); splashDone = false; setTimeout(() => { sp.style.transition = ""; sp.style.transform = ""; }, 330); }
+    else { splashPaint(-H); splashDone = true; setTimeout(() => { sp.hidden = true; sp.style.transition = ""; sp.style.transform = ""; sp.classList.remove("static"); }, 330); }
+  }
+
+  /* 3. Drag a sheet down by its top edge (or anywhere while it is scrolled to the top) to close it */
+  function sheetPaint(g) { g.sheet.style.transform = `translate3d(0,${g.d}px,0)`; $("backdrop").style.opacity = String(1 - Math.min(0.85, g.d / (g.sheet.offsetHeight || 1))); }
+
+  document.addEventListener("touchstart", (e) => {
+    gest = null;
+    if (e.touches.length !== 1 || state.full) return;
+    const t = e.touches[0], base = { x: t.clientX, y: t.clientY, d: 0, active: false, samples: [] };
+    const sh = sheetOpen();
+    if (sh) {
+      if (!sh.contains(e.target)) return;
+      const r = sh.getBoundingClientRect(), head = t.clientY - r.top < 64;
+      if (!head && (sh.scrollTop > 0 || e.target.closest("input, select, textarea, .chiprow, .chips, .pills"))) return;
+      gest = { ...base, kind: "sheet", sheet: sh, head };
+      return;
+    }
+    const sp = $("splash");
+    if (!splashDone && !sp.hidden) { gest = { ...base, kind: "splashUp" }; return; }
+    if (!splashDone || state.sel) return;
+    if (state.stack.length >= 2 && t.clientX <= 32) { gest = { ...base, kind: "back" }; return; }
+    if (state.stack.length === 1 && window.scrollY <= 0) gest = { ...base, kind: "pull" };
+  }, { passive: true });
+
+  document.addEventListener("touchmove", (e) => {
+    const g = gest; if (!g) return;
+    const t = e.touches[0], dx = t.clientX - g.x, dy = t.clientY - g.y;
+    if (!g.active) {
+      if (g.kind === "back") {
+        if (Math.abs(dy) > 12 && Math.abs(dy) > dx) { gest = null; return; }
+        if (dx < 8) return;
+        g.active = true; g.x = t.clientX - 8; backStart();
+      } else {
+        if (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy)) { gest = null; return; }
+        const want = g.kind === "splashUp" ? -dy : dy;
+        if (want < 6) { if (want < -8) gest = null; return; }
+        if (g.kind === "pull" && window.scrollY > 0) { gest = null; return; }
+        if (g.kind === "sheet" && !g.head && g.sheet.scrollTop > 0) { gest = null; return; }
+        g.active = true; g.y = t.clientY - (want > 0 ? 6 : 0) * Math.sign(dy);
+        if (g.kind === "pull") splashShowForPull();
+        if (g.kind === "splashUp") $("splash").classList.add("static", "dragging");
+        if (g.kind === "sheet") { g.sheet.classList.add("dragging"); g.sheet.style.animation = "none"; g.sheet.style.transition = "none"; $("backdrop").style.transition = "none"; if (document.activeElement && g.sheet.contains(document.activeElement)) document.activeElement.blur(); }
+      }
+    }
+    if (e.cancelable) e.preventDefault();
+    if (g.kind === "back") { g.d = Math.max(0, t.clientX - g.x); sample(g, g.d); frame(() => backPaint(g.d)); }
+    else if (g.kind === "pull") { g.d = Math.max(0, t.clientY - g.y); sample(g, g.d); frame(() => splashPaint(Math.min(0, g.d - window.innerHeight))); }
+    else if (g.kind === "splashUp") { g.d = Math.max(0, g.y - t.clientY); sample(g, g.d); frame(() => splashPaint(-g.d)); }
+    else if (g.kind === "sheet") { g.d = Math.max(0, t.clientY - g.y); sample(g, g.d); frame(() => sheetPaint(g)); }
+  }, { passive: false });
+
+  function gestEnd(cancel) {
+    const g = gest; gest = null;
+    if (!g || !g.active) return;
+    cancelAnimationFrame(gRaf); gRaf = 0;
+    const v = cancel ? 0 : vel(g), W = window.innerWidth, H = window.innerHeight;
+    if (g.kind === "back") { backPaint(g.d); backFinish(!cancel && (g.d > W * 0.35 || (v > 0.45 && g.d > 30))); }
+    else if (g.kind === "pull") { splashPaint(Math.min(0, g.d - H)); splashSettle(!cancel && (g.d > H * 0.25 || (v > 0.5 && g.d > 50))); }
+    else if (g.kind === "splashUp") { splashPaint(-g.d); splashSettle(!(!cancel && (g.d > H * 0.2 || (v > 0.5 && g.d > 40)))); }
+    else if (g.kind === "sheet") {
+      const sh = g.sheet; sh.classList.remove("dragging");
+      if (!cancel && (g.d > Math.min(160, sh.offsetHeight * 0.3) || (v > 0.5 && g.d > 40))) dismissSheet(sh, g.d);
+      else { sh.style.transition = `transform .24s ${easeOut}`; sh.style.transform = "translate3d(0,0,0)"; $("backdrop").style.transition = "opacity .24s"; $("backdrop").style.opacity = "1"; setTimeout(() => { sh.style.transition = ""; }, 260); }
+    }
+  }
+  document.addEventListener("touchend", () => gestEnd(false));
+  document.addEventListener("touchcancel", () => gestEnd(true));
 
   /* Start screen */
   const SPLASH_KEY = "pfm.splash";
@@ -4060,8 +4464,8 @@ function buildRecords(imp, existing, learned, today) {
   const splashT0 = Date.now();
   let splashDone = false;
   /* Keep the rocks free: the quote sits on the water, just below the rocks' base line */
-  function placeSplash() {
-    const sp = $("splash"); if (!sp || sp.hidden || splashDone) return;
+  function placeSplash(force) {
+    const sp = $("splash"); if (!sp || sp.hidden || (splashDone && !force)) return;
     const img = sp.querySelector("img"), W = sp.clientWidth, H = sp.clientHeight;
     if (!W || !H) return;
     const IW = img.naturalWidth || 1200, IH = img.naturalHeight || 1292, WY = IH * (960 / 1292);
@@ -4082,8 +4486,9 @@ function buildRecords(imp, existing, learned, today) {
     if (splashDone) return;
     splashDone = true;
     const sp = $("splash");
+    sp.style.transition = ""; sp.style.transform = ""; sp.style.opacity = "";
     sp.classList.add("gone");
-    setTimeout(() => { sp.hidden = true; }, 650);
+    setTimeout(() => { if (!splashDone) return; sp.hidden = true; sp.classList.remove("static"); }, 650);
   }
 
   /* Deep links from a Home Screen shortcut: #add opens a new transaction, #cashflow / #calc / #balance open that page */
@@ -4093,11 +4498,8 @@ function buildRecords(imp, existing, learned, today) {
   else if (["cashflow", "calc", "balance", "fixed", "budgets", "search", "tax", "plan"].includes(deep)) state.stack.push({ v: deep });
   if (deep && (["add", "cashflow", "calc", "balance", "fixed", "budgets", "search", "tax", "plan"].includes(deep))) { $("splash").hidden = true; splashDone = true; }
   else if (!splashEnabled()) { $("splash").hidden = true; splashDone = true; }
-  else {
-    $("splash").addEventListener("click", hideSplash);
-    $("splash").addEventListener("keydown", (e) => { if (["Enter", " ", "Escape"].includes(e.key)) { e.preventDefault(); hideSplash(); } });
-
-  }
+  $("splash").addEventListener("click", hideSplash);
+  $("splash").addEventListener("keydown", (e) => { if (["Enter", " ", "Escape"].includes(e.key)) { e.preventDefault(); hideSplash(); } });
 
   init();
 })();
