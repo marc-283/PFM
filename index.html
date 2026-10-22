@@ -27,7 +27,7 @@ img { max-width: 100%; }
 </style>
 <script>
 window.PFM_STANDALONE = true;
-window.PFM_VERSION = "1.0.0";
+window.PFM_VERSION = "1.2.1";
 if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
 </script>
 </head>
@@ -234,6 +234,40 @@ tr:last-child td { border-bottom: 0; }
 .err { color: var(--neg); font-size: 13.5px; min-height: 1em; }
 .hint { color: var(--muted); font-size: 14px; margin: 0; }
 .toast { position: fixed; left: 50%; transform: translateX(-50%); z-index: 30; bottom: calc(86px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--bg); border-radius: 12px; padding: 10px 16px; font-size: 14.5px; font-weight: 600; max-width: calc(100% - 32px); }
+/* Full-screen chart */
+.cfoot { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.expbtn { flex: none; border: 1px solid var(--line); background: transparent; color: var(--muted); border-radius: 999px; padding: 6px 12px; font-size: 13px; font-weight: 600; white-space: nowrap; }
+.full { position: fixed; inset: 0; z-index: 25; background: var(--bg); overflow-y: auto; }
+.full-in { max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: calc(12px + env(safe-area-inset-top, 0px)) calc(16px + env(safe-area-inset-bottom, 0px)); }
+.full-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.full .chart.big { height: auto; }
+.full-ctl { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.full-ctl input[type="range"] { flex: 1 1 160px; accent-color: var(--accent); min-width: 0; }
+.full-ctl .btn { min-width: 120px; }
+body.fullmode { overflow: hidden; }
+@media (orientation: landscape) and (max-height: 500px) {
+  .full-in { display: grid; grid-template-columns: minmax(240px, 320px) minmax(0, 1fr); grid-auto-rows: min-content; column-gap: 18px; row-gap: 8px; max-width: none; }
+  .full-in > * { grid-column: 1; }
+  .full-in > #fullChart { grid-column: 2; grid-row: 1 / span 5; align-self: start; }
+  .full .heroval { font-size: 30px; } .full .heroval .dec { font-size: 18px; }
+  .full .hero { padding: 0; }
+  .full-in > .hint { display: none; }
+  .full-ctl .btn { min-width: 0; padding-inline: 14px; }
+}
+/* Transfers, accounts, assets */
+.chooser { display: flex; flex-direction: column; gap: 10px; }
+.choice { width: 100%; text-align: left; border: 1px solid var(--line); background: var(--raised); border-radius: 16px; padding: 14px 16px; display: flex; flex-direction: column; gap: 3px; }
+.choice b { font-family: var(--f-display); font-weight: 800; font-size: 20px; text-transform: uppercase; letter-spacing: 0.02em; }
+.choice span { color: var(--muted); font-size: 14px; }
+.acc .inv { color: var(--accent); }
+.inv-t { color: var(--accent); }
+.acc-sub { font-size: 14px; color: var(--muted); }
+details.more { border-top: 1px solid var(--line); padding-top: 12px; }
+details.more summary { cursor: pointer; font-weight: 600; color: var(--accent); }
+details.more[open] summary { margin-bottom: 12px; }
+.preview { background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 12px; font-size: 14.5px; color: var(--muted); }
+.preview b { color: var(--ink); font-variant-numeric: tabular-nums; }
+.three { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 /* Period + cash flows */
 .period { display: flex; flex-direction: column; gap: 10px; }
 .rangerow { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -291,21 +325,36 @@ tr:last-child td { border-bottom: 0; }
 .tacc .row { padding: 10px 0; }
 .autorow { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); }
 .autorow .t2 { font-size: 13.5px; color: var(--muted); }
+.autorow .main { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.balrow .t2 { white-space: normal; }
 .totline { display: flex; justify-content: space-between; gap: 10px; padding-top: 10px; border-top: 2px solid var(--ink); font-weight: 700; font-variant-numeric: tabular-nums; }
 .equity .val { color: var(--accent); }
 tfoot td { font-weight: 700; border-top: 2px solid var(--line); border-bottom: 0; }
 /* Start screen + motto */
 .splash { position: fixed; inset: 0; z-index: 50; background: var(--bg); overflow: hidden; cursor: pointer; transition: opacity 0.6s ease; }
 .splash.gone { opacity: 0; pointer-events: none; }
-.splash img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 55% 45%; animation: drift 7s ease-out both; }
+.splash img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 55% 50%; transform-origin: 55% var(--water, 74%); animation: drift 7s ease-out both; }
 @keyframes drift { from { transform: scale(1.12); } to { transform: scale(1); } }
-.splash::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0) 28%, rgba(0,0,0,0) 45%, rgba(0,0,0,0.75) 72%, #000 100%); }
-.splash-top { position: absolute; z-index: 1; top: calc(18px + env(safe-area-inset-top, 0px)); left: 0; right: 0; max-width: 560px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
-.splash-bottom { position: absolute; z-index: 1; left: 0; right: 0; bottom: 0; max-width: 560px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 calc(36px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 22px; }
-.quote { margin: 0; font-family: var(--f-display); font-weight: 800; text-transform: uppercase; font-size: clamp(28px, 8.5vw, 40px); line-height: 1.02; letter-spacing: 0.01em; text-wrap: balance; animation: fadeup 0.9s 0.4s ease-out both; }
+.splash::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.28) 18%, rgba(0,0,0,0) 34%, rgba(0,0,0,0) var(--water, 74%), rgba(0,0,0,0.42) calc(var(--water, 74%) + 70px), rgba(0,0,0,0.72) 100%); }
+.splash-top { position: absolute; z-index: 1; top: calc(6vh + env(safe-area-inset-top, 0px)); left: 0; right: 0; padding-inline: 16px; display: flex; flex-direction: column; align-items: center; text-align: center; animation: fadeup 0.9s 0.15s ease-out both; }
+.splash-wm { font-family: var(--f-display); font-weight: 800; font-size: clamp(68px, 23vw, 120px); line-height: 0.9; letter-spacing: 0.03em; text-shadow: 0 4px 30px rgba(0,0,0,0.45); }
+.splash-wm b { color: var(--accent); font-weight: 800; }
+.splash-name { margin-top: 10px; font-family: var(--f-display); font-weight: 700; font-size: clamp(12px, 3.4vw, 16px); letter-spacing: 0.34em; text-transform: uppercase; color: rgba(255,255,255,0.85); padding-left: 0.34em; }
+.splash-name::before, .splash-name::after { content: ""; display: inline-block; width: 18px; height: 2px; background: var(--accent); vertical-align: middle; margin: 0 10px 0 0; position: relative; top: -2px; }
+.splash-name::after { margin: 0 0 0 10px; }
+.splash-bottom { position: absolute; z-index: 1; left: 0; right: 0; top: var(--water, 74%); bottom: 0; max-width: 560px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 20px calc(24px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 14px; text-align: center; }
+.quote { margin: auto 0; font-family: var(--f-display); font-weight: 800; text-transform: uppercase; font-size: clamp(19px, 5.6vw, 30px); line-height: 1.04; max-width: 19em; letter-spacing: 0.015em; text-wrap: balance; text-shadow: 0 2px 18px rgba(0,0,0,0.6); animation: fadeup 0.9s 0.5s ease-out both; }
 .quote span { display: block; }
-.quote span + span { margin-top: 12px; color: var(--accent); }
-.splash-go { font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); font-weight: 600; animation: fadeup 0.9s 1.1s ease-out both; }
+.quote span + span { margin-top: 6px; color: var(--accent); }
+@media (orientation: landscape) and (max-height: 500px) {
+  .splash-top { top: calc(4vh + env(safe-area-inset-top, 0px)); }
+  .splash-wm { font-size: 17vh; }
+  .splash-name { font-size: 11px; margin-top: 6px; }
+  .splash-bottom { max-width: 760px; padding-block: 10px calc(12px + env(safe-area-inset-bottom, 0px)); gap: 8px; }
+  .quote { font-size: 5.2vh; max-width: 30em; }
+  .quote span + span { margin-top: 3px; }
+}
+.splash-go { font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.75); font-weight: 600; animation: fadeup 0.9s 1.1s ease-out both; }
 @keyframes fadeup { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 .motto { display: flex; flex-direction: column; gap: 3px; padding-top: 4px; font-family: var(--f-display); font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; font-size: 13px; line-height: 1.3; color: var(--muted); }
 .motto span + span { color: var(--accent); }
@@ -316,7 +365,7 @@ tfoot td { font-weight: 700; border-top: 2px solid var(--line); border-bottom: 0
   .heroval { font-size: 40px; } .heroval .dec { font-size: 22px; }
   .two, .mapgrid { grid-template-columns: 1fr; } .stat .v { font-size: 16px; }
 }
-@media (prefers-reduced-motion: reduce) { .view.enter, .sheet, .splash img, .quote, .splash-go { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .view.enter, .sheet, .splash img, .quote, .splash-go, .splash-top { animation: none; } }
 </style>
 
 <div class="app"><main class="view" id="view"></main></div>
@@ -328,23 +377,26 @@ tfoot td { font-weight: 700; border-top: 2px solid var(--line); border-bottom: 0
   <form id="entryForm" novalidate>
     <div class="grip" aria-hidden="true"></div>
     <div class="sheethead"><h2 id="entryTitle">New transaction</h2><button type="button" class="mbtn" data-close aria-label="Close">✕</button></div>
-    <div class="seg" role="group" aria-label="Type">
+    <div class="seg three" role="group" aria-label="Type">
       <button type="button" id="typeOut" aria-pressed="true">Expense</button>
       <button type="button" id="typeIn" aria-pressed="false">Income</button>
+      <button type="button" id="typeTr" aria-pressed="false">Transfer</button>
     </div>
     <div class="field">
       <label class="label" for="amount">Amount</label>
       <div class="amount"><span>€</span><input id="amount" inputmode="decimal" autocomplete="off" placeholder="0.00"></div>
     </div>
-    <div class="field"><span class="label" id="catLabel">Category</span><div class="chips" id="catChips" role="radiogroup" aria-labelledby="catLabel"></div>
+    <div class="field" id="catWrap"><span class="label" id="catLabel">Category</span><div class="chips" id="catChips" role="radiogroup" aria-labelledby="catLabel"></div>
       <div class="newcat" id="entryNewCat" hidden><input id="entryNewCatName" maxlength="30" placeholder="New category name" aria-label="New category name"><button type="button" class="btn" id="entryNewCatAdd">Add</button></div></div>
     <div class="two">
       <div class="field"><label class="label" for="date">Date</label><input type="date" id="date"></div>
-      <div class="field"><label class="label" for="account">Account</label><select id="account"></select></div>
+      <div class="field"><label class="label" for="account" id="accountLabel">Account</label><select id="account"></select></div>
     </div>
-    <div class="field"><label class="label" for="project">Project</label><select id="project"></select>
+    <div class="field" id="toWrap" hidden><label class="label" for="toAccount">To</label><select id="toAccount"></select>
+      <span class="hint">Moving money between your own accounts, e.g. into Trade Republic. Not counted as spending or income.</span></div>
+    <div class="field" id="projWrap"><label class="label" for="project">Project</label><select id="project"></select>
       <div class="newcat" id="entryNewProj" hidden><input id="entryNewProjName" maxlength="40" placeholder="New project name, e.g. Trip to Naples" aria-label="New project name"><button type="button" class="btn" id="entryNewProjAdd">Add</button></div></div>
-    <div class="two">
+    <div class="two" id="spreadWrap">
       <div class="field"><label class="label" for="spreadMonths">Cost belongs to</label>
         <select id="spreadMonths"><option value="1">This month only</option><option value="3">3 months</option><option value="6">6 months</option><option value="12">12 months</option></select>
       </div>
@@ -356,6 +408,7 @@ tfoot td { font-weight: 700; border-top: 2px solid var(--line); border-bottom: 0
       <button type="submit" class="btn primary" id="saveBtn" style="flex:1">Save</button>
       <button type="button" class="btn danger" id="deleteBtn" hidden>Delete</button>
       <button type="button" class="btn" id="makeRecurring" hidden>Repeat as fixed cost</button>
+      <button type="button" class="btn" id="makeAsset" hidden>Add to balance sheet</button>
     </div>
   </form>
 </div>
@@ -404,22 +457,24 @@ tfoot td { font-weight: 700; border-top: 2px solid var(--line); border-bottom: 0
   <form id="recForm" novalidate>
     <div class="grip" aria-hidden="true"></div>
     <div class="sheethead"><h2 id="recTitle">New fixed cost</h2><button type="button" class="mbtn" data-close aria-label="Close">✕</button></div>
-    <div class="seg" role="group" aria-label="Type">
+    <div class="seg three" role="group" aria-label="Type">
       <button type="button" id="recTypeOut" aria-pressed="true">Expense</button>
       <button type="button" id="recTypeIn" aria-pressed="false">Income</button>
+      <button type="button" id="recTypeTr" aria-pressed="false">Transfer</button>
     </div>
     <div class="field"><label class="label" for="recAmount">Amount per payment</label><div class="amount"><span>€</span><input id="recAmount" inputmode="decimal" autocomplete="off" placeholder="0.00"></div></div>
     <div class="field"><label class="label" for="recName">Name</label><input id="recName" maxlength="60" placeholder="e.g. Spotify, car insurance, rent"></div>
     <div class="two">
       <div class="field"><label class="label" for="recEvery">Repeats</label><select id="recEvery"><option value="1">Monthly</option><option value="3">Quarterly</option><option value="6">Every 6 months</option><option value="12">Yearly</option></select></div>
-      <div class="field"><label class="label" for="recCat">Category</label><select id="recCat"></select></div>
+      <div class="field" id="recCatWrap"><label class="label" for="recCat">Category</label><select id="recCat"></select></div>
+      <div class="field" id="recToWrap" hidden><label class="label" for="recTo">To</label><select id="recTo"></select></div>
     </div>
     <div class="two">
       <div class="field"><label class="label" for="recStart">First payment</label><input type="date" id="recStart"></div>
       <div class="field"><label class="label" for="recEnd">Ends (optional)</label><input type="date" id="recEnd"></div>
     </div>
     <div class="two">
-      <div class="field"><label class="label" for="recAccount">Account</label><select id="recAccount"></select></div>
+      <div class="field"><label class="label" for="recAccount" id="recAccountLabel">Account</label><select id="recAccount"></select></div>
       <div class="field"><label class="label" for="recProject">Project</label><select id="recProject"></select></div>
     </div>
     <label class="check" id="recSpreadWrap"><input type="checkbox" id="recSpread" checked><span>Spread each payment over the months it covers<br><span class="hint">A yearly €480 then counts as €40 per month in the calculated view.</span></span></label>
@@ -439,9 +494,10 @@ tfoot td { font-weight: 700; border-top: 2px solid var(--line); border-bottom: 0
     </div>
     <div class="field"><label class="label" for="balName">Name</label><input id="balName" maxlength="40" placeholder="e.g. DKB checking, ETF portfolio, student loan"></div>
     <div class="field"><label class="label" for="balGroup">Group</label><select id="balGroup"></select></div>
-    <div class="seg" role="group" aria-label="How the value is kept" id="balKindSeg">
-      <button type="button" id="balKindManual" aria-pressed="true">I enter the value</button>
-      <button type="button" id="balKindAccount" aria-pressed="false">Follow an account</button>
+    <div class="seg three" role="group" aria-label="How the value is kept" id="balKindSeg">
+      <button type="button" id="balKindManual" aria-pressed="true">Enter value</button>
+      <button type="button" id="balKindAccount" aria-pressed="false">Bank account</button>
+      <button type="button" id="balKindDepot" aria-pressed="false">Investments</button>
     </div>
     <div id="balManualWrap" class="two">
       <div class="field"><label class="label" for="balValue" id="balValueLabel">Value</label><div class="amount"><span>€</span><input id="balValue" inputmode="decimal" autocomplete="off" placeholder="0.00"></div></div>
@@ -455,10 +511,93 @@ tfoot td { font-weight: 700; border-top: 2px solid var(--line); border-bottom: 0
       </div>
       <div class="field" style="margin-top:12px"><label class="label" for="balOpening">Balance that day</label><div class="amount"><span>€</span><input id="balOpening" inputmode="decimal" autocomplete="off" placeholder="0.00"></div></div>
     </div>
+    <div id="balDepotWrap" hidden>
+      <p class="hint">For Trade Republic, a depot or savings plan. Enter the current total value from the app now and then – transfers you book to this account are added in between automatically.</p>
+      <div class="two" style="margin-top:12px">
+        <div class="field"><label class="label" for="balDepotValue">Current value</label><div class="amount"><span>€</span><input id="balDepotValue" inputmode="decimal" autocomplete="off" placeholder="0.00"></div></div>
+        <div class="field"><label class="label" for="balDepotDate">On</label><input type="date" id="balDepotDate"></div>
+      </div>
+      <label class="check" style="margin-top:12px"><input type="checkbox" id="balShowHome" checked><span>Show on the main menu next to DKB, PayPal and Cash</span></label>
+    </div>
     <div id="balHistory"></div>
     <div class="err" id="balErr" role="alert"></div>
     <div class="btnrow"><button type="submit" class="btn primary" id="balSave" style="flex:1">Save</button><button type="button" class="btn danger" id="balDelete" hidden>Delete</button></div>
   </form>
+</div>
+
+<div class="sheet" id="objSheet" role="dialog" aria-modal="true" aria-labelledby="objTitle" hidden>
+  <form id="objForm" novalidate>
+    <div class="grip" aria-hidden="true"></div>
+    <div class="sheethead"><h2 id="objTitle">New item</h2><button type="button" class="mbtn" data-close aria-label="Close">✕</button></div>
+    <div class="two">
+      <div class="field"><label class="label" for="objType">What is it?</label><select id="objType"></select></div>
+      <div class="field"><label class="label" for="objName">Name</label><input id="objName" maxlength="40" placeholder="e.g. MacBook Air"></div>
+    </div>
+    <div class="two">
+      <div class="field"><label class="label" for="objDate">Bought on</label><input type="date" id="objDate"></div>
+      <div class="field"><label class="label" for="objCost">Price paid</label><div class="amount"><span>€</span><input id="objCost" inputmode="decimal" autocomplete="off" placeholder="0.00"></div></div>
+    </div>
+    <div class="seg" role="group" aria-label="Condition"><button type="button" id="objNew" aria-pressed="true">Bought new</button><button type="button" id="objUsed" aria-pressed="false">Bought used</button></div>
+    <div id="objVehicle" class="three" hidden>
+      <div class="field"><label class="label" for="objRegYear">First registered</label><input id="objRegYear" inputmode="numeric" maxlength="4" placeholder="2019"></div>
+      <div class="field"><label class="label" for="objKm">km when bought</label><input id="objKm" inputmode="numeric" placeholder="45000"></div>
+      <div class="field"><label class="label" for="objKmYear">km per year</label><input id="objKmYear" inputmode="numeric" placeholder="12000"></div>
+    </div>
+    <div class="two">
+      <div class="field"><label class="label" for="objMethod">How it loses value</label>
+        <select id="objMethod"><option value="linear">Evenly over its life</option><option value="declining">Fast at first, then slower</option><option value="none">Keeps its value</option></select></div>
+      <div class="field" id="objLifeWrap"><label class="label" for="objLife">Useful life (years)</label><input id="objLife" inputmode="decimal" placeholder="4"></div>
+      <div class="field" id="objRateWrap" hidden><label class="label" for="objRate">Loses per year (%)</label><input id="objRate" inputmode="decimal" placeholder="15"></div>
+    </div>
+    <div class="two">
+      <div class="field"><label class="label" for="objResidual">Value left at the end (% of price)</label><input id="objResidual" inputmode="decimal" placeholder="10"></div>
+      <div class="field"><label class="label" for="objCostCat">Counts as cost in</label><select id="objCostCat"></select></div>
+    </div>
+    <div class="preview" id="objPreview" aria-live="polite"></div>
+    <details class="more" id="objMore">
+      <summary>Market value or sale</summary>
+      <p class="hint">Know what it's worth today, e.g. from a used-car site? Enter it and PFM adjusts the curve. Sold it? Enter the sale and it leaves the balance sheet.</p>
+      <div class="two" style="margin-top:12px">
+        <div class="field"><label class="label" for="objMarket">Worth today</label><div class="amount"><span>€</span><input id="objMarket" inputmode="decimal" autocomplete="off" placeholder="optional"></div></div>
+        <div class="field"><label class="label" for="objMarketDate">On</label><input type="date" id="objMarketDate"></div>
+      </div>
+      <div class="two" style="margin-top:12px">
+        <div class="field"><label class="label" for="objSoldPrice">Sold for</label><div class="amount"><span>€</span><input id="objSoldPrice" inputmode="decimal" autocomplete="off" placeholder="optional"></div></div>
+        <div class="field"><label class="label" for="objSoldDate">Sold on</label><input type="date" id="objSoldDate"></div>
+      </div>
+    </details>
+    <p class="hint" id="objLinkNote" hidden></p>
+    <div class="err" id="objErr" role="alert"></div>
+    <div class="btnrow"><button type="submit" class="btn primary" id="objSave" style="flex:1">Save</button><button type="button" class="btn danger" id="objDelete" hidden>Delete</button></div>
+  </form>
+</div>
+
+<div class="sheet" id="chooseSheet" role="dialog" aria-modal="true" aria-labelledby="chooseTitle" hidden>
+  <form novalidate onsubmit="return false">
+    <div class="grip" aria-hidden="true"></div>
+    <div class="sheethead"><h2 id="chooseTitle">Add an asset</h2><button type="button" class="mbtn" data-close aria-label="Close">✕</button></div>
+    <div class="chooser">
+      <button type="button" class="choice" data-action="choose" data-arg="account"><b>Bank or cash account</b><span>DKB, PayPal, cash, savings – follows your transactions</span></button>
+      <button type="button" class="choice" data-action="choose" data-arg="depot"><b>Investments</b><span>Trade Republic, depot, ETF savings plan – you update the value now and then</span></button>
+      <button type="button" class="choice" data-action="choose" data-arg="object"><b>Things you own</b><span>Car, laptop, iPad, bike … – value goes down automatically over time</span></button>
+      <button type="button" class="choice" data-action="choose" data-arg="manual"><b>Other value</b><span>e.g. money someone owes you, a deposit</span></button>
+    </div>
+  </form>
+</div>
+
+<div class="full" id="full" role="dialog" aria-modal="true" aria-labelledby="fullTitle" hidden>
+  <div class="full-in" id="fullIn">
+    <div class="full-head"><span class="label" id="fullTitle">Chart</span><button type="button" class="mbtn" data-action="full-close" aria-label="Close full screen">✕</button></div>
+    <section class="hero"><div class="heroval" id="fullVal"></div><div class="herosub" id="fullSub"></div></section>
+    <div id="fullCtl" class="period"></div>
+    <div class="chart big" id="fullChart"></div>
+    <div class="full-ctl">
+      <button type="button" class="btn primary" data-action="full-play" id="fullPlay">▶ Replay</button>
+      <input type="range" id="fullSlider" min="0" max="1" step="0.01" value="1" aria-label="Move through time">
+      <div class="pills" role="group" aria-label="Speed"><button data-action="full-speed" data-arg="1" aria-pressed="true">1×</button><button data-action="full-speed" data-arg="2" aria-pressed="false">2×</button><button data-action="full-speed" data-arg="4" aria-pressed="false">4×</button></div>
+    </div>
+    <p class="hint">Replay draws the chart step by step through the chosen period. Drag the slider to jump to any point, or touch the chart to read single values.</p>
+  </div>
 </div>
 
 <div class="selbar" id="selbar" hidden><div class="selbar-in"><span id="selCount">0 selected</span><span class="btnrow"><button type="button" class="btn" id="selEdit">Edit</button><button type="button" class="btn danger" id="selDelete">Delete</button></span></div></div>
@@ -483,10 +622,13 @@ tfoot td { font-weight: 700; border-top: 2px solid var(--line); border-bottom: 0
 
 <div class="splash" id="splash" role="button" tabindex="0" aria-label="Continue to PFM">
   <img src="splash.jpg" alt="">
-  <div class="splash-top"><span class="wordmark">P<b>F</b>M</span></div>
-  <div class="splash-bottom">
-    <p class="quote"><span>Sometimes I feel like giving up.</span><span>Then I remember I have a lot of people to prove wrong.</span></p>
-    <span class="splash-go">Tap to continue</span>
+  <div class="splash-top">
+    <span class="splash-wm" aria-label="PFM">P<b>F</b>M</span>
+    <span class="splash-name">Personal Finance Management</span>
+  </div>
+  <div class="splash-bottom" id="splashBottom">
+    <p class="quote" id="splashQuote"><span>Sometimes I feel like giving up.</span><span>Then I remember I have a lot of people to prove wrong.</span></p>
+    <span class="splash-go" id="splashGo">Tap to continue</span>
   </div>
 </div>
 
@@ -778,7 +920,7 @@ function buildRecords(imp, existing, learned, today) {
   const COLORS = {
     "Housing": "#8E8BFF", "Groceries": "#FFD6A5", "Restaurants & Cafés": "#FF8A3D", "Transport": "#3FA9FF", "Travel": "#2EE6D6",
     "Subscriptions": "#C77DFF", "Leisure": "#FF5FA8", "Shopping": "#F5C04A", "Health": "#7FD1FF", "Education": "#E8B4FF",
-    "Insurance": "#A3ADB8", "Gifts & Family": "#FFB4A2", "Other": "#D4D4D8", [UNCAT]: "#FFE83A"
+    "Insurance": "#A3ADB8", "Gifts & Family": "#FFB4A2", "Other": "#D4D4D8", "Transfer": "#9AA3AD", [UNCAT]: "#FFE83A"
   };
   const BASE_CATS = { aus: CATS.aus.slice(), ein: CATS.ein.slice() };
   const CUSTOM_COLORS = ["#7CF2C9", "#F7A3FF", "#FFD18C", "#9AD0FF", "#D9FF7A", "#FF9AA2", "#B8B3FF", "#FFC2E2"];
@@ -815,6 +957,7 @@ function buildRecords(imp, existing, learned, today) {
   const $ = (id) => document.getElementById(id);
   const pad = (n) => String(n).padStart(2, "0");
   const todayISO = () => { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };
+  const localDay = (iso) => { const d = new Date(iso); return isNaN(d) ? "" : `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };
   const curMonth = () => todayISO().slice(0, 7);
   const curYear = () => new Date().getFullYear();
   const monthOf = (iso) => iso.slice(0, 7);
@@ -833,6 +976,7 @@ function buildRecords(imp, existing, learned, today) {
     entries: [], trash: [], settings: { limits: {}, projects: [], rules: {}, catMap: {}, recurring: [], balance: { items: [] }, customCats: { aus: [], ein: [] }, cats: null, renames: {} },
     year: curYear(), mon: new Date().getMonth() + 1,
     stack: [{ v: "hub" }], homeCat: "All", listFilter: "all", sel: null, armedCat: null, newCatType: "aus", editCat: null,
+    balAt: null, full: null,
     cfMode: "aus", cfShowAll: false, pkind: "std", from: "", to: "", preset: null, calcMode: "aus", calcCat: "All", calcShowAll: false,
     type: "aus", editingId: null, armed: false, limitCat: null, projectId: null, projArmed: false,
     armedBatch: null, imp: null, enter: false
@@ -897,6 +1041,16 @@ function buildRecords(imp, existing, learned, today) {
   let renderQueued = false;
   function scheduleRender() { if (renderQueued) return; renderQueued = true; requestAnimationFrame(() => { renderQueued = false; render(); }); }
 
+  const BASE_ACCOUNTS = ["DKB", "PayPal", "Cash", "Credit card", "Savings"];
+  function accountsList(extra, opts) {
+    const items = state.settings.balance.items;
+    const names = BASE_ACCOUNTS.slice();
+    items.forEach((it) => { if ((it.kind === "account" || it.kind === "depot") && it.account && !names.includes(it.account)) names.push(it.account); });
+    if (!(opts && opts.noUnspecified)) names.push("Not specified");
+    if (extra && !names.includes(extra)) names.push(extra);
+    return names;
+  }
+  const accountOptions = (sel, opts) => accountsList(sel, opts).map((a) => `<option${a === sel ? " selected" : ""}>${esc(a)}</option>`).join("");
   function deviceDownloads() {
     return {
       async save({ filename, data }) {
@@ -927,6 +1081,7 @@ function buildRecords(imp, existing, learned, today) {
     store.subscribe((list) => { rawList = list; rebuildEntries(); loaded.entries = true; scheduleRender(); bookDue(); purgeTrash(); });
     store.subscribeSettings((s) => {
       CAT_RENAMES = s && s.renames && typeof s.renames === "object" && !Array.isArray(s.renames) ? s.renames : {};
+      txAssetCache = null;
       state.settings = normSettings(s); applyCats(); rebuildEntries(); loaded.settings = true; scheduleRender(); bookDue();
       if (pendingAdd) { pendingAdd = false; openEntry(null); }
     });
@@ -939,17 +1094,20 @@ function buildRecords(imp, existing, learned, today) {
     state.trash = all.filter((e) => e.deletedAt);
   }
   function valid(e) {
-    return e && typeof e.id === "string" && (e.type === "aus" || e.type === "ein") &&
+    return e && typeof e.id === "string" && (e.type === "aus" || e.type === "ein" || (e.type === "tr" && typeof e.toAccount === "string")) &&
       Number.isInteger(e.cents) && e.cents > 0 && /^\d{4}-\d{2}-\d{2}$/.test(e.date || "");
   }
-  function normEntry(e) { return { ...e, cat: normCat(e.cat, e.type), account: ACC_ALIAS[e.account] || e.account || "Not specified" }; }
+  function normEntry(e) {
+    if (e.type === "tr") return { ...e, cat: "Transfer", account: ACC_ALIAS[e.account] || e.account || "Not specified", toAccount: ACC_ALIAS[e.toAccount] || e.toAccount };
+    return { ...e, cat: normCat(e.cat, e.type), account: ACC_ALIAS[e.account] || e.account || "Not specified" };
+  }
   function normSettings(s) {
     s = s && typeof s === "object" ? s : {};
     const lim = {};
     if (s.limits && typeof s.limits === "object") for (const [k, v] of Object.entries(s.limits)) if (Number.isInteger(v) && v > 0) lim[normCat(k, "aus")] = v;
     const projects = Array.isArray(s.projects) ? s.projects.filter((p) => p && typeof p.id === "string" && typeof p.name === "string") : [];
     const obj = (o) => (o && typeof o === "object" && !Array.isArray(o) ? o : {});
-    const recurring = Array.isArray(s.recurring) ? s.recurring.filter((r) => r && typeof r.id === "string" && Number.isInteger(r.cents) && r.cents > 0 && (r.type === "aus" || r.type === "ein") && [1, 3, 6, 12].includes(r.every) && /^\d{4}-\d{2}-\d{2}$/.test(r.start || "")) : [];
+    const recurring = Array.isArray(s.recurring) ? s.recurring.filter((r) => r && typeof r.id === "string" && Number.isInteger(r.cents) && r.cents > 0 && (r.type === "aus" || r.type === "ein" || r.type === "tr") && [1, 3, 6, 12].includes(r.every) && /^\d{4}-\d{2}-\d{2}$/.test(r.start || "")) : [];
     const items = s.balance && Array.isArray(s.balance.items) ? s.balance.items.filter((i) => i && typeof i.id === "string" && typeof i.name === "string") : [];
     const cc = s.customCats && typeof s.customCats === "object" ? s.customCats : {};
     const names = (a) => (Array.isArray(a) ? a.filter((n) => typeof n === "string" && n.trim()).map((n) => n.trim().slice(0, 30)) : []);
@@ -997,7 +1155,8 @@ function buildRecords(imp, existing, learned, today) {
   const fmtX = (m) => String(Math.round(m * 10) / 10);
   const baseMonth = () => (isMonthPeriod() ? ymSel() : curMonth());
   const PRESETS = [["30d", "30 days"], ["2m", "2 months"], ["3m", "3 months"], ["6m", "6 months"], ["12m", "12 months"]];
-  function periodNav() {
+  function periodNav(sfx) {
+    sfx = sfx || "";
     const years = new Set([curYear()]);
     state.entries.forEach((e) => years.add(Number(e.date.slice(0, 4))));
     const ys = [...years].filter((y) => y <= curYear()).sort((a, b) => b - a);
@@ -1006,20 +1165,20 @@ function buildRecords(imp, existing, learned, today) {
     const custom = state.pkind === "custom", r = range();
     return `<div class="period">
       <div class="periodnav">
-        <label><span class="sr">Month</span><select class="psel${custom ? " off" : ""}" id="selMonth" data-action="selmonth">
+        <label><span class="sr">Month</span><select class="psel${custom ? " off" : ""}" id="selMonth${sfx}" data-action="selmonth">
           ${custom ? `<option value="" selected disabled hidden>Month</option>` : ""}
           <option value="0"${!custom && state.mon === 0 ? " selected" : ""}>Whole year</option>
           ${months.map((m) => `<option value="${m}"${!custom && state.mon === m ? " selected" : ""}${m > maxMon ? " disabled" : ""}>${monthName.format(new Date(2000, m - 1, 1))}</option>`).join("")}
         </select></label>
-        <label><span class="sr">Year</span><select class="psel${custom ? " off" : ""}" id="selYear" data-action="selyear">
+        <label><span class="sr">Year</span><select class="psel${custom ? " off" : ""}" id="selYear${sfx}" data-action="selyear">
           ${custom ? `<option value="" selected disabled hidden>Year</option>` : ""}
           ${ys.map((y) => `<option value="${y}"${!custom && state.year === y ? " selected" : ""}>${y}</option>`).join("")}
         </select></label>
         <button class="psel rangebtn" data-action="range-toggle" aria-pressed="${custom}">Custom range</button>
       </div>
       ${custom ? `<div class="rangerow">
-          <label class="field"><span class="label">From</span><input type="date" class="psel datein" id="rangeFrom" value="${r.from}" max="${r.to}"></label>
-          <label class="field"><span class="label">To</span><input type="date" class="psel datein" id="rangeTo" value="${r.to}" min="${r.from}"></label>
+          <label class="field"><span class="label">From</span><input type="date" class="psel datein" id="rangeFrom${sfx}" value="${r.from}" max="${r.to}"></label>
+          <label class="field"><span class="label">To</span><input type="date" class="psel datein" id="rangeTo${sfx}" value="${r.to}" min="${r.from}"></label>
         </div>
         <div class="pills" role="group" aria-label="Quick ranges up to today">${PRESETS.map(([k, t]) => `<button data-action="preset" data-arg="${k}" aria-pressed="${state.preset === k}">${t}</button>`).join("")}</div>` : ""}
     </div>`;
@@ -1027,7 +1186,7 @@ function buildRecords(imp, existing, learned, today) {
 
   /* ================= Calculations ================= */
   /* Money back for an expense category (a friend paying their share, a refund) reduces that category's spending instead of counting as income */
-  function totals(list) { let i = 0, o = 0; for (const e of list) { if (e.type === "aus") o += e.cents; else if (isRefund(e)) o -= e.cents; else i += e.cents; } return { i, o }; }
+  function totals(list) { let i = 0, o = 0; for (const e of list) { if (e.type === "tr") continue; if (e.type === "aus") o += e.cents; else if (isRefund(e)) o -= e.cents; else i += e.cents; } return { i, o }; }
   const spendVal = (e, cat) => (cat === "All" || e.cat === cat) ? (e.type === "aus" ? e.cents : isRefund(e) ? -e.cents : 0) : 0;
   const incomeVal = (e, cat) => (e.type === "ein" && !isRefund(e) && (cat === "All" || e.cat === cat)) ? e.cents : 0;
   function spentWhere(pred, cat) { let s = 0; for (const e of state.entries) if (pred(e)) s += spendVal(e, cat); return s; }
@@ -1057,6 +1216,8 @@ function buildRecords(imp, existing, learned, today) {
   }
   /* Calculated view: a spread payment counts in the months it is for, evenly per day within each month */
   function pieces(e, v) {
+    const asset = assetOf(e);
+    if (asset && e.type === "aus") return v > 0 ? depPieces(asset) : [];
     if (e.spread && e.spread.months > 1) {
       const n = e.spread.months, st = /^\d{4}-\d{2}$/.test(e.spread.start || "") ? e.spread.start : e.date.slice(0, 7);
       return Array.from({ length: n }, (_, k) => { const m = shiftMonth(st, k); return { from: `${m}-01`, to: monthEnd(m), amt: v / n }; });
@@ -1065,8 +1226,8 @@ function buildRecords(imp, existing, learned, today) {
   }
   function calcShares(from, to, fn) {
     const out = [];
-    for (const e of state.entries) {
-      if (!(e.spread && e.spread.months > 1) && (e.date < from || e.date > to)) continue;
+    for (const e of calcPool()) {
+      if (!(e.spread && e.spread.months > 1) && !assetOf(e) && (e.date < from || e.date > to)) continue;
       const v = fn(e); if (!v) continue;
       let share = 0;
       for (const p of pieces(e, v)) {
@@ -1080,8 +1241,8 @@ function buildRecords(imp, existing, learned, today) {
   }
   function calcDaily(from, n, fn) {
     const to = addDays(from, n - 1), arr = new Array(n).fill(0);
-    for (const e of state.entries) {
-      if (!(e.spread && e.spread.months > 1) && (e.date < from || e.date > to)) continue;
+    for (const e of calcPool()) {
+      if (!(e.spread && e.spread.months > 1) && !assetOf(e) && (e.date < from || e.date > to)) continue;
       const v = fn(e); if (!v) continue;
       for (const p of pieces(e, v)) {
         if (p.to < from || p.from > to) continue;
@@ -1099,8 +1260,8 @@ function buildRecords(imp, existing, learned, today) {
   }
   function calcSharesByPiece(from, to, fn) {
     const out = [];
-    for (const e of state.entries) {
-      if (!(e.spread && e.spread.months > 1) && (e.date < from || e.date > to)) continue;
+    for (const e of calcPool()) {
+      if (!(e.spread && e.spread.months > 1) && !assetOf(e) && (e.date < from || e.date > to)) continue;
       const v = fn(e); if (!v) continue;
       for (const p of pieces(e, v)) {
         if (p.to < from || p.from > to) continue;
@@ -1220,8 +1381,9 @@ function buildRecords(imp, existing, learned, today) {
   let gradCount = 0;
   function drawChart(host, cfg) {
     if (!host) return;
-    const W = Math.max(260, Math.round(host.clientWidth || 320)), Hh = 220, L = 56, R = 12, T = 16, B = 26;
-    const pw = W - L - R, ph = Hh - T - B, n = cfg.domain, pts = cfg.points;
+    const W = Math.max(260, Math.round(host.clientWidth || 320)), Hh = cfg.height || 220, L = 56, R = 12, T = 16, B = 26;
+    const pw = W - L - R, ph = Hh - T - B, n = cfg.domain;
+    let pts = cfg.points, extraPts = cfg.extra;
     const X = cfg.bars ? (i) => L + (i + 0.5) * (pw / Math.max(1, n)) : (i) => n <= 1 ? L + pw / 2 : L + i * (pw / (n - 1));
     const vals = pts.map((p) => p.value).concat(cfg.compare ? cfg.compare.map((p) => p.value) : [], cfg.extra ? cfg.extra.map((p) => p.value) : []);
     const max = Math.max(0, ...vals, cfg.limit ? cfg.limit * 1.12 : 0), min = Math.min(0, ...vals);
@@ -1229,7 +1391,18 @@ function buildRecords(imp, existing, learned, today) {
     let yMax = step * Math.ceil(max / step), yMin = -step * Math.ceil(-min / step);
     if (yMax <= yMin) yMax = yMin + step;
     const Y = (v) => T + ph - ((v - yMin) / (yMax - yMin)) * ph, f = (v) => v.toFixed(1);
-    const path = (arr) => arr.map((p, i) => `${i ? "L" : "M"}${f(X(i))},${f(Y(p.value))}`).join("");
+    const xOf = (p, i) => X(p.frac != null ? p.frac : i);
+    const path = (arr) => arr.map((p, i) => `${i ? "L" : "M"}${f(xOf(p, i))},${f(Y(p.value))}`).join("");
+    if (cfg.reveal != null && pts.length) {
+      const k = Math.max(0, Math.min(pts.length - 1, cfg.reveal)), ki = Math.floor(k), fr = k - ki;
+      const cut = (arr) => {
+        if (!arr) return arr;
+        const a = arr.slice(0, ki + 1), nx = arr[ki + 1];
+        if (fr > 0.001 && nx) a.push(cfg.bars ? { value: nx.value * fr, label: nx.label } : { value: arr[ki].value + (nx.value - arr[ki].value) * fr, label: nx.label, frac: ki + fr });
+        return a;
+      };
+      pts = cut(pts); extraPts = cut(extraPts);
+    }
     let s = "";
     for (let v = yMin; v <= yMax + step / 2; v += step) {
       s += `<line class="grid${v === 0 ? " base" : ""}" x1="${L}" x2="${W - R}" y1="${f(Y(v))}" y2="${f(Y(v))}"/><text class="ylab" x="${L - 8}" y="${f(Y(v) + 4)}" text-anchor="end">${esc(axisMoney(v))}</text>`;
@@ -1252,19 +1425,19 @@ function buildRecords(imp, existing, learned, today) {
     } else if (pts.length > 1) {
       const gid = "grad" + (++gradCount);
       s += `<defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:${cfg.color};stop-opacity:0.3"/><stop offset="1" style="stop-color:${cfg.color};stop-opacity:0"/></linearGradient></defs>`;
-      s += `<path d="${d}L${f(X(pts.length - 1))},${f(Y(0))}L${f(X(0))},${f(Y(0))}Z" style="fill:url(#${gid})"/><path class="line" d="${d}" style="stroke:${cfg.color}"/>`;
+      s += `<path d="${d}L${f(xOf(pts[pts.length - 1], pts.length - 1))},${f(Y(0))}L${f(X(0))},${f(Y(0))}Z" style="fill:url(#${gid})"/><path class="line" d="${d}" style="stroke:${cfg.color}"/>`;
     }
     const xc = cfg.extraColor || "var(--pos)";
-    if (cfg.extra && cfg.extra.length > 1) s += `<path class="line" d="${path(cfg.extra)}" style="stroke:${xc}"/>`;
+    if (extraPts && extraPts.length > 1) s += `<path class="line" d="${path(extraPts)}" style="stroke:${xc}"/>`;
     if (cfg.kind !== "daily" && !cfg.bars) {
-      pts.forEach((p, i) => { s += `<circle cx="${f(X(i))}" cy="${f(Y(p.value))}" r="3" style="fill:${cfg.color}"/>`; });
-      if (cfg.extra) cfg.extra.forEach((p, i) => { s += `<circle cx="${f(X(i))}" cy="${f(Y(p.value))}" r="3" style="fill:${xc}"/>`; });
+      pts.forEach((p, i) => { if (p.frac == null) s += `<circle cx="${f(X(i))}" cy="${f(Y(p.value))}" r="3" style="fill:${cfg.color}"/>`; });
+      if (extraPts) extraPts.forEach((p, i) => { if (p.frac == null) s += `<circle cx="${f(X(i))}" cy="${f(Y(p.value))}" r="3" style="fill:${xc}"/>`; });
     }
     const li = pts.length - 1;
-    if (li >= 0 && !cfg.bars) s += `<circle class="ring" cx="${f(X(li))}" cy="${f(Y(pts[li].value))}" r="5" style="fill:${cfg.color}"/>`;
-    if (li >= 0 && cfg.extra) s += `<circle class="ring" cx="${f(X(li))}" cy="${f(Y(cfg.extra[li].value))}" r="5" style="fill:${xc}"/>`;
+    if (li >= 0 && !cfg.bars) s += `<circle class="ring" cx="${f(xOf(pts[li], li))}" cy="${f(Y(pts[li].value))}" r="5" style="fill:${cfg.color}"/>`;
+    if (li >= 0 && extraPts && extraPts[li]) s += `<circle class="ring" cx="${f(xOf(extraPts[li], li))}" cy="${f(Y(extraPts[li].value))}" r="5" style="fill:${xc}"/>`;
     s += `<g class="cur" visibility="hidden"><line class="cursor" x1="0" x2="0" y1="${T}" y2="${T + ph}"/><circle class="ring" r="6" style="fill:${cfg.color}"/></g>`;
-    host.innerHTML = `<svg viewBox="0 0 ${W} ${Hh}" role="img" aria-label="${esc(cfg.aria)}">${s}</svg>`;
+    host.innerHTML = `<svg viewBox="0 0 ${W} ${Hh}" style="height:${Hh}px" role="img" aria-label="${esc(cfg.aria)}">${s}</svg>`;
     if (li < 0) return;
     const svg = host.firstElementChild, cur = svg.querySelector(".cur");
     const hide = () => { cur.setAttribute("visibility", "hidden"); cfg.onScrub && cfg.onScrub(null); };
@@ -1282,10 +1455,11 @@ function buildRecords(imp, existing, learned, today) {
     svg.addEventListener("pointerleave", hide); svg.addEventListener("pointercancel", hide);
     svg.addEventListener("pointerup", (e) => { if (e.pointerType !== "mouse") hide(); });
   }
+  const expandBtn = (id) => `<button class="expbtn" data-action="chart-full" data-arg="${id}" aria-label="Show chart full screen">⤢ Full screen</button>`;
   function heroAndChart(id, s, opts) {
     const mode = opts.mode || "aus", base = heroDefault(s, mode);
     charts.push({
-      id, ...s, color: opts.color, extraColor: "var(--pos)", limit: opts.limit, limitLabel: opts.limitLabel, aria: opts.aria,
+      id, ...s, color: opts.color, extraColor: "var(--pos)", limit: opts.limit, limitLabel: opts.limitLabel, aria: opts.aria, title: opts.label, between: opts.between, periodic: true,
       onScrub: (i) => { const h = i == null ? base : heroAt(s, i, mode); const v = $(id + "Val"), sub = $(id + "Sub"); if (v) v.innerHTML = heroHTML(h.value, h.signed); if (sub) sub.innerHTML = h.sub; }
     });
     const per = s.kind === "daily" ? ", cumulative" : " per month", cl = s.calc ? " (calc.)" : "";
@@ -1305,7 +1479,7 @@ function buildRecords(imp, existing, learned, today) {
       ${opts.between || ""}
       <section class="chartblock" aria-label="Chart">
         <div class="chart" id="${id}"></div>
-        <div class="legend">${legend}</div>
+        <div class="cfoot"><div class="legend">${legend}</div>${expandBtn(id)}</div>
       </section>`;
   }
   /* Net result chart for the Total view: cumulative line for short ranges, bars per month for long ones */
@@ -1316,7 +1490,7 @@ function buildRecords(imp, existing, learned, today) {
     const plus = pts.filter((p) => p.value >= 0).length;
     const base = bars ? `${plus} of ${pts.length} months positive · avg ${signed(Math.round(sum / Math.max(1, pts.length)))} / month`
       : s.isCur ? "What's left so far this period" : "What was left at the end of the period";
-    charts.push({ id, kind: s.kind, domain: s.domain, points: pts, ticks: s.ticks, compare: null, bars, color: "var(--accent)", limit: 0, aria: "Net result: income minus spending",
+    charts.push({ id, kind: s.kind, domain: s.domain, points: pts, ticks: s.ticks, compare: null, bars, color: "var(--accent)", limit: 0, aria: "Net result: income minus spending", title: `Net result${s.calc ? " (calculated)" : ""} · ${periodLabel()}`, periodic: true,
       onScrub: (i) => { const v = $(id + "Val"), sb = $(id + "Sub"); if (!v) return; if (i == null) { v.innerHTML = heroHTML(total, true); sb.textContent = base; } else { v.innerHTML = heroHTML(pts[i].value, true); sb.textContent = `${bars ? "" : "up to "}${pts[i].label}`; } } });
     return `
       <section class="hero">
@@ -1325,7 +1499,7 @@ function buildRecords(imp, existing, learned, today) {
         <div class="herosub" id="${id}Sub">${esc(base)}</div>
       </section>
       <section class="chartblock" aria-label="Net result chart"><div class="chart" id="${id}"></div>
-        <div class="legend">${bars ? `<span><i style="border-color:var(--pos)"></i>Month with a plus</span><span><i style="border-color:var(--neg)"></i>Month with a minus</span>` : `<span><i style="border-color:var(--accent)"></i>Net result, cumulative</span>`}</div></section>`;
+        <div class="cfoot"><div class="legend">${bars ? `<span><i style="border-color:var(--pos)"></i>Month with a plus</span><span><i style="border-color:var(--neg)"></i>Month with a minus</span>` : `<span><i style="border-color:var(--accent)"></i>Net result, cumulative</span>`}</div>${expandBtn(id)}</div></section>`;
   }
   function catChart(id, cat, mode, between, calc) {
     mode = mode || "aus";
@@ -1345,6 +1519,18 @@ function buildRecords(imp, existing, learned, today) {
   const badge = (cat) => { const c = colorOf(cat); return `<span class="badge" style="color:${c};background:${c}24" aria-hidden="true">${esc((cat || "?").slice(0, 2))}</span>`; };
   const projById = (id) => state.settings.projects.find((p) => p.id === id);
   function entryRow(e, opt) {
+    if (e.virtualAsset) {
+      return `<button class="row nochev" data-action="bal-item" data-arg="${esc(e.virtualAsset.id)}">${badge(e.cat)}<span class="main"><span class="t1">${esc(e.virtualAsset.name)}<span class="tag">Depreciation</span></span><span class="t2">${esc(e.cat)} · bought ${esc(dateFmt.format(isoDate(e.date)))} for ${money(e.virtualAsset.cost)}</span></span><span class="val neg">−${money(opt && opt.cents != null ? opt.cents : 0)}</span></button>`;
+    }
+    if (e.type === "tr") {
+      renderIds.push(e.id);
+      const on = state.sel && state.sel.ids.has(e.id);
+      return `<button class="row nochev" data-action="entry" data-arg="${esc(e.id)}"${state.sel ? ` aria-pressed="${on ? "true" : "false"}"` : ""}>
+        ${state.sel ? `<span class="checkc${on ? " on" : ""}" aria-hidden="true">${on ? "✓" : ""}</span>` : `<span class="badge" style="color:#9AA3AD;background:#9AA3AD24" aria-hidden="true">⇄</span>`}
+        <span class="main"><span class="t1">${esc(e.note || "Transfer")}${e.recurring ? '<span class="tag">Fixed</span>' : ""}</span>
+        <span class="t2">${esc(e.account)} → ${esc(e.toAccount)} · ${esc(dayFmt.format(isoDate(e.date)))}</span></span>
+        <span class="val">${money(e.cents)}</span></button>`;
+    }
     const p = e.project && projById(e.project), back = isRefund(e);
     const tags = (e.example ? '<span class="tag">Example</span>' : "") + (e.recurring ? '<span class="tag">Fixed</span>' : "") + (e.spread && e.spread.months > 1 ? `<span class="tag">÷${e.spread.months}</span>` : "") + (e.cat === UNCAT ? '<span class="tag attn">Review</span>' : "");
     renderIds.push(e.id);
@@ -1582,7 +1768,7 @@ function buildRecords(imp, existing, learned, today) {
     const byCat = Object.entries(spentByCat(list)).sort((a, b) => b[1] - a[1]);
     const unassigned = p.start ? state.entries.filter((e) => !e.project && e.date >= p.start && (!p.end || e.date <= p.end)) : [];
     const sub = `${esc(base.sub)}${t.i ? ` · income ${money(t.i)}` : ""}`;
-    charts.push({ id: "chProj", ...s, color: p.color, limit: 0, aria: `Spending per month for ${p.name}`,
+    charts.push({ id: "chProj", ...s, color: p.color, limit: 0, title: p.name, aria: `Spending per month for ${p.name}`,
       onScrub: (i) => { const h = i == null ? { value: t.o, sub } : heroAt(s, i); $("chProjVal").innerHTML = heroHTML(h.value); $("chProjSub").innerHTML = h.sub; } });
     return `
       ${backBar()}
@@ -1594,7 +1780,7 @@ function buildRecords(imp, existing, learned, today) {
         <div class="herosub" id="chProjSub">${sub}</div>
       </section>
       ${budget ? `<section class="card"><div class="split"><span class="label">Project budget</span><span class="hint">${money(p.budget)}</span></div>${barHTML(budget, false)}<span class="status ${budget.cls}">${esc(budget.text)}</span></section>` : ""}
-      <section class="chartblock" aria-label="Chart"><div class="chart" id="chProj"></div><div class="legend"><span><i style="border-color:${p.color}"></i>Spending per month</span></div></section>
+      <section class="chartblock" aria-label="Chart"><div class="chart" id="chProj"></div><div class="cfoot"><div class="legend"><span><i style="border-color:${p.color}"></i>Spending per month</span></div>${expandBtn("chProj")}</div></section>
       <div class="btnrow">
         <button class="btn" data-action="edit-project" data-arg="${esc(p.id)}">Edit project</button>
         ${unassigned.length ? `<button class="btn primary" data-action="assign-project" data-arg="${esc(p.id)}">Add ${unassigned.length} transactions from this period</button>` : ""}
@@ -1758,7 +1944,7 @@ function buildRecords(imp, existing, learned, today) {
         <p>Detected: <b>${esc(imp.source)}</b> · ${esc(imp.fileName)} · ${imp.data.length} rows. Check that the right columns are picked.</p>
         <div class="mapgrid">${fields.map(([k, lab, req]) => `<div class="field"><label class="label" for="map-${k}">${esc(lab)}${req && !(k === "date" && ymd) ? " *" : ""}</label><select class="psel" id="map-${k}" data-action="impmap" data-field="${k}">${opts(map[k])}</select></div>`).join("")}</div>
         <div class="mapgrid">
-          <div class="field"><label class="label" for="impAccount">Paid with</label><select class="psel" id="impAccount" data-action="impopt" data-field="account">${ACCOUNTS.map((a) => `<option${imp.account === a ? " selected" : ""}>${esc(a)}</option>`).join("")}</select></div>
+          <div class="field"><label class="label" for="impAccount">Paid with</label><select class="psel" id="impAccount" data-action="impopt" data-field="account">${accountOptions(imp.account)}</select></div>
           <div class="field"><label class="label" for="impSign">Amounts</label><select class="psel" id="impSign" data-action="impopt" data-field="signMode">
             <option value="auto"${imp.signMode === "auto" ? " selected" : ""}>${anyNeg ? "Minus = expense" : "Detect automatically"}</option>
             <option value="exp"${imp.signMode === "exp" ? " selected" : ""}>All are expenses</option>
@@ -1803,13 +1989,14 @@ function buildRecords(imp, existing, learned, today) {
   }
   function viewFixed() {
     const rules = state.settings.recurring.slice().sort((a, b) => monthlyEq(b) - monthlyEq(a));
-    const out = rules.filter((r) => r.type === "aus"), inc = rules.filter((r) => r.type === "ein");
+    const out = rules.filter((r) => r.type === "aus"), inc = rules.filter((r) => r.type === "ein"), trs = rules.filter((r) => r.type === "tr");
+    const fs = trs.filter((r) => !r.end || r.end >= todayISO()).reduce((a, r) => a + monthlyEq(r), 0);
     const fx = fixedMonthly("aus"), fi = fixedMonthly("ein");
     const next30 = upcoming(addDays(todayISO(), 30));
     const dueM = upcoming(monthEnd(curMonth())).filter((u) => u.r.type === "aus").reduce((a, u) => a + u.r.cents, 0);
     const row = (r) => {
       const nd = nextDue(r), ended = r.end && r.end < todayISO();
-      return `<button class="row" data-action="rec-edit" data-arg="${esc(r.id)}">${badge(r.cat)}<span class="main"><span class="t1">${esc(r.name)}</span><span class="t2">${esc(FREQ[r.every])}${r.every > 1 ? " · " + money(r.cents) : ""} · ${ended ? "ended" : nd ? "next " + esc(dayFmt.format(isoDate(nd))) : "no more payments"}</span></span><span class="val ${r.type === "ein" ? "pos" : ""}">${money(Math.round(monthlyEq(r)))}<small>per month</small></span><span class="chev" aria-hidden="true">›</span></button>`;
+      return `<button class="row" data-action="rec-edit" data-arg="${esc(r.id)}">${r.type === "tr" ? `<span class="badge" style="color:#9AA3AD;background:#9AA3AD24" aria-hidden="true">⇄</span>` : badge(r.cat)}<span class="main"><span class="t1">${esc(r.name)}</span><span class="t2">${r.type === "tr" ? `${esc(r.account)} → ${esc(r.toAccount || "")} · ` : ""}${esc(FREQ[r.every])}${r.every > 1 ? " · " + money(r.cents) : ""} · ${ended ? "ended" : nd ? "next " + esc(dayFmt.format(isoDate(nd))) : "no more payments"}</span></span><span class="val ${r.type === "ein" ? "pos" : ""}">${money(Math.round(monthlyEq(r)))}<small>per month</small></span><span class="chev" aria-hidden="true">›</span></button>`;
     };
     return `
       ${backBar()}
@@ -1818,9 +2005,10 @@ function buildRecords(imp, existing, learned, today) {
         <div class="herosub">${rules.length ? `Fixed income ${money(Math.round(fi))} / month · ${money(dueM)} still due in ${esc(monthName.format(new Date()))}` : "Nothing set up yet"}</div></section>
       <section class="card"><p>Set up what you pay regularly. PFM books each payment automatically on its due date. Quarterly, half-yearly and yearly payments count with their monthly share here – €480 car insurance per year shows as €40 per month.</p>
         <div class="btnrow"><button class="btn primary" data-action="rec-new">+ Add fixed cost</button></div></section>
-      ${next30.length ? `<section class="sec"><div class="sechead"><h2 class="sectitle">Next 30 days</h2></div>${next30.map((u) => `<div class="row nochev">${badge(u.r.cat)}<span class="main"><span class="t1">${esc(u.r.name)}<span class="tag plan">Planned</span></span><span class="t2">${esc(dayFmt.format(isoDate(u.d)))} · ${esc(u.r.account || "")}</span></span><span class="val ${u.r.type === "ein" ? "pos" : ""}">${u.r.type === "ein" ? "+" : "−"}${money(u.r.cents)}</span></div>`).join("")}</section>` : ""}
+      ${next30.length ? `<section class="sec"><div class="sechead"><h2 class="sectitle">Next 30 days</h2></div>${next30.map((u) => `<div class="row nochev">${badge(u.r.cat)}<span class="main"><span class="t1">${esc(u.r.name)}<span class="tag plan">Planned</span></span><span class="t2">${esc(dayFmt.format(isoDate(u.d)))} · ${esc(u.r.account || "")}</span></span><span class="val ${u.r.type === "ein" ? "pos" : u.r.type === "tr" ? "" : "neg"}">${u.r.type === "ein" ? "+" : u.r.type === "tr" ? "⇄ " : "−"}${money(u.r.cents)}</span></div>`).join("")}</section>` : ""}
       ${out.length ? `<section class="sec"><div class="sechead"><h2 class="sectitle">Spending</h2><span class="hint">${money(Math.round(fx))} / month</span></div>${out.map(row).join("")}</section>` : ""}
-      ${inc.length ? `<section class="sec"><div class="sechead"><h2 class="sectitle">Income</h2><span class="hint">${money(Math.round(fi))} / month</span></div>${inc.map(row).join("")}</section>` : ""}`;
+      ${inc.length ? `<section class="sec"><div class="sechead"><h2 class="sectitle">Income</h2><span class="hint">${money(Math.round(fi))} / month</span></div>${inc.map(row).join("")}</section>` : ""}
+      ${trs.length ? `<section class="sec"><div class="sechead"><h2 class="sectitle">Saving &amp; transfers</h2><span class="hint">${money(Math.round(fs))} / month</span></div>${trs.map(row).join("")}</section>` : ""}`;
   }
 
   /* ---------- Calculated view ---------- */
@@ -1838,11 +2026,11 @@ function buildRecords(imp, existing, learned, today) {
     const between = modeSeg("calcmode", mode) + chipRowHTML("calcfilter", mode, cat, chipCats);
     const listFn = mode === "all" ? (e) => e.cents : mode === "ein" ? (e) => incomeVal(e, cat) : (e) => spendVal(e, cat);
     const shares = calcShares(r.from, rTo, listFn).filter((x) => Math.abs(x.share) >= 1).sort((a, b) => byDateDesc(a.e, b.e));
-    scopeIds = shares.map((x) => x.e.id);
+    scopeIds = shares.filter((x) => !x.e.virtualAsset).map((x) => x.e.id);
     const shown = state.calcShowAll || state.sel ? shares : shares.slice(0, 15);
     const total = shares.reduce((a, x) => a + (mode === "all" ? (x.e.type === "ein" && !isRefund(x.e) ? x.share : -x.share) : x.share), 0);
     const title = mode === "all" ? "Transactions" : cat !== "All" ? cat : mode === "ein" ? "Income" : "Costs";
-    const row = (x) => { const e = x.e, sp = e.spread && e.spread.months > 1; return entryRow(e, { cents: Math.round(Math.abs(x.share)), note: sp ? `share of ${money(e.cents)} ÷${e.spread.months}` : "" }); };
+    const row = (x) => { const e = x.e, sp = e.spread && e.spread.months > 1, as = assetOf(e); return entryRow(e, { cents: Math.round(Math.abs(x.share)), note: as && !e.virtualAsset ? `depreciation of ${money(as.cost)}` : sp ? `share of ${money(e.cents)} ÷${e.spread.months}` : "" }); };
     const sumAll = (fn) => calcShares(r.from, rTo, fn).reduce((a, x) => a + x.share, 0);
     const cInc = sumAll((e) => incomeVal(e, "All")), cOut = sumAll((e) => spendVal(e, "All"));
     const months = monthBuckets(r.from, r.to), curIdx = months.indexOf(todayISO().slice(0, 7));
@@ -1884,61 +2072,93 @@ function buildRecords(imp, existing, learned, today) {
   }
 
   /* ---------- Balance sheet view ---------- */
+  /* Reporting dates: today, then every 30 June and 31 December back to the first data */
+  function reportDates() {
+    const now = curMonth(), first = balanceStart() || now, out = [{ key: now, label: `Today (${dateFmt.format(new Date())})` }];
+    let y = curYear(), m = now.slice(5) > "06" ? "06" : "12";
+    if (m === "12") y -= 1;
+    for (let k = 0; k < 20; k++) {
+      const key = `${y}-${m}`;
+      if (key < first.slice(0, 7) && k > 0) break;
+      if (key < now) out.push({ key, label: m === "06" ? `30 Jun ${y}` : `31 Dec ${y}` });
+      if (m === "06") m = "12", y -= 1; else m = "06";
+    }
+    return out;
+  }
   function viewBalance() {
-    const items = state.settings.balance.items, now = curMonth(), b = balanceAt(now), first = balanceStart();
-    let chartHTML = "", sub = "Add your accounts, investments and debts to see your net worth.";
+    const items = state.settings.balance.items, now = curMonth(), first = balanceStart();
+    const dates = reportDates();
+    if (!dates.some((d) => d.key === state.balAt)) state.balAt = now;
+    const at = state.balAt, atIdx = dates.findIndex((d) => d.key === at), prevD = dates[atIdx + 1] || null;
+    const b = balanceAt(at), pb = prevD ? balanceAt(prevD.key) : null;
+    let chartHTML = "", sub = "Add your accounts, investments, things you own and debts to see your net worth.";
     if (first) {
-      let from = first < shiftMonth(now, -35) ? shiftMonth(now, -35) : first;
+      sub = pb ? `<span class="${b.net - pb.net >= 0 ? "pos" : "neg"}">${b.net - pb.net >= 0 ? "▲" : "▼"} ${money(Math.abs(b.net - pb.net))}</span> since ${esc(prevD.label)}` : "First reporting date";
+      const from = first < shiftMonth(now, -35) ? shiftMonth(now, -35) : first;
       const months = []; for (let m = from; m <= now; m = shiftMonth(m, 1)) months.push(m);
-      const nets = months.map((m) => balanceAt(m).net);
-      const crossYear = months[0].slice(0, 4) !== now.slice(0, 4);
-      const ref = `${curYear() - 1}-12` >= first ? `${curYear() - 1}-12` : first;
-      const diff = b.net - balanceAt(ref).net;
-      sub = `<span class="${diff >= 0 ? "pos" : "neg"}">${diff >= 0 ? "▲" : "▼"} ${money(Math.abs(diff))}</span> ${ref.endsWith("-12") && ref.startsWith(String(curYear() - 1)) ? "since the start of the year" : `since ${esc(monthFmt.format(ymDate(ref)))}`}`;
       if (months.length > 1) {
-        const minV = Math.min(...nets);
-        charts.push({ id: "chBal", kind: "monthly", domain: months.length, isCur: true, cmpLabel: "", compare: null, color: "var(--accent)", limit: 0, aria: "Net worth per month",
+        const nets = months.map((m) => balanceAt(m).net), crossYear = months[0].slice(0, 4) !== now.slice(0, 4);
+        charts.push({ id: "chBal", kind: "monthly", domain: months.length, isCur: true, cmpLabel: "", compare: null, color: "var(--accent)", limit: 0, aria: "Net worth per month", title: "Net worth",
           points: months.map((m, i) => ({ value: nets[i], label: monthFmt.format(ymDate(m)) })), ticks: months.map((m, i) => ({ i, text: crossYear ? `${mShort(m)} ${m.slice(2, 4)}` : mShort(m) })),
           onScrub: (i) => { $("chBalVal").innerHTML = heroHTML(i == null ? b.net : nets[i]); $("chBalSub").innerHTML = i == null ? sub : esc(monthFmt.format(ymDate(months[i]))); } });
-        chartHTML = `<section class="chartblock" aria-label="Chart"><div class="chart" id="chBal"></div><div class="legend"><span><i style="border-color:var(--accent)"></i>Net worth at month end</span></div>${minV < 0 ? `<p class="hint">Months with negative net worth are drawn at zero.</p>` : ""}</section>`;
+        chartHTML = `<section class="chartblock" aria-label="Chart"><div class="chart" id="chBal"></div><div class="cfoot"><div class="legend"><span><i style="border-color:var(--accent)"></i>Net worth at month end</span></div>${expandBtn("chBal")}</div></section>`;
       }
     }
+    const valAt = (it, key) => itemValue(it, key);
     const itemRow = (it) => {
-      const v = itemValue(it, now);
-      const keys = Object.keys(it.values || {}).sort(), last = keys[keys.length - 1];
-      const t2 = it.kind === "account" ? `Follows ${it.account} transactions` : last ? `Value from ${monthFmt.format(ymDate(last))}${last < now ? " · tap to update" : ""}` : "";
-      return `<button class="row nobadge" data-action="bal-item" data-arg="${esc(it.id)}"><span class="main"><span class="t1">${esc(it.name)}</span><span class="t2">${esc(t2)}</span></span><span class="val">${money(v || 0)}</span><span class="chev" aria-hidden="true">›</span></button>`;
+      const v = valAt(it, at);
+      if (v == null && it.kind === "asset") return "";
+      const pv = prevD ? valAt(it, prevD.key) : null;
+      let t2 = "";
+      if (it.kind === "account") t2 = `Follows ${it.account} transactions`;
+      else if (it.kind === "depot") { const ks = Object.keys(it.snaps || {}).sort(), last = ks[ks.length - 1]; t2 = last ? `Value from ${dateFmt.format(isoDate(last))} + transfers since${last < addDays(todayISO(), -30) ? " · tap to update" : ""}` : "Tap to enter the value"; }
+      else if (it.kind === "asset") { const T = ASSET_TYPES[it.atype] || ASSET_TYPES.other, ml = monthlyLoss(it); t2 = `${T.label} · ${money(it.cost)} in ${mShort(it.date.slice(0, 7))} ${it.date.slice(0, 4)}${ml ? ` · −${money(ml)}/month` : it.method === "none" ? " · keeps value" : ""}`; }
+      else { const ks = Object.keys(it.values || {}).sort(), last = ks[ks.length - 1]; t2 = last ? `Value from ${monthFmt.format(ymDate(last))}${last < now ? " · tap to update" : ""}` : ""; }
+      const cmp = prevD && pv != null && pv !== v ? `<small>${esc(prevD.label.replace(/^Today.*/, "today"))}: ${money(pv)}</small>` : "";
+      return `<button class="row nobadge balrow" data-action="bal-item" data-arg="${esc(it.id)}"><span class="main"><span class="t1">${esc(it.name)}</span><span class="t2">${esc(t2)}</span></span><span class="val">${v == null ? "–" : money(v)}${cmp}</span><span class="chev" aria-hidden="true">›</span></button>`;
     };
+    const sideOf = (it) => (it.side === "liability" ? "liability" : "asset");
     const groupBlock = (side, groups) => groups.map((g) => {
-      const list = items.filter((it) => (it.side === "liability" ? "liability" : "asset") === side && it.group === g);
-      return list.length ? `<div class="grp"><span class="label">${esc(g)}</span>${list.map(itemRow).join("")}</div>` : "";
+      const rows = items.filter((it) => sideOf(it) === side && it.group === g).map(itemRow).filter(Boolean);
+      if (!rows.length) return "";
+      let extra = "";
+      if (g === "Property & valuables") { const ml = items.filter((it) => it.kind === "asset").reduce((s2, it) => s2 + monthlyLoss(it), 0); if (ml && at === now) extra = `<span class="hint">Loses about ${money(ml)} per month in value</span>`; }
+      return `<div class="grp"><span class="label">${esc(g)}</span>${extra}${rows.join("")}</div>`;
     }).join("");
-    const other = (side, groups) => items.filter((it) => (it.side === "liability" ? "liability" : "asset") === side && !groups.includes(it.group));
+    const otherRows = (side, groups) => items.filter((it) => sideOf(it) === side && !groups.includes(it.group)).map(itemRow).filter(Boolean);
     const autoRow = (name, v, hint) => v ? `<div class="grp"><span class="label">${esc(name)}</span><div class="autorow"><span class="main"><span class="t2">${esc(hint)}</span></span><span class="val tn">${money(v)}</span></div></div>` : "";
+    const oA = otherRows("asset", ASSET_GROUPS), oL = otherRows("liability", LIAB_GROUPS);
+    const depYear = items.filter((it) => it.kind === "asset").reduce((sum, it) => {
+      const y0 = `${at.slice(0, 4)}-01-01`, endD = at === now ? todayISO() : monthEnd(at);
+      const v0 = assetValueAt(it, y0 < it.date ? it.date : y0), v1 = assetValueAt(it, endD);
+      return v0 != null && v1 != null ? sum + Math.max(0, v0 - v1) : sum;
+    }, 0);
     return `
       ${backBar()}
       <h1 class="vtitle">Balance sheet</h1>
-      <p class="meta">As of ${esc(dateFmt.format(new Date()))}</p>
-      <section class="hero"><span class="label">Net worth (equity)</span><div class="heroval" id="chBalVal">${heroHTML(b.net)}</div><div class="herosub" id="chBalSub">${sub}</div></section>
+      <div class="periodnav"><label><span class="sr">Reporting date</span><select class="psel" id="balAtSel" data-action="balat">${dates.map((d) => `<option value="${d.key}"${d.key === at ? " selected" : ""}>${esc(d.label)}</option>`).join("")}</select></label></div>
+      <section class="hero"><span class="label">Net worth (equity)${at === now ? "" : " · " + esc(dates[atIdx].label)}</span><div class="heroval" id="chBalVal">${heroHTML(b.net)}</div><div class="herosub" id="chBalSub">${sub}</div></section>
       ${chartHTML}
       <div class="btnrow"><button class="btn primary" data-action="bal-new" data-arg="asset">+ Asset</button><button class="btn" data-action="bal-new" data-arg="liability">+ Liability</button></div>
       ${items.length || b.prepaid || b.deferred ? `
       <section class="card tacc" aria-label="Assets">
-        <div class="split"><h2>Assets</h2></div>
-        ${groupBlock("asset", ASSET_GROUPS)}${other("asset", ASSET_GROUPS).length ? `<div class="grp"><span class="label">Other</span>${other("asset", ASSET_GROUPS).map(itemRow).join("")}</div>` : ""}
+        <div class="split"><h2>Assets</h2>${prevD ? `<span class="hint">vs ${esc(prevD.label)}</span>` : ""}</div>
+        ${groupBlock("asset", ASSET_GROUPS)}${oA.length ? `<div class="grp"><span class="label">Other</span>${oA.join("")}</div>` : ""}
         ${autoRow("Prepaid expenses", b.prepaid, "Not yet used part of spread payments (aktive RAP) · automatic")}
         <div class="totline"><span>Total assets</span><span>${money(b.assets)}</span></div>
+        ${pb ? `<div class="split"><span class="hint">${esc(prevD.label)}</span><span class="hint tn">${money(pb.assets)}</span></div>` : ""}
       </section>
       <section class="card tacc" aria-label="Liabilities and equity">
         <div class="split"><h2>Liabilities &amp; equity</h2></div>
-        ${groupBlock("liability", LIAB_GROUPS)}${other("liability", LIAB_GROUPS).length ? `<div class="grp"><span class="label">Other</span>${other("liability", LIAB_GROUPS).map(itemRow).join("")}</div>` : ""}
+        ${groupBlock("liability", LIAB_GROUPS)}${oL.length ? `<div class="grp"><span class="label">Other</span>${oL.join("")}</div>` : ""}
         ${autoRow("Deferred income", b.deferred, "Spread income for months still to come (passive RAP) · automatic")}
         <div class="split" style="padding-top:6px"><span class="hint">Total liabilities</span><span class="tn">${money(b.liab)}</span></div>
-        <div class="grp equity"><span class="label">Equity</span><div class="autorow"><span class="main"><span class="t1">Net worth</span></span><span class="val tn">${money(b.net)}</span></div></div>
+        <div class="grp equity"><span class="label">Equity</span><div class="autorow"><span class="main"><span class="t1">Net worth</span>${pb ? `<span class="t2">${esc(prevD.label)}: ${money(pb.net)}</span>` : ""}</span><span class="val tn">${money(b.net)}</span></div></div>
         <div class="totline"><span>Total liabilities &amp; equity</span><span>${money(b.liab + b.net)}</span></div>
-      </section>` : `
-      <section class="empty"><strong>Build your balance sheet</strong><span>Start with your accounts (DKB, PayPal, savings), investments and anything you own of value. Then add debts like a loan or money you owe. Update the values about once a month – PFM draws your net worth over time.</span></section>`}
-      <section class="card"><p>Accounts can follow your transactions automatically: enter the balance once, and every booking on that account moves it. Payments you spread in the calculated view show up here as prepaid expenses until their months have passed.</p></section>`;
+      </section>
+      ${depYear ? `<section class="card"><span class="label">Depreciation ${esc(at.slice(0, 4))}${at === now ? " so far" : ""}</span><div class="split"><span class="big">${money(depYear)}</span><span class="hint">value your things lost</span></div><p>This also appears in Calculated costs as monthly cost instead of the purchase price.</p></section>` : ""}` : `
+      <section class="empty"><strong>Build your balance sheet</strong><span>Start with your accounts (DKB, PayPal, cash), your investments (Trade Republic, depot) and things you own like a car or laptop. Then add debts like a loan. PFM keeps the values up to date and draws your net worth over time.</span></section>`}
+      <section class="card"><p>Bank accounts follow your transactions. Investment accounts add your transfers to the last value you entered. Things you own lose value automatically – evenly over their useful life (like the German AfA table, adjusted to real resale values) or, for vehicles, fast at first and slower later. Pick a reporting date above to see your balance sheet at 30 June or 31 December.</p></section>`;
   }
 
   /* ---------- Main menu ---------- */
@@ -1960,8 +2180,11 @@ function buildRecords(imp, existing, learned, today) {
     const avg = calcAvg(y);
     const hasBal = state.settings.balance.items.length > 0;
     const nets = hasBal ? Array.from({ length: 6 }, (_, k) => balanceAt(shiftMonth(cm, k - 5)).net) : [];
-    const accs = HUB_ACCOUNTS.map((a) => ({ a, v: accountBalance(a) }));
+    const accs = HUB_ACCOUNTS.map((a) => ({ a, v: accountBalance(a), inv: false, action: "acc", arg: a }));
+    state.settings.balance.items.filter((it) => it.kind === "depot" && it.showHome !== false).forEach((it) => accs.push({ a: it.name, v: itemValue(it, cm), inv: true, action: "bal-item", arg: it.id }));
     const known = accs.filter((x) => x.v != null), total = known.reduce((s, x) => s + x.v, 0);
+    const liquid = known.filter((x) => !x.inv).reduce((s, x) => s + x.v, 0), invested = known.filter((x) => x.inv).reduce((s, x) => s + x.v, 0);
+    const hasInv = accs.some((x) => x.inv);
     const bal = mt.i - mt.o, plus = ytd.i - ytd.o;
     return `
       <header class="hubhead">
@@ -1982,9 +2205,10 @@ function buildRecords(imp, existing, learned, today) {
           ${spark(nets, "var(--accent)")}<span class="chev" aria-hidden="true">›</span></button>
       </nav>
       <section class="accounts" aria-label="Accounts">
-        <span class="label">Account balance</span>
+        <span class="label">${hasInv ? "Accounts &amp; investments" : "Account balance"}</span>
         <div class="acc-total">${known.length ? heroHTML(total) : "–"}</div>
-        <div class="acc-split">${accs.map((x) => `<button class="acc" data-action="acc" data-arg="${esc(x.a)}"><span class="label">${esc(x.a)}</span>${x.v != null ? `<b>${money(x.v)}</b>` : `<span class="set">Set balance</span>`}</button>`).join("")}</div>
+        ${hasInv && known.length ? `<div class="acc-sub">Liquid ${money(liquid)} · <span class="inv-t">Invested ${money(invested)}</span></div>` : ""}
+        <div class="acc-split">${accs.map((x) => `<button class="acc" data-action="${x.action}" data-arg="${esc(x.arg)}"><span class="label${x.inv ? " inv" : ""}">${esc(x.a)}</span>${x.v != null ? `<b>${money(x.v)}</b>` : `<span class="set">Set balance</span>`}</button>`).join("")}${hasInv ? "" : `<button class="acc" data-action="choose" data-arg="depot"><span class="label inv">Investments</span><span class="set">+ Add</span></button>`}</div>
         <div class="ytd"><span class="label">Plus since 1 Jan</span><b class="${plus >= 0 ? "pos" : "neg"}">${signed(plus)}</b></div>
       </section>`;
   }
@@ -2047,6 +2271,7 @@ function buildRecords(imp, existing, learned, today) {
     const newRow = root.querySelector(".chiprow"); if (newRow) newRow.scrollLeft = keepScroll;
     if (focusId && root.contains($(focusId))) $(focusId).focus({ preventScroll: true });
     charts.forEach((c) => drawChart($(c.id), c));
+    if (state.full) renderFull();
     $("addBtn").hidden = !["cashflow", "list", "cat", "project", "budgets"].includes(top.v) || !!state.sel;
     const bar = $("selbar");
     bar.hidden = !state.sel;
@@ -2059,10 +2284,18 @@ function buildRecords(imp, existing, learned, today) {
     }
   }
   let resizeTimer;
-  window.addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => charts.forEach((c) => drawChart($(c.id), c)), 120); });
+  window.addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => { charts.forEach((c) => drawChart($(c.id), c)); if (state.full) drawFull(); }, 120); });
 
   /* ================= Actions ================= */
-  function go(v, p) { state.stack.push({ v, p }); state.enter = true; state.armedBatch = null; state.sel = null; state.armedTrash = false; state.armedCat = null; render(); window.scrollTo(0, 0); }
+  function go(v, p) { state.stack[state.stack.length - 1].scroll = window.scrollY; state.stack.push({ v, p }); state.enter = true; state.armedBatch = null; state.sel = null; state.armedTrash = false; state.armedCat = null; render(); window.scrollTo(0, 0); }
+  function goBack() {
+    if (state.stack.length < 2) return;
+    state.stack.pop();
+    const top = state.stack[state.stack.length - 1];
+    if (top.v !== "list" && state.listFilter === "review") state.listFilter = "all";
+    state.armedBatch = null; state.sel = null; state.armedTrash = false; state.armedCat = null; render();
+    window.scrollTo(0, top.scroll || 0);
+  }
   document.addEventListener("click", (ev) => {
     if (ev.target.closest("[data-close]")) { closeSheets(); return; }
     const a = ev.target.closest("[data-action]");
@@ -2073,10 +2306,7 @@ function buildRecords(imp, existing, learned, today) {
       case "cat": go("cat", arg); break;
       case "project": go("project", arg); break;
       case "review": state.listFilter = "review"; go("list"); break;
-      case "back":
-        if (state.stack.length > 1) state.stack.pop();
-        if (state.stack[state.stack.length - 1].v !== "list" && state.listFilter === "review") state.listFilter = "all";
-        state.armedBatch = null; state.sel = null; state.armedTrash = false; state.armedCat = null; render(); window.scrollTo(0, 0); break;
+      case "back": goBack(); break;
       case "filter": state.homeCat = arg; state.cfShowAll = false; render(); break;
       case "cfmode": state.cfMode = arg; state.homeCat = "All"; state.cfShowAll = false; render(); break;
       case "cf-showall": state.cfShowAll = true; render(); break;
@@ -2127,8 +2357,18 @@ function buildRecords(imp, existing, learned, today) {
       case "imp-reset": state.imp = null; render(); break;
       case "rec-new": openRec(null); break;
       case "rec-edit": openRec(state.settings.recurring.find((r) => r.id === arg)); break;
-      case "bal-new": openBal(null, arg); break;
-      case "bal-item": openBal(state.settings.balance.items.find((i) => i.id === arg)); break;
+      case "bal-new": if (arg === "asset") { closeSheets(); showSheet("chooseSheet"); } else openBal(null, arg); break;
+      case "bal-item": { const it = state.settings.balance.items.find((i) => i.id === arg); if (it && it.kind === "asset") openObj(it); else openBal(it); break; }
+      case "chart-full": openFull(arg); break;
+      case "full-close": closeFull(); break;
+      case "full-play": sim.playing ? simPause() : simPlay(); break;
+      case "full-speed": sim.speed = Number(arg) || 1; document.querySelectorAll('[data-action="full-speed"]').forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.arg === arg))); break;
+      case "choose":
+        if (arg === "object") openObj(null);
+        else if (arg === "depot") { openBal(null, "asset", { kind: "depot" }); $("balTitle").textContent = "New investment account"; $("balName").placeholder = "e.g. Trade Republic"; }
+        else if (arg === "account") { openBal(null, "asset", { kind: "account" }); $("balTitle").textContent = "New account"; }
+        else openBal(null, "asset", { kind: "manual" });
+        break;
       case "resort": resort(); break;
     }
   });
@@ -2140,10 +2380,11 @@ function buildRecords(imp, existing, learned, today) {
     if (t.id === "spreadMonths") { if (Number(t.value) > 1 && !$("spreadStart").value) $("spreadStart").value = ($("date").value || todayISO()).slice(0, 7); syncSpreadUI(); return; }
     if (t.id === "recEvery" || t.id === "recStart") { syncRecUI(); return; }
     if (t.id === "openModeSel") { try { localStorage.setItem(OPEN_KEY, t.value); } catch { /* ignore */ } toast("Saved"); return; }
+    if (act === "balat") { state.balAt = t.value; render(); return; }
     if (act === "selmonth") { state.pkind = "std"; state.mon = Number(t.value); state.cfShowAll = false; state.calcShowAll = false; render(); }
-    else if (t.id === "rangeFrom" || t.id === "rangeTo") {
+    else if (t.id.startsWith("rangeFrom") || t.id.startsWith("rangeTo")) {
       if (/^\d{4}-\d{2}-\d{2}$/.test(t.value)) {
-        if (t.id === "rangeFrom") state.from = t.value; else state.to = t.value;
+        if (t.id.startsWith("rangeFrom")) state.from = t.value; else state.to = t.value;
         if (state.from > state.to) [state.from, state.to] = [state.to, state.from];
         state.preset = null; state.cfShowAll = false; render();
       }
@@ -2158,13 +2399,13 @@ function buildRecords(imp, existing, learned, today) {
     else if (act === "impproj" && state.imp) { const mp = state.imp.catMap[t.dataset.src] || (state.imp.catMap[t.dataset.src] = { aus: AUTO, ein: AUTO, project: "" }); mp.project = t.value; render(); }
     else if (act === "impopt" && state.imp) { state.imp[t.dataset.field] = t.type === "checkbox" ? t.checked : t.value; render(); }
   });
-  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeSheets(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") { if (state.full && SHEETS.every((id) => $(id).hidden)) closeFull(); else closeSheets(); } });
   $("backdrop").addEventListener("click", closeSheets);
   $("addBtn").addEventListener("click", () => openEntry(null));
 
   function showSheet(id) { $("backdrop").hidden = false; $(id).hidden = false; }
   function closeSheets() {
-    ["entrySheet", "limitSheet", "projectSheet", "recSheet", "balSheet", "bulkSheet"].forEach((id) => { $(id).hidden = true; });
+    ["entrySheet", "limitSheet", "projectSheet", "recSheet", "balSheet", "bulkSheet", "objSheet", "chooseSheet"].forEach((id) => { $(id).hidden = true; });
     $("backdrop").hidden = true; state.editingId = null; state.limitCat = null; state.projectId = null;
   }
   function parseAmount(raw) { const v = parseNum(raw); if (v == null || v <= 0) return null; const c = Math.round(v * 100); return c > 0 ? c : null; }
@@ -2175,6 +2416,12 @@ function buildRecords(imp, existing, learned, today) {
     state.type = t;
     $("typeOut").setAttribute("aria-pressed", String(t === "aus"));
     $("typeIn").setAttribute("aria-pressed", String(t === "ein"));
+    $("typeTr").setAttribute("aria-pressed", String(t === "tr"));
+    const tr = t === "tr";
+    $("catWrap").hidden = tr; $("projWrap").hidden = tr; $("spreadWrap").hidden = tr; $("toWrap").hidden = !tr;
+    $("accountLabel").textContent = tr ? "From" : "Account";
+    $("note").placeholder = tr ? "e.g. Savings plan" : "e.g. Weekly groceries";
+    if (tr) { $("catChips").innerHTML = ""; return; }
     const main = CATS[t].slice(), extra = t === "ein" ? CATS.aus.slice() : [];
     if (keepCat && !main.includes(keepCat) && !extra.includes(keepCat) && (t === "ein" || !CATS.ein.includes(keepCat))) main.push(keepCat);
     const sel = keepCat && main.concat(extra).includes(keepCat) ? keepCat : main[0];
@@ -2194,7 +2441,10 @@ function buildRecords(imp, existing, learned, today) {
     const pr = range(), td = todayISO();
     $("date").value = entry ? entry.date : (top.v === "hub" || (td >= pr.from && td <= pr.to) ? td : pr.from);
     const acc = entry ? entry.account : "DKB";
-    $("account").innerHTML = ACCOUNTS.concat(ACCOUNTS.includes(acc) ? [] : [acc]).map((a) => `<option${a === acc ? " selected" : ""}>${esc(a)}</option>`).join("");
+    $("account").innerHTML = accountOptions(acc);
+    const depot = state.settings.balance.items.find((it) => it.kind === "depot");
+    const to = entry && entry.toAccount ? entry.toAccount : depot ? depot.account : "Savings";
+    $("toAccount").innerHTML = accountOptions(to, { noUnspecified: true });
     const def = state.settings.projects.find((p) => p.isDefault);
     const projSel = entry ? (entry.project || "") : (top.v === "project" ? top.p : (def ? def.id : ""));
     fillProjects(projSel);
@@ -2206,12 +2456,14 @@ function buildRecords(imp, existing, learned, today) {
     $("spreadStart").value = sp ? (sp.start || entry.date.slice(0, 7)) : "";
     syncSpreadUI();
     $("makeRecurring").hidden = !entry || !!entry.recurring;
+    $("makeAsset").hidden = !entry || entry.type !== "aus" || state.settings.balance.items.some((it) => it.txId === entry.id);
     $("entryErr").textContent = "";
     showSheet("entrySheet");
     if (!entry) setTimeout(() => $("amount").focus(), 60);
   }
   $("typeOut").addEventListener("click", () => setType("aus"));
   $("typeIn").addEventListener("click", () => setType("ein"));
+  $("typeTr").addEventListener("click", () => setType("tr"));
   $("entryForm").addEventListener("submit", async (ev) => {
     ev.preventDefault();
     if (!store) { $("entryErr").textContent = "One moment, storage is still connecting."; return; }
@@ -2221,7 +2473,18 @@ function buildRecords(imp, existing, learned, today) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) { $("entryErr").textContent = "Pick a date."; return; }
     const catInput = document.querySelector('input[name="cat"]:checked');
     const old = state.editingId ? state.entries.find((e) => e.id === state.editingId) : null;
-    const { project: _drop, ...rest } = old || {};
+    if (state.type === "tr") {
+      const from = $("account").value, to = $("toAccount").value;
+      if (from === to) { $("entryErr").textContent = "Pick two different accounts."; return; }
+      const { project: _p, spread: _s, payee: _y, memo: _m, ...base } = old || {};
+      const entry = { ...base, id: old ? old.id : newId(), type: "tr", cents, cat: "Transfer", date, account: from, toAccount: to, note: $("note").value.trim(), created: old ? old.created : new Date().toISOString() };
+      $("saveBtn").disabled = true;
+      try { await store.put(entry); closeSheets(); toast(old ? "Transfer updated" : `Transfer to ${to} saved`); }
+      catch (err) { $("entryErr").textContent = writeError(err); }
+      finally { $("saveBtn").disabled = false; }
+      return;
+    }
+    const { project: _drop, toAccount: _ta, ...rest } = old || {};
     const entry = {
       ...rest, id: old ? old.id : newId(), type: state.type, cents, cat: catInput ? catInput.value : rn(state.type === "ein" ? "Other income" : "Other"),
       date, account: $("account").value, note: $("note").value.trim(), created: old ? old.created : new Date().toISOString()
@@ -2462,10 +2725,10 @@ function buildRecords(imp, existing, learned, today) {
   function exportCsv() {
     const rows = state.entries.slice().sort((a, b) => a.date.localeCompare(b.date));
     const q = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
-    const lines = ["Date;Type;Category;Account;Amount;Description;Project"].concat(rows.map((e) => {
+    const lines = ["Date;Type;Category;Account;To account;Amount;Description;Project"].concat(rows.map((e) => {
       const p = e.project && projById(e.project);
-      return [e.date.split("-").reverse().join("."), e.type === "ein" ? "Income" : "Expense", q(e.cat), q(e.account),
-        ((e.type === "ein" ? 1 : -1) * e.cents / 100).toFixed(2).replace(".", ","), q(e.note), q(p ? p.name : "")].join(";");
+      return [e.date.split("-").reverse().join("."), e.type === "ein" ? "Income" : e.type === "tr" ? "Transfer" : "Expense", q(e.cat), q(e.account), q(e.toAccount || ""),
+        ((e.type === "aus" ? -1 : 1) * e.cents / 100).toFixed(2).replace(".", ","), q(e.note), q(p ? p.name : "")].join(";");
     }));
     offer(`pfm-${todayISO()}.csv`, "﻿" + lines.join("\r\n"));
   }
@@ -2534,6 +2797,7 @@ function buildRecords(imp, existing, learned, today) {
   function nextDue(r) { const y = addDays(todayISO(), -1); return occurrences(r, r.lastBooked && r.lastBooked > y ? r.lastBooked : y, addMonthsISO(todayISO(), 13))[0] || null; }
   function recEntry(r, d) {
     const e = { id: `r${r.id}x${d.replace(/-/g, "")}`, type: r.type, cents: r.cents, cat: r.cat, date: d, account: r.account || "Not specified", note: r.name, recurring: r.id, created: new Date().toISOString() };
+    if (r.type === "tr") { e.toAccount = r.toAccount || "Savings"; e.cat = "Transfer"; return e; }
     if (r.project) e.project = r.project;
     if (r.spread !== false && r.every > 1) e.spread = { months: r.every, start: d.slice(0, 7) };
     return e;
@@ -2565,11 +2829,15 @@ function buildRecords(imp, existing, learned, today) {
     recType = t;
     $("recTypeOut").setAttribute("aria-pressed", String(t === "aus"));
     $("recTypeIn").setAttribute("aria-pressed", String(t === "ein"));
+    $("recTypeTr").setAttribute("aria-pressed", String(t === "tr"));
+    $("recCatWrap").hidden = t === "tr"; $("recToWrap").hidden = t !== "tr";
+    $("recAccountLabel").textContent = t === "tr" ? "From" : "Account";
+    if (t === "tr") { $("recCat").innerHTML = `<option>Transfer</option>`; return; }
     const cats = CATS[t], sel = cat && cats.includes(cat) ? cat : rn(t === "aus" ? "Subscriptions" : "Salary");
     $("recCat").innerHTML = cats.map((c) => `<option${c === sel ? " selected" : ""}>${esc(c)}</option>`).join("");
   }
   function syncRecUI() {
-    $("recSpreadWrap").hidden = Number($("recEvery").value) === 1;
+    $("recSpreadWrap").hidden = Number($("recEvery").value) === 1 || recType === "tr";
     const st = $("recStart").value;
     $("recBackfillWrap").hidden = !(state.recId == null && st && st < todayISO());
   }
@@ -2586,7 +2854,9 @@ function buildRecords(imp, existing, learned, today) {
     $("recStart").value = r ? r.start : (fromEntry ? fromEntry.date : todayISO());
     $("recEnd").value = (r && r.end) || "";
     const acc = (src && src.account) || "DKB";
-    $("recAccount").innerHTML = ACCOUNTS.concat(ACCOUNTS.includes(acc) ? [] : [acc]).map((a) => `<option${a === acc ? " selected" : ""}>${esc(a)}</option>`).join("");
+    $("recAccount").innerHTML = accountOptions(acc);
+    const depotR = state.settings.balance.items.find((it) => it.kind === "depot");
+    $("recTo").innerHTML = accountOptions((src && src.toAccount) || (depotR ? depotR.account : "Savings"), { noUnspecified: true });
     const pj = (src && src.project) || "";
     $("recProject").innerHTML = `<option value="">None</option>` + state.settings.projects.map((p) => `<option value="${esc(p.id)}"${p.id === pj ? " selected" : ""}>${esc(p.name)}</option>`).join("");
     $("recSpread").checked = r ? r.spread !== false : true;
@@ -2598,6 +2868,7 @@ function buildRecords(imp, existing, learned, today) {
   }
   $("recTypeOut").addEventListener("click", () => setRecType("aus"));
   $("recTypeIn").addEventListener("click", () => setRecType("ein"));
+  $("recTypeTr").addEventListener("click", () => { setRecType("tr"); syncRecUI(); });
   $("makeRecurring").addEventListener("click", () => { const e = state.entries.find((x) => x.id === state.editingId); if (e) openRec(null, e); });
   $("recForm").addEventListener("submit", async (ev) => {
     ev.preventDefault();
@@ -2608,7 +2879,9 @@ function buildRecords(imp, existing, learned, today) {
     if (end && end < start) { $("recErr").textContent = "The end date is before the first payment."; return; }
     const every = Number($("recEvery").value), list = state.settings.recurring;
     const old = state.recId ? list.find((x) => x.id === state.recId) : null;
-    const rule = { id: old ? old.id : "f" + Date.now().toString(36), type: recType, cents, name: $("recName").value.trim() || $("recCat").value, cat: $("recCat").value, account: $("recAccount").value, project: $("recProject").value, every, start, end, spread: $("recSpread").checked };
+    if (recType === "tr" && $("recAccount").value === $("recTo").value) { $("recErr").textContent = "Pick two different accounts."; return; }
+    const rule = { id: old ? old.id : "f" + Date.now().toString(36), type: recType, cents, name: $("recName").value.trim() || (recType === "tr" ? `Transfer to ${$("recTo").value}` : $("recCat").value), cat: recType === "tr" ? "Transfer" : $("recCat").value, account: $("recAccount").value, project: recType === "tr" ? "" : $("recProject").value, every, start, end, spread: recType === "tr" ? false : $("recSpread").checked };
+    if (recType === "tr") rule.toAccount = $("recTo").value;
     const lastPast = occurrences(rule, "", addDays(todayISO(), -1)).pop() || "";
     if (old) rule.lastBooked = old.start === start && old.every === every ? (old.lastBooked || lastPast) : lastPast;
     else rule.lastBooked = $("recBackfill").checked ? "" : lastPast;
@@ -2630,14 +2903,8 @@ function buildRecords(imp, existing, learned, today) {
 
   /* ================= Calculated view logic ================= */
   function accrual(year, kind) {
-    const arr = new Array(12).fill(0);
-    for (const e of state.entries) {
-      const v = kind === "out" ? (e.type === "aus" ? e.cents : isRefund(e) ? -e.cents : 0) : (e.type === "ein" && !isRefund(e) ? e.cents : 0);
-      if (!v) continue;
-      const n = e.spread && e.spread.months > 1 ? e.spread.months : 1;
-      const start = n > 1 && /^\d{4}-\d{2}$/.test(e.spread.start || "") ? e.spread.start : e.date.slice(0, 7);
-      for (let k = 0; k < n; k++) { const m = shiftMonth(start, k); if (m.startsWith(year + "-")) arr[Number(m.slice(5)) - 1] += v / n; }
-    }
+    const arr = new Array(12).fill(0), fn = kind === "out" ? (e) => spendVal(e, "All") : (e) => incomeVal(e, "All");
+    for (const x of calcSharesByPiece(`${year}-01-01`, `${year}-12-31`, fn)) arr[Number(x.month.slice(5)) - 1] += x.amt;
     return arr;
   }
   const cashMonths = (year) => Array.from({ length: 12 }, (_, i) => spentInMonth(`${year}-${pad(i + 1)}`, "All"));
@@ -2646,14 +2913,29 @@ function buildRecords(imp, existing, learned, today) {
   /* ================= Balance sheet logic ================= */
   const ASSET_GROUPS = ["Cash & accounts", "Investments", "Receivables", "Property & valuables", "Other assets"];
   const LIAB_GROUPS = ["Loans", "Credit cards", "Payables", "Other liabilities"];
-  function itemValue(it, ym) {
-    if (it.kind === "account") {
-      if (!it.openingDate || ym < it.openingDate.slice(0, 7)) return null;
-      const end = monthEnd(ym);
-      let v = it.opening || 0;
-      for (const e of state.entries) if (e.account === it.account && e.date > it.openingDate && e.date <= end) v += e.type === "ein" ? e.cents : -e.cents;
-      return v;
+  /* Account-like items: latest known balance (opening or snapshot) plus every booking after it */
+  function flowValue(it, end) {
+    const snaps = { ...(it.snaps || {}) };
+    if (it.openingDate) snaps[it.openingDate] = it.opening || 0;
+    const keys = Object.keys(snaps).filter((d) => d <= end).sort();
+    if (!keys.length) return null;
+    const d0 = keys[keys.length - 1];
+    let v = snaps[d0];
+    // Bookings on the day of the balance count as already included – unless they were typed in after the balance was entered that same day
+    const stamp = d0 === it.openingDate && it.openingSetAt ? it.openingSetAt : (it.snapsAt || {})[d0];
+    const sameDay = stamp && localDay(stamp) === d0;
+    for (const e of state.entries) {
+      if (e.date < d0 || e.date > end) continue;
+      if (e.date === d0 && !(sameDay && !e.batch && (e.created || "") > stamp)) continue;
+      if (e.type === "tr") { if (e.account === it.account) v -= e.cents; if (e.toAccount === it.account) v += e.cents; }
+      else if (e.account === it.account) v += e.type === "ein" ? e.cents : -e.cents;
     }
+    return v;
+  }
+  function itemValue(it, ym) {
+    const end = ym === curMonth() ? todayISO() : monthEnd(ym);
+    if (it.kind === "account" || it.kind === "depot") return flowValue(it, end);
+    if (it.kind === "asset") return assetValueAt(it, end);
     const keys = Object.keys(it.values || {}).filter((k) => k <= ym).sort();
     return keys.length ? it.values[keys[keys.length - 1]] : null;
   }
@@ -2678,7 +2960,8 @@ function buildRecords(imp, existing, learned, today) {
   function balanceStart() {
     let first = null;
     for (const it of state.settings.balance.items) {
-      const k = it.kind === "account" ? (it.openingDate || "").slice(0, 7) : Object.keys(it.values || {}).sort()[0];
+      const k = it.kind === "account" || it.kind === "depot" ? [it.openingDate || "", ...Object.keys(it.snaps || {})].filter(Boolean).sort()[0]?.slice(0, 7)
+        : it.kind === "asset" ? (it.date || "").slice(0, 7) : Object.keys(it.values || {}).sort()[0];
       if (k && (!first || k < first)) first = k;
     }
     return first;
@@ -2699,26 +2982,36 @@ function buildRecords(imp, existing, learned, today) {
     balKind = k;
     $("balKindManual").setAttribute("aria-pressed", String(k === "manual"));
     $("balKindAccount").setAttribute("aria-pressed", String(k === "account"));
+    $("balKindDepot").setAttribute("aria-pressed", String(k === "depot"));
     $("balManualWrap").hidden = k !== "manual";
     $("balAccountWrap").hidden = k !== "account";
+    $("balDepotWrap").hidden = k !== "depot";
+    const g = $("balGroup");
+    if (k === "depot" && [...g.options].some((o) => o.value === "Investments") && !state.balId) g.value = "Investments";
+    if (k === "account" && [...g.options].some((o) => o.value === "Cash & accounts") && !state.balId) g.value = "Cash & accounts";
   }
   function openBal(it, side, preset) {
     closeSheets();
     state.balId = it ? it.id : null; state.balArmed = false;
     const sd = it ? (it.side === "liability" ? "liability" : "asset") : (side === "liability" ? "liability" : "asset");
     setBalSide(sd, it ? it.group : null);
-    setBalKind(it && it.kind === "account" ? "account" : "manual");
+    state.balId = it ? it.id : null;
+    setBalKind(it ? (it.kind === "account" || it.kind === "depot" ? it.kind : "manual") : (preset && preset.kind) || "manual");
     $("balTitle").textContent = it ? `Edit ${sd}` : `New ${sd}`;
     $("balName").value = it ? it.name : "";
-    const cur = it && it.kind !== "account" ? itemValue(it, curMonth()) : null;
+    const cur = it && it.kind === "manual" ? itemValue(it, curMonth()) : it && !it.kind ? itemValue(it, curMonth()) : null;
     $("balValue").value = cur != null ? (cur / 100).toFixed(2) : "";
     $("balMonth").value = curMonth();
     const acc = (it && it.account) || "DKB";
-    $("balAccount").innerHTML = ACCOUNTS.filter((a) => a !== "Not specified").map((a) => `<option${a === acc ? " selected" : ""}>${esc(a)}</option>`).join("");
+    $("balAccount").innerHTML = accountOptions(acc, { noUnspecified: true });
+    $("balDepotValue").value = it && it.kind === "depot" ? ((itemValue(it, curMonth()) || 0) / 100).toFixed(2) : "";
+    $("balDepotDate").value = todayISO();
+    $("balShowHome").checked = it ? it.showHome !== false : true;
     $("balOpening").value = it && it.kind === "account" ? ((it.opening || 0) / 100).toFixed(2) : "";
     $("balOpeningDate").value = (it && it.openingDate) || todayISO();
-    const hist = it && it.values ? Object.entries(it.values).sort((a, b) => b[0].localeCompare(a[0])).slice(0, 8) : [];
-    $("balHistory").innerHTML = hist.length ? `<span class="label">History</span><div class="sumlist" style="margin-top:6px">${hist.map(([k, v]) => `<div><span class="hint">${esc(monthFmt.format(ymDate(k)))}</span><b>${money(v)}</b></div>`).join("")}</div>` : "";
+    const histSrc = it ? (it.kind === "depot" ? it.snaps : it.values) : null;
+    const hist = histSrc ? Object.entries(histSrc).sort((a, b) => b[0].localeCompare(a[0])).slice(0, 8) : [];
+    $("balHistory").innerHTML = hist.length ? `<span class="label">${it.kind === "depot" ? "Values you entered" : "History"}</span><div class="sumlist" style="margin-top:6px">${hist.map(([k, v]) => `<div><span class="hint">${esc(k.length > 7 ? dateFmt.format(isoDate(k)) : monthFmt.format(ymDate(k)))}</span><b>${money(v)}</b></div>`).join("")}</div>` : "";
     const del = $("balDelete"); del.hidden = !it; del.classList.remove("armed"); del.textContent = "Delete";
     $("balErr").textContent = "";
     if (preset && preset.account) {
@@ -2737,6 +3030,7 @@ function buildRecords(imp, existing, learned, today) {
   $("balSideL").addEventListener("click", () => setBalSide("liability"));
   $("balKindManual").addEventListener("click", () => setBalKind("manual"));
   $("balKindAccount").addEventListener("click", () => setBalKind("account"));
+  $("balKindDepot").addEventListener("click", () => setBalKind("depot"));
   $("balForm").addEventListener("submit", async (ev) => {
     ev.preventDefault();
     const name = $("balName").value.trim();
@@ -2748,11 +3042,22 @@ function buildRecords(imp, existing, learned, today) {
       if (v == null) { $("balErr").textContent = "Enter the value as a number, e.g. 1250.00."; return; }
       if (!/^\d{4}-\d{2}$/.test(mon)) { $("balErr").textContent = "Pick the month this value is from (YYYY-MM)."; return; }
       item.values = { ...((old && old.values) || {}), [mon]: Math.round(v * 100) };
+    } else if (balKind === "depot") {
+      const raw = $("balDepotValue").value.trim(), d = $("balDepotDate").value;
+      const v = raw ? parseNum(raw) : null;
+      if (raw && v == null) { $("balErr").textContent = "Enter the value as a number, e.g. 2450.00."; return; }
+      if (!old && v == null) { $("balErr").textContent = "Enter the current total value, e.g. from the Trade Republic app."; return; }
+      if (v != null && !/^\d{4}-\d{2}-\d{2}$/.test(d)) { $("balErr").textContent = "Pick the day of that value."; return; }
+      const prevAcc = old && old.account;
+      Object.assign(item, { account: name, showHome: $("balShowHome").checked, snaps: { ...((old && old.snaps) || {}) }, snapsAt: { ...((old && old.snapsAt) || {}) } });
+      if (v != null && item.snaps[d] !== Math.round(v * 100)) { item.snaps[d] = Math.round(v * 100); item.snapsAt[d] = new Date().toISOString(); }
+      if (prevAcc && prevAcc !== name && state.entries.some((e) => e.account === prevAcc || e.toAccount === prevAcc)) item.account = prevAcc;
     } else {
       const v = parseNum($("balOpening").value), d = $("balOpeningDate").value;
       if (v == null) { $("balErr").textContent = "Enter the balance on that day, e.g. 850.00."; return; }
       if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) { $("balErr").textContent = "Pick the day of that balance."; return; }
-      Object.assign(item, { account: $("balAccount").value, opening: Math.round(v * 100), openingDate: d });
+      const changed = !old || old.opening !== Math.round(v * 100) || old.openingDate !== d;
+      Object.assign(item, { account: $("balAccount").value, opening: Math.round(v * 100), openingDate: d, openingSetAt: changed ? new Date().toISOString() : old.openingSetAt });
     }
     $("balSave").disabled = true;
     try { await patchSettings({ balance: { items: old ? list.map((x) => (x.id === old.id ? item : x)) : list.concat(item) } }); closeSheets(); toast(old ? "Saved" : `“${name}” added`); }
@@ -2795,11 +3100,11 @@ function buildRecords(imp, existing, learned, today) {
     const list = state.entries.filter((e) => state.sel.ids.has(e.id));
     closeSheets();
     $("bulkTitle").textContent = `Edit ${list.length} ${list.length === 1 ? "transaction" : "transactions"}`;
-    $("bulkAccount").innerHTML = `<option value="">Keep</option>` + ACCOUNTS.map((a) => `<option>${esc(a)}</option>`).join("");
+    $("bulkAccount").innerHTML = `<option value="">Keep</option>` + accountsList().map((a) => `<option>${esc(a)}</option>`).join("");
     $("bulkProject").innerHTML = `<option value="">Keep</option><option value="__none">No project</option>` + state.settings.projects.map((p) => `<option value="${esc(p.id)}">${esc(p.name)}</option>`).join("");
     const types = [...new Set(list.map((e) => e.type))];
-    $("bulkCatWrap").hidden = types.length !== 1;
-    if (types.length === 1) {
+    $("bulkCatWrap").hidden = types.length !== 1 || types[0] === "tr";
+    if (types.length === 1 && types[0] !== "tr") {
       const t = types[0];
       $("bulkCat").innerHTML = `<option value="">Keep</option>` + CATS[t].map((c) => `<option>${esc(c)}</option>`).join("") + (t === "ein" ? `<optgroup label="Money back for">${CATS.aus.map((c) => `<option value="${esc(c)}">${esc(c)} (money back)</option>`).join("")}</optgroup>` : "");
     }
@@ -2912,6 +3217,206 @@ function buildRecords(imp, existing, learned, today) {
   }
   $("entryNewProjAdd").addEventListener("click", () => { quickProject(); });
 
+  /* ================= Things you own: depreciation ================= */
+  const ASSET_TYPES = {
+    car: { label: "Car", method: "declining", rate: 15, firstDrop: 10, life: 8, residual: 10, cost: "Transport", vehicle: true },
+    motorbike: { label: "Motorbike / scooter", method: "declining", rate: 12, firstDrop: 8, life: 8, residual: 15, cost: "Transport", vehicle: true },
+    bike: { label: "Bicycle", method: "linear", life: 7, residual: 15, cost: "Transport" },
+    ebike: { label: "E-bike", method: "linear", life: 6, residual: 15, cost: "Transport" },
+    laptop: { label: "Laptop / computer", method: "linear", life: 4, residual: 10, cost: "Shopping" },
+    tablet: { label: "Tablet / iPad", method: "linear", life: 4, residual: 15, cost: "Shopping" },
+    phone: { label: "Smartphone", method: "linear", life: 3, residual: 15, cost: "Shopping" },
+    watch: { label: "Smartwatch / headphones", method: "linear", life: 3, residual: 10, cost: "Shopping" },
+    camera: { label: "Camera / audio", method: "linear", life: 7, residual: 15, cost: "Shopping" },
+    tv: { label: "TV / monitor", method: "linear", life: 7, residual: 5, cost: "Shopping" },
+    console: { label: "Game console", method: "linear", life: 5, residual: 15, cost: "Leisure" },
+    furniture: { label: "Furniture", method: "linear", life: 10, residual: 0, cost: "Housing" },
+    appliance: { label: "Household appliance", method: "linear", life: 10, residual: 0, cost: "Housing" },
+    sports: { label: "Sports equipment", method: "linear", life: 5, residual: 10, cost: "Leisure" },
+    instrument: { label: "Musical instrument", method: "linear", life: 15, residual: 30, cost: "Leisure" },
+    valuables: { label: "Jewellery / watch / art", method: "none", life: 0, residual: 100, cost: "Other" },
+    other: { label: "Other", method: "linear", life: 5, residual: 10, cost: "Other" }
+  };
+  function guessAssetType(text) {
+    const t = normText(text);
+    if (/e-?bike|pedelec/.test(t)) return "ebike";
+    if (/macbook|laptop|notebook|thinkpad|computer|\bpc\b|imac/.test(t)) return "laptop";
+    if (/ipad|tablet/.test(t)) return "tablet";
+    if (/iphone|handy|smartphone|pixel|galaxy s/.test(t)) return "phone";
+    if (/watch|airpods|kopfh|headphone/.test(t)) return "watch";
+    if (/playstation|ps5|xbox|switch|konsole|console/.test(t)) return "console";
+    if (/fernseh|\btv\b|monitor|bildschirm/.test(t)) return "tv";
+    if (/kamera|camera|lautsprecher|speaker/.test(t)) return "camera";
+    if (/fahrrad|bike|rennrad|mtb/.test(t)) return "bike";
+    if (/motorrad|roller|vespa|scooter/.test(t)) return "motorbike";
+    if (/\bauto\b|\bcar\b|golf|polo|\bbmw\b|audi|\bvw\b|mercedes|opel|skoda|seat|toyota|fiat|renault/.test(t)) return "car";
+    if (/sofa|bett|tisch|schrank|stuhl|regal|ikea|desk|chair/.test(t)) return "furniture";
+    if (/waschmaschine|kühlschrank|spülmaschine|staubsauger|kaffeemaschine|dyson/.test(t)) return "appliance";
+    return "other";
+  }
+  /* Suggested yearly loss for vehicles: newer cars lose more, many kilometres add to it */
+  function suggestRate(type, a) {
+    const T = ASSET_TYPES[type] || ASSET_TYPES.other;
+    if (!T.vehicle) return T.rate || 15;
+    let r = T.rate;
+    const bought = Number((a.date || todayISO()).slice(0, 4)), age = a.regYear ? bought - Number(a.regYear) : a.condition === "used" ? 3 : 0;
+    if (age >= 8) r -= 6; else if (age >= 4) r -= 3;
+    if (a.kmYear > 15000) r += Math.min(8, ((a.kmYear - 15000) / 5000) * 1.5);
+    return Math.round(Math.max(5, r) * 10) / 10;
+  }
+  function assetModel(a, iso) {
+    const cost = a.cost || 0, t = Math.max(0, dayDiff(a.date, iso)) / 365.25, res = cost * (a.residual || 0) / 100;
+    if (a.method === "none") return cost;
+    if (a.method === "declining") {
+      const r = Math.min(0.9, (a.rate || 0) / 100), d1 = (a.firstDrop || 0) / 100;
+      return Math.max(res, cost * (1 - d1 * Math.min(1, t)) * Math.pow(1 - r, t));
+    }
+    const life = Math.max(0.1, a.life || 1);
+    return cost - (cost - res) * Math.min(1, t / life);
+  }
+  function assetBook(a, iso) {
+    let v = assetModel(a, iso);
+    if (a.market && a.market.date && a.market.date <= iso) {
+      const mv = assetModel(a, a.market.date);
+      v = mv > 0 ? v * (a.market.cents / mv) : a.market.cents;
+    }
+    return v;
+  }
+  function assetValueAt(a, iso) {
+    if (!a.date || iso < a.date) return null;
+    if (a.sold && a.sold.date && iso >= a.sold.date) return null;
+    return Math.round(assetBook(a, iso));
+  }
+  const monthlyLoss = (a) => { const t = todayISO(); const v0 = assetValueAt(a, t); const v1 = assetValueAt(a, addDays(t, 30)); return v0 == null || v1 == null ? 0 : Math.max(0, v0 - v1); };
+  /* Depreciation as cost pieces for the calculated view (Aufwand instead of the purchase price) */
+  function depPieces(a) {
+    const out = [], start = a.date.slice(0, 7), soldD = a.sold && a.sold.date;
+    let prev = a.cost;
+    for (let k = 0, m = start; k < 480; k++, m = shiftMonth(m, 1)) {
+      const mEnd = monthEnd(m), to = soldD && soldD <= mEnd ? soldD : mEnd;
+      const v = assetBook(a, to), amt = prev - v;
+      if (Math.abs(amt) >= 0.5) out.push({ from: k === 0 ? a.date : `${m}-01`, to, amt });
+      prev = v;
+      if (soldD && soldD <= mEnd) { const diff = v - (a.sold.cents || 0); if (Math.abs(diff) >= 0.5) out.push({ from: soldD, to: soldD, amt: diff }); break; }
+      if (k > 12 && Math.abs(amt) < 0.5 && (!a.market || a.market.date < `${m}-01`)) break;
+    }
+    return out;
+  }
+  let txAssetCache = null;
+  function assetOf(e) {
+    if (e.virtualAsset) return e.virtualAsset;
+    if (!txAssetCache) { txAssetCache = new Map(); state.settings.balance.items.forEach((it) => { if (it.kind === "asset" && it.txId) txAssetCache.set(it.txId, it); }); }
+    return txAssetCache.get(e.id) || null;
+  }
+  function calcPool() {
+    const ids = new Set(state.entries.map((e) => e.id));
+    const virt = state.settings.balance.items.filter((it) => it.kind === "asset" && it.method !== "none" && it.cost > 0 && it.date && !(it.txId && ids.has(it.txId)))
+      .map((a) => ({ id: "dep:" + a.id, type: "aus", cents: a.cost, cat: a.costCat && CATS.aus.includes(a.costCat) ? a.costCat : rn("Other"), date: a.date, account: "", note: a.name, virtualAsset: a }));
+    return virt.length ? state.entries.concat(virt) : state.entries;
+  }
+
+  let objCond = "new", objRateDirty = false, objType = "laptop";
+  function readObjForm() {
+    const num = (id) => { const v = parseNum($(id).value); return v == null ? null : v; };
+    const cost = num("objCost");
+    return {
+      atype: $("objType").value, cost: cost == null ? 0 : Math.round(cost * 100), date: $("objDate").value, condition: objCond,
+      method: $("objMethod").value, life: num("objLife") || 0, rate: num("objRate") || 0, residual: num("objResidual") || 0,
+      regYear: parseInt($("objRegYear").value, 10) || null, km: parseInt($("objKm").value, 10) || null, kmYear: parseInt($("objKmYear").value, 10) || null
+    };
+  }
+  function objFirstDrop(f) { const T = ASSET_TYPES[f.atype] || ASSET_TYPES.other; return f.condition === "new" ? (T.firstDrop || 0) : 0; }
+  function updateObjPreview() {
+    const f = readObjForm(), T = ASSET_TYPES[f.atype] || ASSET_TYPES.other;
+    $("objVehicle").hidden = !T.vehicle;
+    $("objLifeWrap").hidden = f.method !== "linear";
+    $("objRateWrap").hidden = f.method !== "declining";
+    if (T.vehicle && !objRateDirty) { $("objRate").value = String(suggestRate(f.atype, f)); f.rate = Number($("objRate").value); }
+    if (!f.cost || !/^\d{4}-\d{2}-\d{2}$/.test(f.date)) { $("objPreview").innerHTML = "Enter the price and the purchase date to see how its value develops."; return; }
+    const a = { ...f, firstDrop: objFirstDrop(f) }, t = todayISO();
+    const now = assetModel(a, t < f.date ? f.date : t), y1 = assetModel(a, addDays(t < f.date ? f.date : t, 365)), m1 = now - assetModel(a, addDays(t < f.date ? f.date : t, 30));
+    const end = f.method === "linear" && f.life ? `<br>After ${fmtX(f.life)} years: <b>${money(Math.round(f.cost * f.residual / 100))}</b>` : f.method === "declining" ? `<br>In 5 years: <b>${money(Math.round(assetModel(a, addDays(f.date, 365 * 5 + 1))))}</b>` : "";
+    $("objPreview").innerHTML = f.method === "none" ? `Keeps its value of <b>${money(f.cost)}</b>. Enter a market value now and then if it changes.`
+      : `Value today: <b>${money(Math.round(now))}</b> · in a year: <b>${money(Math.round(y1))}</b><br>Loses about <b>${money(Math.round(m1))}</b> per month right now${end}`;
+  }
+  function setObjCond(c) { objCond = c; $("objNew").setAttribute("aria-pressed", String(c === "new")); $("objUsed").setAttribute("aria-pressed", String(c === "used")); updateObjPreview(); }
+  function applyObjType(type, keepName) {
+    const T = ASSET_TYPES[type] || ASSET_TYPES.other;
+    $("objMethod").value = T.method; $("objLife").value = T.life ? String(T.life) : ""; $("objResidual").value = String(T.residual);
+    $("objRate").value = String(T.rate || 15); objRateDirty = false;
+    const cc = rn(T.cost); if ([...$("objCostCat").options].some((o) => o.value === cc)) $("objCostCat").value = cc;
+    if (!keepName && !$("objName").value) $("objName").placeholder = `e.g. ${T.label}`;
+    updateObjPreview();
+  }
+  function openObj(a, fromEntry) {
+    closeSheets();
+    state.objId = a ? a.id : null; state.objArmed = false; state.objTx = a ? a.txId || null : fromEntry ? fromEntry.id : null;
+    $("objTitle").textContent = a ? "Edit item" : "New item";
+    $("objType").innerHTML = Object.entries(ASSET_TYPES).map(([k, T]) => `<option value="${k}">${esc(T.label)}</option>`).join("");
+    $("objCostCat").innerHTML = CATS.aus.map((c) => `<option>${esc(c)}</option>`).join("");
+    const type = a ? a.atype : guessAssetType(fromEntry ? `${fromEntry.note || ""} ${fromEntry.cat || ""}` : "");
+    $("objType").value = type;
+    $("objName").value = a ? a.name : fromEntry ? (fromEntry.note || "") : "";
+    $("objDate").value = a ? a.date : fromEntry ? fromEntry.date : todayISO();
+    $("objCost").value = a ? toInput(a.cost) : fromEntry ? toInput(fromEntry.cents) : "";
+    $("objRegYear").value = a && a.regYear ? a.regYear : ""; $("objKm").value = a && a.km ? a.km : ""; $("objKmYear").value = a && a.kmYear ? a.kmYear : "";
+    objCond = a ? a.condition || "new" : "new";
+    $("objNew").setAttribute("aria-pressed", String(objCond === "new")); $("objUsed").setAttribute("aria-pressed", String(objCond === "used"));
+    if (a) {
+      $("objMethod").value = a.method; $("objLife").value = a.life ? String(a.life) : ""; $("objRate").value = String(a.rate || 15); $("objResidual").value = String(a.residual || 0);
+      if ([...$("objCostCat").options].some((o) => o.value === a.costCat)) $("objCostCat").value = a.costCat;
+      objRateDirty = true;
+      updateObjPreview();
+    } else {
+      applyObjType(type, true);
+      if (fromEntry && CATS.aus.includes(fromEntry.cat)) $("objCostCat").value = fromEntry.cat;
+    }
+    $("objMarket").value = a && a.market ? toInput(a.market.cents) : ""; $("objMarketDate").value = a && a.market ? a.market.date : todayISO();
+    $("objSoldPrice").value = a && a.sold ? toInput(a.sold.cents) : ""; $("objSoldDate").value = a && a.sold ? a.sold.date : "";
+    $("objMore").open = !!(a && (a.market || a.sold));
+    const tx = state.objTx && state.entries.find((e) => e.id === state.objTx);
+    $("objLinkNote").hidden = !tx;
+    if (tx) $("objLinkNote").textContent = `Linked to your purchase on ${dateFmt.format(isoDate(tx.date))}. Calculated costs show the depreciation instead of the full price.`;
+    const del = $("objDelete"); del.hidden = !a; del.classList.remove("armed"); del.textContent = "Delete";
+    $("objErr").textContent = "";
+    showSheet("objSheet");
+  }
+  $("objType").addEventListener("change", () => applyObjType($("objType").value));
+  $("objNew").addEventListener("click", () => setObjCond("new"));
+  $("objUsed").addEventListener("click", () => setObjCond("used"));
+  $("objRate").addEventListener("input", () => { objRateDirty = true; });
+  $("objForm").addEventListener("input", updateObjPreview);
+  $("objForm").addEventListener("change", updateObjPreview);
+  $("makeAsset").addEventListener("click", () => { const e = state.entries.find((x) => x.id === state.editingId); if (e) openObj(null, e); });
+  $("objForm").addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const f = readObjForm();
+    const name = $("objName").value.trim() || (ASSET_TYPES[f.atype] || ASSET_TYPES.other).label;
+    if (!f.cost) { $("objErr").textContent = "Enter the price you paid, e.g. 1299."; return; }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(f.date)) { $("objErr").textContent = "Pick the date you bought it."; return; }
+    if (f.method === "linear" && !(f.life > 0)) { $("objErr").textContent = "Enter how many years it is used, e.g. 4."; return; }
+    if (f.method === "declining" && !(f.rate > 0 && f.rate < 90)) { $("objErr").textContent = "Enter how much value it loses per year, e.g. 15."; return; }
+    if (f.residual < 0 || f.residual > 100) { $("objErr").textContent = "The value left at the end must be between 0 and 100 %."; return; }
+    const list = state.settings.balance.items, old = state.objId ? list.find((x) => x.id === state.objId) : null;
+    const item = { id: old ? old.id : "o" + Date.now().toString(36), name, side: "asset", group: "Property & valuables", kind: "asset", ...f, firstDrop: objFirstDrop(f), costCat: $("objCostCat").value };
+    if (state.objTx) item.txId = state.objTx;
+    const mk = parseNum($("objMarket").value), md = $("objMarketDate").value;
+    if ($("objMarket").value.trim() && mk != null && /^\d{4}-\d{2}-\d{2}$/.test(md)) item.market = { cents: Math.round(mk * 100), date: md };
+    const sp = parseNum($("objSoldPrice").value), sd = $("objSoldDate").value;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(sd)) item.sold = { cents: sp == null ? 0 : Math.round(sp * 100), date: sd };
+    if (item.sold && item.sold.date < item.date) { $("objErr").textContent = "The sale date is before the purchase date."; return; }
+    $("objSave").disabled = true;
+    try { await patchSettings({ balance: { items: old ? list.map((x) => (x.id === old.id ? item : x)) : list.concat(item) } }); txAssetCache = null; closeSheets(); toast(old ? "Saved" : `“${name}” added to your balance sheet`); }
+    catch (err) { $("objErr").textContent = writeError(err); }
+    finally { $("objSave").disabled = false; }
+  });
+  $("objDelete").addEventListener("click", async () => {
+    const b = $("objDelete");
+    if (!state.objArmed) { state.objArmed = true; b.classList.add("armed"); b.textContent = "Really delete?"; return; }
+    try { await patchSettings({ balance: { items: state.settings.balance.items.filter((x) => x.id !== state.objId) } }); txAssetCache = null; closeSheets(); toast("Deleted"); }
+    catch (err) { $("objErr").textContent = writeError(err); }
+  });
+
   async function resort() {
     const changes = [];
     for (const e of state.entries) {
@@ -2923,6 +3428,118 @@ function buildRecords(imp, existing, learned, today) {
     try { await store.bulkPut(changes); toast(`${changes.length} transactions sorted`); } catch (err) { toast(writeError(err)); }
   }
 
+  /* ================= Full-screen chart with replay ================= */
+  const sim = { k: null, playing: false, speed: 1, raf: 0, last: 0 };
+  const fullCfg = () => (state.full ? charts.find((c) => c.id === state.full.id) : null);
+  function mirrorHero() {
+    const c = fullCfg(); if (!c) return;
+    const v = $(c.id + "Val"), sb = $(c.id + "Sub");
+    $("fullVal").innerHTML = v ? v.innerHTML : ""; $("fullSub").innerHTML = sb ? sb.innerHTML : "";
+  }
+  function scrubTo(c, i) { if (c.onScrub) c.onScrub(i); mirrorHero(); }
+  function drawFull() {
+    const c = fullCfg(); if (!c) return;
+    const host = $("fullChart"), inner = $("fullIn"), cs = getComputedStyle(inner);
+    host.style.height = "0px";
+    const side = cs.display === "grid";
+    const avail = side
+      ? Math.max(200, Math.floor(window.innerHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom)))
+      : Math.max(240, Math.floor(window.innerHeight - inner.scrollHeight - 8));
+    host.style.height = avail + "px";
+    const n = c.points.length;
+    drawChart(host, { ...c, height: avail, reveal: sim.k != null && sim.k < n - 1 ? sim.k : null,
+      onScrub: (i) => scrubTo(c, i == null ? (sim.k != null && sim.k < n - 1 ? Math.floor(sim.k) : null) : i) });
+  }
+  function renderFull() {
+    const c = fullCfg();
+    if (!c) { closeFull(); return; }
+    $("full").hidden = false; document.body.classList.add("fullmode");
+    $("fullTitle").textContent = c.title || "Chart";
+    $("fullCtl").innerHTML = (c.periodic ? periodNav("F") : "") + (c.between || "");
+    const n = c.points.length, sl = $("fullSlider"), sig = `${c.title}|${n}|${c.points[0] ? c.points[0].label : ""}`;
+    if (sig !== sim.sig) { sim.sig = sig; if (!sim.playing) sim.k = null; }
+    if (sim.k == null || sim.k > n - 1) sim.k = n - 1;
+    sl.max = String(Math.max(1, n - 1)); sl.value = String(sim.k); sl.disabled = n < 2;
+    $("fullPlay").disabled = n < 2;
+    drawFull();
+    scrubTo(c, sim.k < n - 1 ? Math.floor(sim.k) : null);
+  }
+  function openFull(id) {
+    simPause(); sim.k = null; sim.sig = ""; state.full = { id };
+    renderFull();
+    $("full").scrollTop = 0;
+  }
+  function closeFull() {
+    simPause(); state.full = null; sim.k = null;
+    $("full").hidden = true; document.body.classList.remove("fullmode");
+    charts.forEach((c) => { if (c.onScrub) c.onScrub(null); });
+  }
+  function updatePlayBtn() { $("fullPlay").textContent = sim.playing ? "❚❚ Pause" : "▶ Replay"; }
+  function simFrame(ts) {
+    if (!sim.playing) return;
+    const c = fullCfg(); if (!c) { simPause(); return; }
+    const n = c.points.length, dt = Math.min(100, ts - sim.last); sim.last = ts;
+    sim.k = Math.min(n - 1, sim.k + dt * (n - 1) / (6000 / sim.speed));
+    $("fullSlider").value = String(sim.k);
+    drawFull();
+    scrubTo(c, sim.k >= n - 1 ? null : Math.floor(sim.k));
+    if (sim.k >= n - 1) { sim.playing = false; updatePlayBtn(); return; }
+    sim.raf = requestAnimationFrame(simFrame);
+  }
+  function simPlay() {
+    const c = fullCfg(); if (!c || c.points.length < 2) return;
+    if (sim.k == null || sim.k >= c.points.length - 1) sim.k = 0;
+    sim.playing = true; sim.last = performance.now(); updatePlayBtn();
+    sim.raf = requestAnimationFrame(simFrame);
+  }
+  function simPause() { sim.playing = false; cancelAnimationFrame(sim.raf); if (document.getElementById("fullPlay")) updatePlayBtn(); }
+  $("fullSlider").addEventListener("input", (e) => {
+    const c = fullCfg(); if (!c) return;
+    simPause(); sim.k = Number(e.target.value);
+    drawFull();
+    scrubTo(c, sim.k >= c.points.length - 1 ? null : Math.floor(sim.k));
+  });
+
+  /* Swipe from the left edge to go back */
+  const SHEETS = ["entrySheet", "limitSheet", "projectSheet", "recSheet", "balSheet", "bulkSheet", "objSheet", "chooseSheet"];
+  let swipe = null;
+  function swipeReset(v) { v.style.transition = "transform .2s ease-out, opacity .2s ease-out"; v.style.transform = ""; v.style.opacity = ""; }
+  document.addEventListener("touchstart", (e) => {
+    swipe = null;
+    if (e.touches.length !== 1 || state.stack.length < 2 || !splashDone || state.sel || state.full) return;
+    if (SHEETS.some((id) => !$(id).hidden)) return;
+    const t = e.touches[0];
+    if (t.clientX > 30) return;
+    swipe = { x: t.clientX, y: t.clientY, dx: 0, active: false, t0: Date.now() };
+  }, { passive: true });
+  document.addEventListener("touchmove", (e) => {
+    if (!swipe) return;
+    const t = e.touches[0], dx = t.clientX - swipe.x, dy = t.clientY - swipe.y;
+    if (!swipe.active) {
+      if (Math.abs(dy) > 12 && Math.abs(dy) > dx) { swipe = null; return; }
+      if (dx < 10) return;
+      swipe.active = true;
+    }
+    swipe.dx = Math.max(0, dx);
+    const v = $("view");
+    v.style.transition = "none";
+    v.style.transform = `translateX(${swipe.dx}px)`;
+    v.style.opacity = String(1 - Math.min(0.6, swipe.dx / 700));
+    if (e.cancelable) e.preventDefault();
+  }, { passive: false });
+  function swipeEnd() {
+    const s = swipe; swipe = null;
+    if (!s || !s.active) return;
+    const v = $("view"), fast = s.dx > 50 && Date.now() - s.t0 < 280;
+    if (s.dx > window.innerWidth * 0.3 || fast) {
+      v.style.transition = "transform .16s ease-out, opacity .16s ease-out";
+      v.style.transform = `translateX(${window.innerWidth}px)`; v.style.opacity = "0";
+      setTimeout(() => { v.style.transition = "none"; v.style.transform = ""; v.style.opacity = ""; goBack(); }, 160);
+    } else swipeReset(v);
+  }
+  document.addEventListener("touchend", swipeEnd);
+  document.addEventListener("touchcancel", () => { const s = swipe; swipe = null; if (s && s.active) swipeReset($("view")); });
+
   /* Start screen */
   const SPLASH_KEY = "pfm.splash";
   const OPEN_KEY = "pfm.open";
@@ -2930,6 +3547,25 @@ function buildRecords(imp, existing, learned, today) {
   function splashEnabled() { return openMode() === "splash"; }
   const splashT0 = Date.now();
   let splashDone = false;
+  /* Keep the rocks free: the quote sits on the water, just below the rocks' base line */
+  function placeSplash() {
+    const sp = $("splash"); if (!sp || sp.hidden || splashDone) return;
+    const img = sp.querySelector("img"), W = sp.clientWidth, H = sp.clientHeight;
+    if (!W || !H) return;
+    const IW = img.naturalWidth || 1200, IH = img.naturalHeight || 1292, WY = IH * (960 / 1292);
+    const sc = Math.max(W / IW, H / IH), rh = IH * sc;
+    let off = (H - rh) / 2;
+    if (rh > H + 1) { off = Math.min(0, Math.max(H - rh, 0.72 * H - WY * sc)); img.style.objectPosition = `55% ${((off / (H - rh)) * 100).toFixed(1)}%`; }
+    else img.style.objectPosition = "55% 50%";
+    const base = off + WY * sc;
+    const bs = getComputedStyle($("splashBottom"));
+    const need = $("splashQuote").offsetHeight + $("splashGo").offsetHeight + parseFloat(bs.paddingTop) + parseFloat(bs.paddingBottom) + (parseFloat(bs.rowGap) || 0) + 24;
+    sp.style.setProperty("--water", Math.round(Math.min(base, H - need)) + "px");
+  }
+  placeSplash();
+  $("splash").querySelector("img").addEventListener("load", placeSplash);
+  window.addEventListener("resize", placeSplash);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(placeSplash);
   function hideSplash() {
     if (splashDone) return;
     splashDone = true;
