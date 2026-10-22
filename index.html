@@ -27,7 +27,7 @@ img { max-width: 100%; }
 </style>
 <script>
 window.PFM_STANDALONE = true;
-window.PFM_VERSION = "1.2.1";
+window.PFM_VERSION = "1.3.0";
 if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
 </script>
 </head>
@@ -234,6 +234,37 @@ tr:last-child td { border-bottom: 0; }
 .err { color: var(--neg); font-size: 13.5px; min-height: 1em; }
 .hint { color: var(--muted); font-size: 14px; margin: 0; }
 .toast { position: fixed; left: 50%; transform: translateX(-50%); z-index: 30; bottom: calc(86px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--bg); border-radius: 12px; padding: 10px 16px; font-size: 14.5px; font-weight: 600; max-width: calc(100% - 32px); }
+/* Search, tax, independence plan */
+.searchbar { display: flex; align-items: center; gap: 10px; border: 1px solid var(--line); background: var(--surface); border-radius: 14px; padding: 0 12px 0 14px; color: var(--muted); min-height: 50px; }
+.searchbar .ic { flex: none; }
+.searchbar input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--ink); font: inherit; font-size: 17px; padding: 12px 0; outline: none; -webkit-appearance: none; appearance: none; border-radius: 0; }
+.searchbar input::-webkit-search-cancel-button { display: none; }
+.searchbar button { border: 0; background: var(--raised); color: var(--muted); width: 28px; height: 28px; border-radius: 50%; font-size: 13px; flex: none; }
+.hubsearch { width: 100%; text-align: left; font-size: 16.5px; }
+.minitiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.mtile { border: 1px solid var(--line); border-radius: 18px; background: var(--surface); padding: 16px 14px; text-align: left; display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.mtile .tile-t { font-size: 21px; }
+.mtile .tile-v { font-size: 18px; }
+.chiprow.wrap { flex-wrap: wrap; overflow: visible; }
+.sumlist .tot { border-top: 1px solid var(--line); padding-top: 8px; margin-top: 2px; font-weight: 700; }
+.sumlist .sub { color: var(--muted); font-size: 13.5px; padding-left: 12px; }
+.prow { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.prow.off .pmain { opacity: 0.45; }
+.pmain { border: 0; background: none; text-align: left; display: flex; flex-direction: column; gap: 2px; min-width: 0; padding: 0; color: var(--ink); font: inherit; }
+.pmain .t1 { font-weight: 600; font-size: 16px; }
+.pmain .t2 { font-size: 13.5px; color: var(--muted); }
+.ptog { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--faint); background: transparent; color: var(--accent-ink); font-weight: 800; }
+.ptog[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); }
+.sugg { display: flex; flex-direction: column; gap: 8px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.sugg .acts { display: flex; gap: 8px; flex-wrap: wrap; }
+.sugg .acts button { border: 1px solid var(--line); background: var(--raised); border-radius: 999px; padding: 7px 12px; font-weight: 600; font-size: 13.5px; color: var(--ink); }
+.sugg .acts button.pri { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.ckl { display: flex; flex-direction: column; gap: 14px; }
+.ckl small { color: var(--muted); font-size: 13px; display: block; margin-top: 2px; }
+.kinds details.more { padding-top: 10px; }
+.kinds details.more summary { display: flex; justify-content: space-between; gap: 10px; color: var(--ink); }
+.kinds details.more summary b { font-variant-numeric: tabular-nums; }
+.tline { display: grid; grid-template-columns: minmax(0, 1fr) 92px; gap: 10px; align-items: end; }
 /* Full-screen chart */
 .cfoot { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
 .expbtn { flex: none; border: 1px solid var(--line); background: transparent; color: var(--muted); border-radius: 999px; padding: 6px 12px; font-size: 13px; font-weight: 600; white-space: nowrap; }
@@ -398,11 +429,23 @@ tfoot td { font-weight: 700; border-top: 2px solid var(--line); border-bottom: 0
       <div class="newcat" id="entryNewProj" hidden><input id="entryNewProjName" maxlength="40" placeholder="New project name, e.g. Trip to Naples" aria-label="New project name"><button type="button" class="btn" id="entryNewProjAdd">Add</button></div></div>
     <div class="two" id="spreadWrap">
       <div class="field"><label class="label" for="spreadMonths">Cost belongs to</label>
-        <select id="spreadMonths"><option value="1">This month only</option><option value="3">3 months</option><option value="6">6 months</option><option value="12">12 months</option></select>
+        <select id="spreadMonths"><option value="1">This month only</option><option value="2">2 months</option><option value="3">3 months</option><option value="6">6 months</option><option value="12">1 year (12 months)</option><option value="24">2 years (24 months)</option><option value="36">3 years (36 months)</option><option value="48">4 years (48 months)</option><option value="custom">Other number of months…</option></select>
+        <input id="spreadCustom" inputmode="numeric" placeholder="Months, e.g. 18" aria-label="Number of months" hidden>
       </div>
       <div class="field" id="spreadStartWrap" hidden><label class="label" for="spreadStart">Starting</label><input type="month" id="spreadStart" placeholder="YYYY-MM"></div>
     </div>
     <div class="field"><label class="label" for="note">Description</label><input id="note" maxlength="120" placeholder="e.g. Weekly groceries"></div>
+    <details class="more" id="taxMore">
+      <summary id="taxSum">Tax return</summary>
+      <div class="field"><label class="label" for="taxKind">Counts in your tax return as</label><select id="taxKind"></select></div>
+      <div id="taxFields" hidden>
+        <div class="tline" style="margin-top:12px">
+          <label class="check"><input type="checkbox" id="taxReceipt"><span>I have the receipt or invoice</span></label>
+          <div class="field"><label class="label" for="taxShare">Share %</label><input id="taxShare" inputmode="numeric" placeholder="100"></div>
+        </div>
+      </div>
+      <p class="hint" id="taxHint" style="margin-top:10px"></p>
+    </details>
     <div class="err" id="entryErr" role="alert"></div>
     <div class="btnrow">
       <button type="submit" class="btn primary" id="saveBtn" style="flex:1">Save</button>
@@ -465,7 +508,7 @@ tfoot td { font-weight: 700; border-top: 2px solid var(--line); border-bottom: 0
     <div class="field"><label class="label" for="recAmount">Amount per payment</label><div class="amount"><span>€</span><input id="recAmount" inputmode="decimal" autocomplete="off" placeholder="0.00"></div></div>
     <div class="field"><label class="label" for="recName">Name</label><input id="recName" maxlength="60" placeholder="e.g. Spotify, car insurance, rent"></div>
     <div class="two">
-      <div class="field"><label class="label" for="recEvery">Repeats</label><select id="recEvery"><option value="1">Monthly</option><option value="3">Quarterly</option><option value="6">Every 6 months</option><option value="12">Yearly</option></select></div>
+      <div class="field"><label class="label" for="recEvery">Repeats</label><select id="recEvery"><option value="1">Monthly</option><option value="3">Quarterly</option><option value="6">Every 6 months</option><option value="12">Yearly</option><option value="24">Every 2 years</option></select></div>
       <div class="field" id="recCatWrap"><label class="label" for="recCat">Category</label><select id="recCat"></select></div>
       <div class="field" id="recToWrap" hidden><label class="label" for="recTo">To</label><select id="recTo"></select></div>
     </div>
@@ -613,9 +656,24 @@ tfoot td { font-weight: 700; border-top: 2px solid var(--line); border-bottom: 0
     </div>
     <div class="field" id="bulkCatWrap"><label class="label" for="bulkCat">Category</label><select id="bulkCat"></select></div>
     <div class="field"><label class="label" for="bulkSpread">Cost belongs to</label>
-      <select id="bulkSpread"><option value="">Keep</option><option value="1">Its own month only</option><option value="3">3 months from its date</option><option value="6">6 months from its date</option><option value="12">12 months from its date</option></select></div>
+      <select id="bulkSpread"><option value="">Keep</option><option value="1">Its own month only</option><option value="2">2 months from its date</option><option value="3">3 months from its date</option><option value="6">6 months from its date</option><option value="12">1 year from its date</option><option value="24">2 years from its date</option><option value="36">3 years from its date</option><option value="48">4 years from its date</option><option value="custom">Other number of months…</option></select>
+      <input id="bulkSpreadCustom" inputmode="numeric" placeholder="Months, e.g. 18" aria-label="Number of months" hidden></div>
+    <div class="field" id="bulkTaxWrap"><label class="label" for="bulkTax">Tax return</label><select id="bulkTax"></select></div>
     <div class="err" id="bulkErr" role="alert"></div>
     <div class="btnrow"><button type="submit" class="btn primary" id="bulkSave" style="flex:1">Apply</button></div>
+  </form>
+</div>
+<div class="sheet" id="planSheet" role="dialog" aria-modal="true" aria-labelledby="planTitle" hidden>
+  <form id="planForm" novalidate>
+    <div class="grip" aria-hidden="true"></div>
+    <div class="sheethead"><h2 id="planTitle">Paid by your parents</h2><button type="button" class="mbtn" data-close aria-label="Close">✕</button></div>
+    <div class="field"><label class="label" for="planName">What</label><input id="planName" maxlength="40" placeholder="e.g. Health insurance"></div>
+    <div class="field"><label class="label" for="planAmt">Amount</label><div class="amount"><span>€</span><input id="planAmt" inputmode="decimal" autocomplete="off" placeholder="0.00"></div></div>
+    <div class="field"><label class="label" for="planEvery">Paid</label><select id="planEvery"><option value="1">Every month</option><option value="3">Every 3 months</option><option value="6">Every 6 months</option><option value="12">Once a year</option></select></div>
+    <label class="check"><input type="checkbox" id="planPayroll"><span>Taken from your salary in a regular job – true for health and care insurance</span></label>
+    <p class="hint">Calculated rent: what a room like yours would cost if you rented it yourself.</p>
+    <div class="err" id="planErr" role="alert"></div>
+    <div class="btnrow"><button type="submit" class="btn primary" id="planSave" style="flex:1">Save</button><button type="button" class="btn danger" id="planDelete" hidden>Delete</button></div>
   </form>
 </div>
 <div class="toast" id="toast" role="status" hidden></div>
@@ -973,7 +1031,8 @@ function buildRecords(imp, existing, learned, today) {
   const axisMoney = (c) => eur0.format(c / 100);
 
   const state = {
-    entries: [], trash: [], settings: { limits: {}, projects: [], rules: {}, catMap: {}, recurring: [], balance: { items: [] }, customCats: { aus: [], ein: [] }, cats: null, renames: {} },
+    entries: [], trash: [], settings: { limits: {}, projects: [], rules: {}, catMap: {}, recurring: [], balance: { items: [] }, customCats: { aus: [], ein: [] }, cats: null, renames: {}, tax: { study: "", years: {} }, plan: { items: [] } },
+    q: { text: "", type: "all", f: "any" }, taxYear: null, planId: null,
     year: curYear(), mon: new Date().getMonth() + 1,
     stack: [{ v: "hub" }], homeCat: "All", listFilter: "all", sel: null, armedCat: null, newCatType: "aus", editCat: null,
     balAt: null, full: null,
@@ -1093,11 +1152,41 @@ function buildRecords(imp, existing, learned, today) {
     state.entries = all.filter((e) => !e.deletedAt);
     state.trash = all.filter((e) => e.deletedAt);
   }
+  /* ================= Tax ================= */
+  const TAX_KINDS = {
+    study: { label: "Study costs", de: "Studienkosten", hint: "Tuition, semester fee, books, printing, trips to uni, the semester abroad. In a Master (second degree) they count as work-related costs without a cap." },
+    equipment: { label: "Work & study equipment", de: "Arbeitsmittel", hint: "Laptop, tablet, desk, software, specialist books. Used privately too? Enter the share you use for work or study." },
+    travel: { label: "Trips for work or study", de: "Reisekosten", hint: "Tickets and accommodation for business trips, excursions or getting to your semester abroad. Your daily commute is entered in the Tax view instead." },
+    application: { label: "Job applications", de: "Bewerbungskosten", hint: "Photos, printing, postage, travel to interviews." },
+    workother: { label: "Other work costs", de: "Sonstige Werbungskosten", hint: "Work clothes, union fees, the work share of your phone or internet." },
+    insurance: { label: "Insurance & pension", de: "Vorsorgeaufwendungen", hint: "Health, care, liability, accident or disability insurance that you pay yourself. For a car, only the liability part (Kfz-Haftpflicht) counts. If your parents pay it, they claim it." },
+    donation: { label: "Donations", de: "Spenden", hint: "Up to €300 per donation the bank statement is enough as proof." },
+    health: { label: "Medical costs", de: "Krankheitskosten", hint: "Glasses, dentist, prescribed treatment. Only the part above a personal threshold counts." },
+    household: { label: "Household services & tradesmen", de: "Haushaltsnahe Dienstleistungen / Handwerker", hint: "Only the labour part of an invoice, paid by transfer. 20 % of it comes straight off your tax." }
+  };
+  const TAX_RULES = [
+    ["equipment", /(laptop|notebook|macbook|ipad|tablet|monitor|bildschirm|drucker|printer|tastatur|keyboard|\bmaus\b|mouse|software|microsoft 365|office 365|adobe|schreibtisch|bürostuhl|buerostuhl|office chair|taschenrechner)/],
+    ["study", /(semesterbeitrag|semester fee|studiengebühr|studiengebuehr|tuition|universit|hochschule|\buni\b|erasmus|sprachkurs|language course|lehrbuch|fachbuch|skript|repetitorium|prüfungsgebühr|exam fee|copyshop|abschlussarbeit|thesis)/],
+    ["application", /(bewerbung|job application)/],
+    ["insurance", /(haftpflicht|unfallversicherung|krankenversicherung|krankenkasse|berufsunfähig|berufsunfaehig|pflegeversicherung|liability insurance|health insurance|\baok\b|techniker krankenkasse|barmer|\bdak\b|\bhkk\b)/],
+    ["donation", /(spende|donation|unicef|rotes kreuz|caritas|diakonie|wikimedia|greenpeace|ärzte ohne grenzen|aerzte ohne grenzen)/],
+    ["health", /(zahnarzt|arztpraxis|\barzt\b|physio|optiker|fielmann|brille|kontaktlinse|krankenhaus)/],
+    ["household", /(handwerker|putzhilfe|reinigungskraft|hausmeister|schornsteinfeger|umzugsunternehmen)/]
+  ];
+  const TAX_CAT = { Education: "study", Insurance: "insurance" };
+  function taxSuggest(e) {
+    if (e.type !== "aus" || e.tax || e.taxNo) return null;
+    const h = `${e.note || ""} ${e.payee || ""} ${e.memo || ""}`.toLowerCase();
+    for (const [k, re] of TAX_RULES) if (re.test(h)) return k;
+    for (const [c, k] of Object.entries(TAX_CAT)) if (e.cat === rn(c)) return k;
+    return null;
+  }
   function valid(e) {
     return e && typeof e.id === "string" && (e.type === "aus" || e.type === "ein" || (e.type === "tr" && typeof e.toAccount === "string")) &&
       Number.isInteger(e.cents) && e.cents > 0 && /^\d{4}-\d{2}-\d{2}$/.test(e.date || "");
   }
   function normEntry(e) {
+    if (e.tax && !(e.type === "aus" && e.tax.kind in TAX_KINDS)) { const { tax: _t, ...r } = e; e = r; }
     if (e.type === "tr") return { ...e, cat: "Transfer", account: ACC_ALIAS[e.account] || e.account || "Not specified", toAccount: ACC_ALIAS[e.toAccount] || e.toAccount };
     return { ...e, cat: normCat(e.cat, e.type), account: ACC_ALIAS[e.account] || e.account || "Not specified" };
   }
@@ -1107,14 +1196,19 @@ function buildRecords(imp, existing, learned, today) {
     if (s.limits && typeof s.limits === "object") for (const [k, v] of Object.entries(s.limits)) if (Number.isInteger(v) && v > 0) lim[normCat(k, "aus")] = v;
     const projects = Array.isArray(s.projects) ? s.projects.filter((p) => p && typeof p.id === "string" && typeof p.name === "string") : [];
     const obj = (o) => (o && typeof o === "object" && !Array.isArray(o) ? o : {});
-    const recurring = Array.isArray(s.recurring) ? s.recurring.filter((r) => r && typeof r.id === "string" && Number.isInteger(r.cents) && r.cents > 0 && (r.type === "aus" || r.type === "ein" || r.type === "tr") && [1, 3, 6, 12].includes(r.every) && /^\d{4}-\d{2}-\d{2}$/.test(r.start || "")) : [];
+    const recurring = Array.isArray(s.recurring) ? s.recurring.filter((r) => r && typeof r.id === "string" && Number.isInteger(r.cents) && r.cents > 0 && (r.type === "aus" || r.type === "ein" || r.type === "tr") && [1, 3, 6, 12, 24].includes(r.every) && /^\d{4}-\d{2}-\d{2}$/.test(r.start || "")) : [];
     const items = s.balance && Array.isArray(s.balance.items) ? s.balance.items.filter((i) => i && typeof i.id === "string" && typeof i.name === "string") : [];
     const cc = s.customCats && typeof s.customCats === "object" ? s.customCats : {};
     const names = (a) => (Array.isArray(a) ? a.filter((n) => typeof n === "string" && n.trim()).map((n) => n.trim().slice(0, 30)) : []);
     const catsOk = s.cats && Array.isArray(s.cats.aus) && Array.isArray(s.cats.ein);
     const renames = {};
     if (s.renames && typeof s.renames === "object") for (const [k, v] of Object.entries(s.renames)) if (typeof v === "string" && v) renames[k] = v;
-    return { limits: lim, projects, rules: obj(s.rules), catMap: obj(s.catMap), recurring, balance: { items }, customCats: { aus: names(cc.aus), ein: names(cc.ein) }, cats: catsOk ? { aus: names(s.cats.aus), ein: names(s.cats.ein) } : null, renames };
+    const tx = obj(s.tax), years = {};
+    for (const [y, v] of Object.entries(obj(tx.years))) if (/^\d{4}$/.test(y) && v && typeof v === "object") years[y] = { ...v, check: obj(v.check) };
+    const pl = obj(s.plan);
+    const planItems = Array.isArray(pl.items) ? pl.items.filter((i) => i && typeof i.id === "string" && typeof i.name === "string" && Number.isInteger(i.cents) && i.cents > 0).map((i) => ({ ...i, every: [1, 3, 6, 12].includes(i.every) ? i.every : 1 })) : [];
+    return { limits: lim, projects, rules: obj(s.rules), catMap: obj(s.catMap), recurring, balance: { items }, customCats: { aus: names(cc.aus), ein: names(cc.ein) }, cats: catsOk ? { aus: names(s.cats.aus), ein: names(s.cats.ein) } : null, renames,
+      tax: { study: ["master", "first", "none"].includes(tx.study) ? tx.study : "", years }, plan: { ...pl, items: planItems } };
   }
   async function patchSettings(patch) {
     if (!store) throw new Error("not ready");
@@ -1532,7 +1626,7 @@ function buildRecords(imp, existing, learned, today) {
         <span class="val">${money(e.cents)}</span></button>`;
     }
     const p = e.project && projById(e.project), back = isRefund(e);
-    const tags = (e.example ? '<span class="tag">Example</span>' : "") + (e.recurring ? '<span class="tag">Fixed</span>' : "") + (e.spread && e.spread.months > 1 ? `<span class="tag">÷${e.spread.months}</span>` : "") + (e.cat === UNCAT ? '<span class="tag attn">Review</span>' : "");
+    const tags = (e.example ? '<span class="tag">Example</span>' : "") + (e.recurring ? '<span class="tag">Fixed</span>' : "") + (e.spread && e.spread.months > 1 ? `<span class="tag">÷${e.spread.months}</span>` : "") + (e.tax ? '<span class="tag">Tax</span>' : "") + (e.cat === UNCAT ? '<span class="tag attn">Review</span>' : "");
     renderIds.push(e.id);
     const on = state.sel && state.sel.ids.has(e.id);
     return `<button class="row nochev" data-action="entry" data-arg="${esc(e.id)}"${state.sel ? ` aria-pressed="${on ? "true" : "false"}"` : ""}>
@@ -1558,12 +1652,12 @@ function buildRecords(imp, existing, learned, today) {
       </span>
       <span></span><span class="chev" aria-hidden="true">›</span></button>`;
   }
-  const VIEW_LABEL = { hub: "Menu", cashflow: "Cash flows", cat: "Category", budgets: "Budgets", list: "Transactions", project: "Project", data: "Data & backup", import: "Import", fixed: "Fixed costs", calc: "Calculated costs", balance: "Balance sheet", trash: "Recently deleted", categories: "Categories" };
+  const VIEW_LABEL = { hub: "Menu", cashflow: "Cash flows", cat: "Category", budgets: "Budgets", list: "Transactions", project: "Project", data: "Data & backup", import: "Import", fixed: "Fixed costs", calc: "Calculated costs", balance: "Balance sheet", trash: "Recently deleted", categories: "Categories", search: "Search", tax: "Tax return", plan: "Independence plan" };
   const backBar = () => { const prev = state.stack[state.stack.length - 2]; return `<button class="backbtn" data-action="back"><span aria-hidden="true">‹</span>${esc(prev ? VIEW_LABEL[prev.v] || "Back" : "Menu")}</button>`; };
   let renderIds = [], scopeIds = [];
-  function selToolbar() {
+  function selToolbar(startLabel) {
     if (state.sel) return `<div class="seltools"><button class="more" data-action="sel-all">Select all</button><button class="more" data-action="sel-cancel">Cancel</button></div>`;
-    return `<div class="seltools"><button class="more" data-action="sel-start">Delete</button>${state.trash.length ? `<button class="more" data-action="nav" data-arg="trash">Restore (${state.trash.length})</button>` : ""}</div>`;
+    return `<div class="seltools"><button class="more" data-action="sel-start">${startLabel || "Delete"}</button>${state.trash.length ? `<button class="more" data-action="nav" data-arg="trash">Restore (${state.trash.length})</button>` : ""}</div>`;
   }
   const byDateDesc = (a, b) => b.date.localeCompare(a.date) || String(b.created || "").localeCompare(String(a.created || ""));
   const projRange = (p) => p.start || p.end ? `${p.start ? dateFmt.format(isoDate(p.start)) : "…"} – ${p.end ? dateFmt.format(isoDate(p.end)) : "ongoing"}` : "No dates set";
@@ -1738,6 +1832,7 @@ function buildRecords(imp, existing, learned, today) {
         <div class="stat"><span class="label">Expenses</span><span class="v">${money(o)}</span></div>
         <div class="stat"><span class="label">Balance</span><span class="v ${i - o > 0 ? "pos" : i - o < 0 ? "neg" : ""}">${signed(i - o)}</span></div>
       </section>`}
+      ${review ? "" : `<button class="searchbar hubsearch" data-action="search">${ICON_SEARCH}<span>Search all transactions</span></button>`}
       <div class="pills" role="group" aria-label="Filter">${pills.map(([k, t]) => `<button data-action="listfilter" data-arg="${k}" aria-pressed="${state.listFilter === k}">${esc(t)}</button>`).join("")}</div>
       ${selToolbar()}
       <section class="sec" aria-label="List">
@@ -2186,12 +2281,14 @@ function buildRecords(imp, existing, learned, today) {
     const liquid = known.filter((x) => !x.inv).reduce((s, x) => s + x.v, 0), invested = known.filter((x) => x.inv).reduce((s, x) => s + x.v, 0);
     const hasInv = accs.some((x) => x.inv);
     const bal = mt.i - mt.o, plus = ytd.i - ytd.o;
+    const pd = state.settings.plan.items.length ? planData() : null, txs = taxSummary(String(y));
     return `
       <header class="hubhead">
         <div class="brand"><h1 class="wordmark">P<b>F</b>M</h1><span class="label">Personal Finance Management</span></div>
         <span class="sync" data-mode="${syncMode}">${esc(syncText)}</span>
       </header>
       <button class="addbig" data-action="add"><span aria-hidden="true">+</span>Add transaction</button>
+      <button class="searchbar hubsearch" data-action="search">${ICON_SEARCH}<span>Search transactions</span></button>
       ${STANDALONE && state.entries.length && (lastBackupDays() == null || lastBackupDays() > 14) ? `<button class="notice" data-action="export-json">Last backup: ${esc(lastBackupText())} · Save a backup now ›</button>` : ""}
       <nav class="tiles" aria-label="Menu">
         <button class="tile" data-action="nav" data-arg="cashflow">
@@ -2204,6 +2301,10 @@ function buildRecords(imp, existing, learned, today) {
           <span class="tile-l"><span class="tile-t">Balance sheet</span>${hasBal ? `<span class="tile-v">${money(balanceAt(cm).net)} <span class="tile-s">net worth</span></span>` : ""}<span class="tile-s">${hasBal ? "Assets, liabilities, equity" : "Set up assets and liabilities"}</span></span>
           ${spark(nets, "var(--accent)")}<span class="chev" aria-hidden="true">›</span></button>
       </nav>
+      <div class="minitiles">
+        <button class="mtile" data-action="nav" data-arg="plan"><span class="tile-t">Independence</span>${pd ? `<span class="tile-v">${Math.round(pd.cov * 100)} %</span><span class="tile-s">paid by yourself</span>` : `<span class="tile-s">What you'd need to earn to pay everything yourself</span>`}</button>
+        <button class="mtile" data-action="nav" data-arg="tax"><span class="tile-t">Tax return</span>${txs.wk + txs.sa ? `<span class="tile-v">${money(txs.wk + txs.sa)}</span><span class="tile-s">deductible in ${y}</span>` : `<span class="tile-s">Collect deductible costs for ${y}</span>`}</button>
+      </div>
       <section class="accounts" aria-label="Accounts">
         <span class="label">${hasInv ? "Accounts &amp; investments" : "Account balance"}</span>
         <div class="acc-total">${known.length ? heroHTML(total) : "–"}</div>
@@ -2211,6 +2312,326 @@ function buildRecords(imp, existing, learned, today) {
         <div class="acc-split">${accs.map((x) => `<button class="acc" data-action="${x.action}" data-arg="${esc(x.arg)}"><span class="label${x.inv ? " inv" : ""}">${esc(x.a)}</span>${x.v != null ? `<b>${money(x.v)}</b>` : `<span class="set">Set balance</span>`}</button>`).join("")}${hasInv ? "" : `<button class="acc" data-action="choose" data-arg="depot"><span class="label inv">Investments</span><span class="set">+ Add</span></button>`}</div>
         <div class="ytd"><span class="label">Plus since 1 Jan</span><b class="${plus >= 0 ? "pos" : "neg"}">${signed(plus)}</b></div>
       </section>`;
+  }
+
+
+  /* ---------- Search ---------- */
+  const ICON_SEARCH = '<svg class="ic" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M15.5 15.5L20.5 20.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>';
+  const fold = (x) => String(x || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+  function hay(e) {
+    const p = e.project && projById(e.project), amt = (e.cents / 100).toFixed(2);
+    return fold([e.note, e.payee, e.memo, e.cat, e.account, e.toAccount, p && p.name, amt, amt.replace(".", ","), e.date, monthFmt.format(isoDate(e.date)),
+      e.tax && TAX_KINDS[e.tax.kind] ? TAX_KINDS[e.tax.kind].label : "", e.spread && e.spread.months > 1 ? `÷${e.spread.months}` : ""].filter(Boolean).join(" "));
+  }
+  /* Payments that look like they are meant for half a year, a year or two years but are not spread yet */
+  let guessCache = null;
+  function periodicGuess() {
+    if (guessCache && guessCache.ref === state.entries) return guessCache.map;
+    const map = new Map(), groups = new Map(), frequent = new Set();
+    const cand = state.entries.filter((e) => e.type === "aus" && !(e.spread && e.spread.months > 1) && !e.recurring && !assetOf(e));
+    for (const e of cand) {
+      const k = normPayee(e.payee || e.note || ""); if (!k || k.length < 3) continue;
+      const key = k + "|" + e.cat; if (!groups.has(key)) groups.set(key, []); groups.get(key).push(e);
+    }
+    for (const list of groups.values()) {
+      if (list.length < 2) continue;
+      list.sort((a, b) => a.date.localeCompare(b.date));
+      const gaps = list.slice(1).map((e, i) => dayDiff(list[i].date, e.date)).sort((a, b) => a - b), med = gaps[Math.floor(gaps.length / 2)];
+      if (med < 75) { list.forEach((e) => frequent.add(e.id)); continue; }
+      const amts = list.map((e) => e.cents), similar = Math.max(...amts) <= Math.min(...amts) * 1.6;
+      const m = !similar ? 0 : med >= 80 && med <= 105 ? 3 : med >= 150 && med <= 215 ? 6 : med >= 330 && med <= 400 ? 12 : med >= 680 && med <= 770 ? 24 : 0;
+      if (!m) list.forEach((e) => frequent.add(e.id));
+      if (m) list.forEach((e) => map.set(e.id, m));
+    }
+    const KW = [[24, /(inspektion|hauptuntersuchung|\btüv\b|\btuev\b|\bhu\b|durchsicht)/], [6, /(semesterbeitrag|semester fee|semesterticket|halbjahr)/],
+      [12, /(versicherung|insurance|rundfunk|beitragsservice|\bgez\b|kfz-steuer|kfz steuer|jahresbeitrag|jahresabo|annual|yearly|mitgliedsbeitrag|\badac\b|bahncard|jährlich|jaehrlich)/]];
+    for (const e of cand) {
+      if (map.has(e.id) || frequent.has(e.id)) continue;
+      const h = `${e.note || ""} ${e.payee || ""} ${e.memo || ""}`.toLowerCase();
+      for (const [m, re] of KW) if (re.test(h)) { map.set(e.id, m); break; }
+    }
+    guessCache = { ref: state.entries, map };
+    return map;
+  }
+  function searchList() {
+    const S = state.q, toks = fold(S.text).split(/\s+/).filter(Boolean), guess = S.f.startsWith("g") ? periodicGuess() : null;
+    return state.entries.filter((e) => {
+      if (S.type !== "all" && e.type !== S.type) return false;
+      const m = e.spread && e.spread.months > 1 ? e.spread.months : 1;
+      if (S.f === "one" && m > 1) return false;
+      if (S.f === "spread" && m === 1) return false;
+      if (S.f.startsWith("m") && m !== Number(S.f.slice(1))) return false;
+      if (guess && guess.get(e.id) !== Number(S.f.slice(1))) return false;
+      if (S.f === "tax" && !e.tax) return false;
+      if (S.f === "fixed" && !e.recurring) return false;
+      if (!toks.length) return true;
+      const h = hay(e); return toks.every((t) => h.includes(t));
+    }).sort(byDateDesc);
+  }
+  function searchBody(list) {
+    if (!list.length) return `<p class="hint" style="padding:12px 0">Nothing found. Try fewer or other words.</p>`;
+    const shown = list.slice(0, 300), months = new Map();
+    for (const e of shown) { const k = e.date.slice(0, 7); if (!months.has(k)) months.set(k, []); months.get(k).push(e); }
+    return [...months.entries()].map(([m, items]) => { const t = totals(items); return `<div class="dayhead"><span>${esc(monthFmt.format(ymDate(m)))}</span><span class="tn">${signed(t.i - t.o)}</span></div>${items.map((e) => entryRow(e)).join("")}`; }).join("")
+      + (list.length > shown.length ? `<p class="hint" style="padding:12px 0">Showing the latest ${shown.length} of ${list.length}. Add a word to narrow it down.</p>` : "");
+  }
+  function searchStats(list) { const t = totals(list); return `${list.length} ${list.length === 1 ? "transaction" : "transactions"}${t.o ? ` · out ${money(t.o)}` : ""}${t.i ? ` · in ${money(t.i)}` : ""}`; }
+  function viewSearch() {
+    const S = state.q, list = searchList(); scopeIds = list.map((e) => e.id);
+    const guess = periodicGuess(), gc = { 3: 0, 6: 0, 12: 0, 24: 0 }; for (const m of guess.values()) gc[m]++;
+    const spreadM = [...new Set(state.entries.filter((e) => e.spread && e.spread.months > 1).map((e) => e.spread.months))].sort((a, b) => a - b);
+    const chips = [["any", "All"], ["one", "Not spread"], ["spread", "Spread"]].concat(spreadM.map((m) => [`m${m}`, `÷${m}`]),
+      [3, 6, 12, 24].filter((m) => gc[m]).map((m) => [`g${m}`, `Maybe ÷${m} (${gc[m]})`]), [["tax", "Tax"], ["fixed", "Fixed costs"]]);
+    const gm = S.f.startsWith("g") ? Number(S.f.slice(1)) : 0;
+    return `
+      ${backBar()}
+      <h1 class="vtitle">Search</h1>
+      <label class="searchbar">${ICON_SEARCH}<input id="q" type="search" enterkeyhint="search" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Description, category, amount…" value="${esc(S.text)}" aria-label="Search transactions"><button type="button" id="qClear" data-action="q-clear" aria-label="Clear search"${S.text ? "" : " hidden"}>✕</button></label>
+      <div class="pills" role="group" aria-label="Type">${[["all", "All"], ["aus", "Expenses"], ["ein", "Income"], ["tr", "Transfers"]].map(([k, t]) => `<button data-action="q-type" data-arg="${k}" aria-pressed="${S.type === k}">${t}</button>`).join("")}</div>
+      <div class="chiprow" role="group" aria-label="Cost belongs to">${chips.map(([k, t]) => `<button class="fchip" data-action="q-f" data-arg="${k}" aria-pressed="${S.f === k}">${esc(t)}</button>`).join("")}</div>
+      ${gm ? `<p class="hint">These look like payments for ${gm === 3 ? "three months" : gm === 6 ? "half a year" : gm === 12 ? "a whole year" : "two years"}, but so far count fully in one month. Tap <b>Select</b> → <b>Select all</b> → <b>Edit</b> and set “Cost belongs to” to ${gm === 24 ? "2 years" : gm + " months"}.</p>` : ""}
+      <div class="split"><span class="hint" id="qStats">${esc(searchStats(list))}</span>${selToolbar("Select")}</div>
+      <section class="sec" aria-label="Results" id="qRes">${searchBody(list)}</section>`;
+  }
+  let qTimer = 0;
+  function updateSearch() {
+    const top = state.stack[state.stack.length - 1]; if (top.v !== "search" || !$("qRes")) return;
+    const list = searchList(); scopeIds = list.map((e) => e.id); renderIds = [];
+    $("qRes").innerHTML = searchBody(list); $("qStats").textContent = searchStats(list); $("qClear").hidden = !state.q.text;
+  }
+
+  /* ---------- Tax return ---------- */
+  const TAX_LIFE = { car: 6, motorbike: 7, bike: 7, ebike: 7, phone: 5, watch: 5, camera: 7, tv: 7, console: 5, furniture: 13, appliance: 10, sports: 7, instrument: 10, valuables: 0, other: 5 };
+  const TAX_CHECK = [
+    ["lstb", "Wage tax certificate (Lohnsteuerbescheinigung)", "From your employer, usually by the end of February. ELSTER pre-fills it for you."],
+    ["enrol", "Proof of enrolment + your Bachelor certificate", "Shows that your Master is a second degree – then study costs count as Werbungskosten."],
+    ["abroad", "Semester abroad documents", "Learning agreement or transcript, tickets, rent contract abroad and proof that you kept your room in Germany."],
+    ["kv", "Health & care insurance statement", "Your insurer reports the amounts to the tax office – check them. If your parents pay, they claim them."],
+    ["kap", "Annual tax statements of your depots", "Jahressteuerbescheinigung from Trade Republic and your other depot for Anlage KAP. Your exemption orders may add up to €1,000 in total."],
+    ["receipts", "Receipts for everything marked", "Invoices for equipment, books and tickets. A photo in one folder per year is enough."],
+    ["ids", "Tax ID and IBAN", "Your 11-digit Steuer-ID and the account for the refund."],
+    ["elster", "ELSTER account", "Register at elster.de – the activation letter comes by post and takes about two weeks."]
+  ];
+  const taxCfg = (y) => state.settings.tax.years[y] || {};
+  const wkFlat = (y) => (y >= 2023 ? 123000 : y === 2022 ? 120000 : 100000);
+  function commuteDay(km, y) {
+    if (y >= 2026) return Math.round(km * 38);
+    return Math.round(Math.min(km, 20) * 30 + Math.max(0, km - 20) * (y >= 2022 ? 38 : 35));
+  }
+  /* Tax depreciation (AfA) of a thing used for work or study: computers in full in the year of purchase, up to €952 incl. VAT (GWG) as well, otherwise monthly over the official useful life */
+  function taxDep(a, y, share) {
+    if (!a || !a.cost || !share || !/^\d{4}-\d{2}/.test(a.date || "")) return 0;
+    const by = Number(a.date.slice(0, 4)), bm = Number(a.date.slice(5, 7)), base = a.cost * share / 100;
+    if (y < by) return 0;
+    if (a.atype === "laptop" || a.atype === "tablet" || a.cost <= 95200) return y === by ? Math.round(base) : 0;
+    const life = TAX_LIFE[a.atype] == null ? 5 : TAX_LIFE[a.atype]; if (!life) return 0;
+    const total = life * 12, before = y === by ? 0 : (13 - bm) + 12 * (y - by - 1), inYear = y === by ? 13 - bm : 12;
+    return Math.round(base / total * Math.max(0, Math.min(inYear, total - before)));
+  }
+  function taxRows(y) {
+    const rows = [], linked = new Set(), yn = Number(y);
+    for (const e of state.entries) {
+      if (e.type !== "aus" || !e.tax || !e.date.startsWith(y + "-")) continue;
+      const share = e.tax.share || 100, a = assetOf(e);
+      if (a && e.tax.kind === "equipment") { linked.add(a.id); rows.push({ e, kind: "equipment", amt: taxDep(a, yn, a.taxShare || share), note: (a.cost > 95200 && a.atype !== "laptop" && a.atype !== "tablet") ? "spread over its useful life" : "" }); continue; }
+      rows.push({ e, kind: e.tax.kind, amt: Math.round(e.cents * share / 100) });
+    }
+    for (const a of state.settings.balance.items) {
+      if (a.kind !== "asset" || linked.has(a.id)) continue;
+      const tx = a.txId && state.entries.find((x) => x.id === a.txId);
+      const share = a.taxShare || (tx && tx.tax && tx.tax.kind === "equipment" ? tx.tax.share || 100 : 0);
+      const amt = share ? taxDep(a, yn, share) : 0;
+      if (amt) rows.push({ asset: a, kind: "equipment", amt, note: `${share < 100 ? share + " % of " : ""}${money(a.cost)} · bought ${dateFmt.format(isoDate(a.date))}` });
+    }
+    return rows;
+  }
+  function taxSummary(y) {
+    y = String(y); const yn = Number(y), cfg = taxCfg(y), study = state.settings.tax.study || "master";
+    const rows = taxRows(y), by = {};
+    for (const r of rows) by[r.kind] = (by[r.kind] || 0) + r.amt;
+    const cWork = cfg.workKm && cfg.workDays ? commuteDay(cfg.workKm, yn) * cfg.workDays : 0, cUni = cfg.uniKm && cfg.uniDays ? commuteDay(cfg.uniKm, yn) * cfg.uniDays : 0;
+    const ho = yn >= 2023 ? Math.min(210, cfg.hoDays || 0) * 600 : 0;
+    const studyWk = study === "master" ? by.study || 0 : 0;
+    const wk = (by.equipment || 0) + (by.travel || 0) + (by.application || 0) + (by.workother || 0) + studyWk + cWork + cUni + ho;
+    const sa = (study === "first" ? Math.min(600000, by.study || 0) : 0) + (by.insurance || 0) + (by.donation || 0);
+    const missing = rows.filter((r) => r.e && !r.e.tax.receipt).length;
+    return { y, rows, by, cWork, cUni, ho, wk, sa, ab: by.health || 0, hh: by.household || 0, flat: wkFlat(yn), missing, study };
+  }
+  function viewTax() {
+    const ys = new Set(state.entries.map((e) => e.date.slice(0, 4))); ys.add(String(curYear()));
+    const years = [...ys].sort().reverse(), y = state.taxYear && ys.has(state.taxYear) ? state.taxYear : String(curYear());
+    const T = taxSummary(y), cfg = taxCfg(y), yn = Number(y), over = T.wk - T.flat, st = T.study;
+    const kindBlock = (k) => {
+      const rs = T.rows.filter((r) => r.kind === k); if (!rs.length) return "";
+      return `<details class="more"><summary><span>${esc(TAX_KINDS[k].label)} (${rs.length})</span><b>${money(rs.reduce((a, r) => a + r.amt, 0))}</b></summary>${rs.map((r) => r.e
+        ? entryRow(r.e, { cents: r.amt, note: [(r.e.tax.share || 100) < 100 ? `${r.e.tax.share} % of ${money(r.e.cents)}` : "", r.note || "", r.e.tax.receipt ? "" : "no receipt yet"].filter(Boolean).join(" · ") })
+        : `<button class="row nochev" data-action="bal-item" data-arg="${esc(r.asset.id)}">${badge(r.asset.costCat || "Shopping")}<span class="main"><span class="t1">${esc(r.asset.name)}<span class="tag">AfA</span></span><span class="t2">${esc(r.note)}</span></span><span class="val">${money(r.amt)}</span></button>`).join("")}</details>`;
+    };
+    const line = (label, v, sub) => (v ? `<div><span>${esc(label)}${sub ? `<br><span class="hint">${esc(sub)}</span>` : ""}</span><b>${money(v)}</b></div>` : "");
+    const numIn = (k, label, ph) => `<div class="field"><label class="label" for="tx-${k}">${label}</label><input id="tx-${k}" data-action="tax-set" data-arg="${k}" inputmode="decimal" value="${cfg[k] != null ? esc(String(cfg[k])) : ""}" placeholder="${ph}"></div>`;
+    const sugg = state.entries.filter((e) => e.date.startsWith(y + "-")).map((e) => [e, taxSuggest(e)]).filter((x) => x[1]).sort((a, b) => b[0].cents - a[0].cents);
+    const chk = cfg.check || {};
+    const kmRate = yn >= 2026 ? "€0.38 per km from the first km" : "€0.30 per km, from km 21 €0.38";
+    return `
+      ${backBar()}
+      <h1 class="vtitle">Tax return</h1>
+      <div class="periodnav"><label><span class="sr">Tax year</span><select class="psel" data-action="taxyear">${years.map((v) => `<option value="${v}"${v === y ? " selected" : ""}>${v}</option>`).join("")}</select></label></div>
+      <section class="hero"><span class="label">Work &amp; study costs ${esc(y)} (Werbungskosten)</span><div class="heroval">${heroHTML(T.wk)}</div>
+        <div class="herosub">${over > 0 ? `<span class="pos">${money(over)} above</span> the flat €1,230 – list every cost, each euro above it lowers your tax` : `The flat ${money(T.flat)} is applied to your wages automatically.${st === "master" ? " Record everything anyway: in a Master, costs above your income are carried forward to the years you earn more." : ""}`}</div></section>
+      <section class="card"><span class="label">Your studies</span>
+        <div class="seg three" role="group" aria-label="Your studies">${[["master", "Master / 2nd degree"], ["first", "First degree"], ["none", "Not studying"]].map(([k, t]) => `<button type="button" data-action="tax-study" data-arg="${k}" aria-pressed="${st === k}">${t}</button>`).join("")}</div>
+        <p>${st === "first" ? "A first degree counts as special expenses (Sonderausgaben), up to €6,000 a year – only useful in years with taxable income." : st === "none" ? "Study costs are ignored." : "A Master after a Bachelor is a second degree: study costs are work-related (Werbungskosten) without a cap. A loss can be carried forward and filed up to 7 years back."}</p></section>
+      <section class="card"><h2>Werbungskosten · Anlage N</h2>
+        <div class="sumlist">
+          ${st === "master" ? line("Study costs", T.by.study) : ""}${line("Work & study equipment", T.by.equipment)}${line("Trips for work or study", T.by.travel)}${line("Job applications", T.by.application)}${line("Other work costs", T.by.workother)}
+          ${line("Commute to work", T.cWork, `${cfg.workKm} km × ${cfg.workDays} days`)}${line("Commute to university", T.cUni, `${cfg.uniKm} km × ${cfg.uniDays} days`)}${line("Home office", T.ho, `${Math.min(210, cfg.hoDays || 0)} days × €6`)}
+          <div class="tot"><span>Total</span><b>${money(T.wk)}</b></div>
+        </div>
+        <div class="kinds">${(st === "master" ? ["study"] : []).concat(["equipment", "travel", "application", "workother"]).map(kindBlock).join("")}</div>
+        ${T.missing ? `<p class="status warn">${T.missing} ${T.missing === 1 ? "cost has" : "costs have"} no receipt ticked yet.</p>` : ""}</section>
+      <section class="card"><h2>Commute &amp; home office ${esc(y)}</h2>
+        <p>One way, shortest road. ${kmRate}. Home office: €6 per day, up to 210 days.</p>
+        <div class="two">${numIn("workKm", "Work: km one way", "e.g. 12")}${numIn("workDays", "Days at work", "e.g. 80")}</div>
+        <div class="two">${numIn("uniKm", "University: km one way", "e.g. 5")}${numIn("uniDays", "Days at uni", "e.g. 90")}</div>
+        <div class="two">${numIn("hoDays", "Home office days", "e.g. 40")}<div></div></div></section>
+      <section class="card"><h2>Other deductions</h2>
+        <div class="sumlist">
+          ${st === "first" ? line("First-degree study costs (max €6,000)", Math.min(600000, T.by.study || 0)) : ""}${line("Insurance & pension · Vorsorgeaufwand", T.by.insurance)}${line("Donations · Sonderausgaben", T.by.donation)}
+          ${line("Medical costs · außergewöhnliche Belastungen", T.ab)}${T.hh ? `<div><span>Household services · §35a<br><span class="hint">≈ ${money(Math.round(T.hh * 0.2))} straight off your tax</span></span><b>${money(T.hh)}</b></div>` : ""}
+          ${T.sa + T.ab + T.hh ? "" : `<div><span class="hint">Nothing marked yet.</span></div>`}
+        </div>
+        <div class="kinds">${(st === "first" ? ["study"] : []).concat(["insurance", "donation", "health", "household"]).map(kindBlock).join("")}</div></section>
+      ${sugg.length ? `<section class="card"><h2>Maybe deductible</h2><p>Found by description or category. Add them or tap “No” to hide them.</p>
+        ${sugg.slice(0, 25).map(([e, k]) => `<div class="sugg"><button class="pmain" data-action="entry" data-arg="${esc(e.id)}"><span class="t1">${esc(e.note || e.cat)}</span><span class="t2">${esc(e.cat)} · ${esc(dateFmt.format(isoDate(e.date)))} · ${money(e.cents)}</span></button>
+          <div class="acts"><button class="pri" data-action="tax-tag" data-arg="${esc(e.id)}|${k}">+ ${esc(TAX_KINDS[k].label)}</button><button data-action="entry" data-arg="${esc(e.id)}">Other…</button><button data-action="tax-no" data-arg="${esc(e.id)}">No</button></div></div>`).join("")}
+        ${sugg.length > 25 ? `<p class="hint">${sugg.length - 25} more – handle these first.</p>` : ""}</section>` : ""}
+      <section class="card"><h2>Checklist ${esc(y)}</h2><div class="ckl">${TAX_CHECK.map(([k, t, d]) => `<label class="check"><input type="checkbox" data-action="tax-check" data-arg="${k}"${chk[k] ? " checked" : ""}><span><b>${esc(t)}</b><small>${esc(d)}</small></span></label>`).join("")}</div></section>
+      <div class="btnrow"><button class="btn primary" data-action="tax-export" style="flex:1">Export list for ${esc(y)} (CSV)</button></div>
+      <p class="hint">Mark costs while you enter them (“Tax return” in each transaction) or here. The list gives you every amount with date and German term for ELSTER or a tax app. Estimates with the rules for ${esc(y)} – not tax advice.</p>`;
+  }
+  function exportTaxCsv(y) {
+    const T = taxSummary(y), q = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`, eu = (c) => (c / 100).toFixed(2).replace(".", ","), d = (iso) => iso.split("-").reverse().join(".");
+    const lines = ["Date;Description;Category;Counts as;German term;Share %;Paid;Deductible;Receipt"];
+    for (const r of T.rows.slice().sort((a, b) => (a.e ? a.e.date : a.asset.date).localeCompare(b.e ? b.e.date : b.asset.date))) {
+      const K = TAX_KINDS[r.kind];
+      if (r.e) lines.push([d(r.e.date), q(r.e.note || r.e.cat), q(r.e.cat), q(K.label), q(K.de + (r.note ? " (AfA)" : "")), r.e.tax.share || 100, eu(r.e.cents), eu(r.amt), r.e.tax.receipt ? "yes" : "no"].join(";"));
+      else lines.push([d(r.asset.date), q(r.asset.name + " (depreciation)"), q(r.asset.costCat || ""), q(K.label), q(K.de + " (AfA)"), r.asset.taxShare || 100, eu(r.asset.cost), eu(r.amt), ""].join(";"));
+    }
+    if (T.cWork) lines.push(["", q("Commute to work (Entfernungspauschale)"), "", q("Commute"), q("Wege zur ersten Tätigkeitsstätte"), "", "", eu(T.cWork), ""].join(";"));
+    if (T.cUni) lines.push(["", q("Commute to university (Entfernungspauschale)"), "", q("Commute"), q("Wege zur Hochschule"), "", "", eu(T.cUni), ""].join(";"));
+    if (T.ho) lines.push(["", q("Home office (Tagespauschale)"), "", q("Home office"), q("Homeoffice-Pauschale"), "", "", eu(T.ho), ""].join(";"));
+    offer(`pfm-tax-${y}.csv`, "﻿" + lines.join("\r\n"));
+  }
+
+  /* ---------- Independence plan ---------- */
+  const SV = { kv: 14.6, pv: 3.6, pvChildless: 0.6, rv: 18.6, av: 2.6, bbgKV: 581250, bbgRV: 845000, mini: 60300, midi: 200000, flat: 123000, soliFree: 20350 };
+  function incomeTax(zve) {
+    zve = Math.floor(zve);
+    if (zve <= 12348) return 0;
+    if (zve <= 17799) { const y = (zve - 12348) / 1e4; return Math.floor((914.51 * y + 1400) * y); }
+    if (zve <= 69878) { const z = (zve - 17799) / 1e4; return Math.floor((173.1 * z + 2397) * z + 1034.87); }
+    if (zve <= 277825) return Math.floor(0.42 * zve - 11135.63);
+    return Math.floor(0.45 * zve - 19470.38);
+  }
+  const soliOf = (t) => (t <= SV.soliFree ? 0 : Math.min(t * 0.055, (t - SV.soliFree) * 0.119));
+  /* Employee social insurance per month. mode "ws": Werkstudent (only pension insurance), "ft": regular job */
+  function payroll(g, mode, P) {
+    if (g <= 0) return { rv: 0, kv: 0, pv: 0, av: 0, sv: 0 };
+    if (g <= SV.mini) { const rv = Math.round(g * 0.036); return { rv, kv: 0, pv: 0, av: 0, sv: rv }; }
+    const base = g < SV.midi ? SV.midi / (SV.midi - SV.mini) * (g - SV.mini) : g;
+    const rvB = Math.min(base, SV.bbgRV), kvB = Math.min(base, SV.bbgKV), zus = P.zusatz != null ? Number(P.zusatz) : 2.9;
+    const rv = Math.round(rvB * SV.rv / 200);
+    if (mode === "ws") return { rv, kv: 0, pv: 0, av: 0, sv: rv };
+    const kv = Math.round(kvB * (SV.kv + zus) / 200), pv = Math.round(kvB * (SV.pv / 2 + (P.childless !== false ? SV.pvChildless : 0)) / 100), av = Math.round(rvB * SV.av / 200);
+    return { rv, kv, pv, av, sv: rv + kv + pv + av };
+  }
+  /* Net per month after the yearly tax assessment (tax class I, flat €1,230 work costs, €36 special expenses) */
+  function netOf(g, mode, P, kvSelfYear) {
+    const s = payroll(g, mode, P);
+    const vors = (s.rv + Math.round(s.kv * 0.96) + s.pv) * 12 + (mode === "ws" ? kvSelfYear : 0);
+    const zve = Math.max(0, (g * 12 - SV.flat - 3600 - vors) / 100);
+    const est = incomeTax(zve), all = est + soliOf(est) + est * (Number(P.church) || 0) / 100;
+    const tax = Math.round(all * 100 / 12);
+    return { gross: Math.round(g), sv: s, tax, net: Math.round(g - s.sv - tax) };
+  }
+  function grossFor(need, mode, P, kvSelfYear) {
+    if (need <= 0) return 0;
+    let lo = 0, hi = 3000000;
+    for (let i = 0; i < 48; i++) { const mid = (lo + hi) / 2; if (netOf(mid, mode, P, kvSelfYear).net >= need) hi = mid; else lo = mid; }
+    return Math.ceil(hi / 100) * 100;
+  }
+  const PLAN_PRESETS = { health: ["Health & care insurance", true], accident: ["Accident insurance", false], rent: ["Calculated rent", false], phone: ["Phone contract", false], food: ["Food at home", false], other: ["", false] };
+  const PLAN_FREQ = { 1: "per month", 3: "every 3 months", 6: "every 6 months", 12: "per year" };
+  const planIncCats = () => { const P = state.settings.plan; return Array.isArray(P.incomeCats) ? P.incomeCats.filter((c) => CATS.ein.includes(c)) : CATS.ein.filter((c) => ![rn("Gifts"), rn("Refunds"), rn("Other income")].includes(c)); };
+  function planData() {
+    const P = state.settings.plan, n = [3, 6, 12].includes(P.basis) ? P.basis : 12, cm = curMonth();
+    const first = state.entries.reduce((m, e) => (e.date < m ? e.date : m), todayISO()).slice(0, 7);
+    let months = []; for (let k = n; k >= 1; k--) { const m = shiftMonth(cm, -k); if (m >= first) months.push(m); }
+    const partial = !months.length; if (partial) months = [cm];
+    const from = `${months[0]}-01`, to = partial ? todayISO() : monthEnd(months[months.length - 1]);
+    const f = partial ? Math.max(1, Number(todayISO().slice(8))) / daysIn(cm) : months.length;
+    const own = calcBuckets(months, from, to, (e) => spendVal(e, "All")).reduce((a, b) => a + b, 0) / f;
+    const incCats = planIncCats();
+    let inc = 0; for (const e of state.entries) if (e.date >= from && e.date <= to && e.type === "ein" && !isRefund(e) && incCats.includes(e.cat)) inc += e.cents;
+    inc /= f;
+    const items = P.items || [], on = items.filter((i) => i.on !== false);
+    const par = on.reduce((a, i) => a + i.cents / i.every, 0), parPay = on.filter((i) => i.payroll).reduce((a, i) => a + i.cents / i.every, 0);
+    const save = Math.min(50, Math.max(0, Number(P.savings) || 0)) / 100;
+    const total = own + par, needWS = total / (1 - save), needFT = (total - parPay) / (1 - save);
+    const ws = grossFor(needWS, "ws", P, parPay * 12), ft = grossFor(needFT, "ft", P, 0);
+    const cats = CATS.aus.map((c) => [c, calcBuckets(months, from, to, (e) => spendVal(e, c)).reduce((a, b) => a + b, 0) / f]).filter((x) => x[1] >= 100).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    return { P, months, partial, own, inc, incCats, items, par, parPay, total, save, needWS, needFT, ws, ft, wsN: netOf(ws, "ws", P, parPay * 12), ftN: netOf(ft, "ft", P, 0), cov: total > 0 ? inc / total : 0, cats };
+  }
+  function viewPlan() {
+    const D = planData(), P = D.P, wage = P.wage || 0, hours = P.hours || 20, wph = 52 / 12;
+    const gap = Math.round(D.total - D.inc), pctv = Math.round(D.cov * 100), hrsNeed = wage ? D.ws / (wage * wph) : 0;
+    const planRow = (i) => `<div class="prow${i.on === false ? " off" : ""}"><button class="pmain" data-action="plan-item" data-arg="${esc(i.id)}"><span class="t1">${esc(i.name)}${i.payroll ? '<span class="tag">Via salary</span>' : ""}</span><span class="t2">${money(i.cents)} ${esc(PLAN_FREQ[i.every])}${i.every > 1 ? ` · ${money(Math.round(i.cents / i.every))} a month` : ""}${i.on === false ? " · not counted" : ""}</span></button><button class="ptog" data-action="plan-toggle" data-arg="${esc(i.id)}" aria-pressed="${i.on !== false}" aria-label="Count ${esc(i.name)}">${i.on !== false ? "✓" : ""}</button></div>`;
+    const ded = (N, mode) => `<div class="sumlist">
+        <div><span>Gross salary</span><b>${money(N.gross)}</b></div>
+        ${mode === "ft" ? `<div><span>Health &amp; care insurance</span><b>−${money(N.sv.kv + N.sv.pv)}</b></div><div><span>Pension &amp; unemployment insurance</span><b>−${money(N.sv.rv + N.sv.av)}</b></div>` : `<div><span>Pension insurance</span><b>−${money(N.sv.rv)}</b></div>`}
+        <div><span>Income tax${Number(P.church) ? " &amp; church tax" : ""}</span><b>${N.tax ? "−" + money(N.tax) : money(0)}</b></div>
+        <div class="tot"><span>Net per month</span><b>${money(N.net)}</b></div></div>`;
+    const basisTxt = D.partial ? "this month so far" : `last ${D.months.length} ${D.months.length === 1 ? "month" : "months"}`;
+    return `
+      ${backBar()}
+      <h1 class="vtitle">Independence plan</h1>
+      <p class="hint">What it takes to pay for everything yourself – including what your parents cover today.</p>
+      <section class="hero"><span class="label">You pay yourself</span><div class="heroval"><span>${pctv}</span><span class="dec"> %</span></div>
+        <div class="herosub">${money(Math.round(D.inc))} own income of ${money(Math.round(D.total))} a month · ${gap > 0 ? `<span class="neg">${money(gap)} missing</span>` : `<span class="pos">${money(-gap)} to spare</span>`}</div>
+        ${barHTML({ cls: D.cov >= 1 ? "ok" : D.cov >= 0.6 ? "warn" : "over", pct: Math.min(1, D.cov), frac: 0 }, false)}</section>
+      <section class="card"><div class="split"><h2>Cost of your life</h2><span class="hint">per month</span></div>
+        <div class="pills" role="group" aria-label="Average over">${[3, 6, 12].map((k) => `<button data-action="plan-basis" data-arg="${k}" aria-pressed="${(P.basis || 12) === k}">${k} months</button>`).join("")}</div>
+        <div class="sumlist"><div><span>What you spend yourself<br><span class="hint">calculated costs, average ${esc(basisTxt)}</span></span><b>${money(Math.round(D.own))}</b></div></div>
+        <span class="label">Paid by your parents</span>
+        <div>${D.items.length ? D.items.map(planRow).join("") : `<p class="hint">Nothing yet. Add what your parents pay for you – and a calculated rent if you live with them for free.</p>`}</div>
+        <div class="chiprow wrap">${Object.entries(PLAN_PRESETS).map(([k, v]) => `<button class="fchip" data-action="plan-new" data-arg="${k}">+ ${esc(v[0] || "Other")}</button>`).join("")}</div>
+        <div class="sumlist"><div class="tot"><span>Total</span><b>${money(Math.round(D.total))}</b></div>${D.save ? `<div class="sub"><span>+ ${Math.round(D.save * 100)} % of your net income for saving</span><b>${money(Math.round(D.needWS - D.total))}</b></div>` : ""}</div>
+        <span class="label">Save from your income</span>
+        <div class="pills" role="group" aria-label="Saving">${[0, 10, 20, 30].map((k) => `<button data-action="plan-savings" data-arg="${k}" aria-pressed="${(Number(P.savings) || 0) === k}">${k} %</button>`).join("")}</div></section>
+      <section class="card"><div class="split"><h2>As a Werkstudent</h2><span class="hint">up to 20 h a week</span></div>
+        <div class="split"><span class="big">${money(D.ws)}</span><span class="hint">gross per month needed</span></div>
+        <p>That is about <b>${money(Math.round(D.ws / (hours * wph)))}/h</b> at ${hours} h a week.${wage ? ` With your ${money(wage)}/h you'd need <b>${fmtX(hrsNeed)} h a week</b>${hrsNeed > 20 ? " – more than the 20 h a Werkstudent may work during the semester" : ""}.` : " Enter your hourly wage below to see the hours you'd need."}</p>
+        ${ded(D.wsN, "ws")}
+        <p>Werkstudents only pay pension insurance. Your health insurance stays your own cost and is part of the total above. Tax is what's left after your tax return.</p></section>
+      <section class="card"><div class="split"><h2>In a full-time job</h2><span class="hint">tax class I</span></div>
+        <div class="split"><span class="big">${money(D.ft)}</span><span class="hint">gross per month · ${money(D.ft * 12)} a year</span></div>
+        ${ded(D.ftN, "ft")}
+        <p>${D.parPay ? "Health and care insurance come out of your salary, so the ones your parents pay today aren't counted twice." : "Tip: mark your health insurance as “Taken from your salary”, then it isn't counted twice."}</p></section>
+      ${D.cats.length ? `<section class="card"><h2>Where your money goes</h2><p>Your biggest costs a month – cutting here helps fastest.</p><div class="sumlist">${D.cats.map(([c, v]) => `<div><span>${esc(c)}</span><b>${money(Math.round(v))}</b></div>`).join("")}</div></section>` : ""}
+      <section class="card"><details class="more" style="border:0;padding:0"><summary>Settings for the calculation</summary>
+        <div class="two">
+          <div class="field"><label class="label" for="planWage">Your hourly wage (€)</label><input id="planWage" data-action="plan-set" data-arg="wage" inputmode="decimal" value="${wage ? toInput(wage) : ""}" placeholder="e.g. 15.00"></div>
+          <div class="field"><label class="label" for="planHours">Hours a week</label><input id="planHours" data-action="plan-set" data-arg="hours" inputmode="numeric" value="${hours}"></div>
+        </div>
+        <div class="two" style="margin-top:12px">
+          <div class="field"><label class="label" for="planZus">Health ins. extra %</label><input id="planZus" data-action="plan-set" data-arg="zusatz" inputmode="decimal" value="${P.zusatz != null ? P.zusatz : 2.9}"></div>
+          <div class="field"><label class="label" for="planChurch">Church tax</label><select id="planChurch" data-action="plan-set" data-arg="church">${[[0, "None"], [8, "8 % (BY, BW)"], [9, "9 %"]].map(([v, t]) => `<option value="${v}"${(Number(P.church) || 0) === v ? " selected" : ""}>${t}</option>`).join("")}</select></div>
+        </div>
+        <label class="check" style="margin-top:12px"><input type="checkbox" data-action="plan-set" data-arg="childless"${P.childless !== false ? " checked" : ""}><span>No children (+0.6 % care insurance)</span></label>
+        <span class="label" style="display:block;margin-top:14px">Counts as your own income</span>
+        <div class="chiprow wrap" style="margin-top:8px">${CATS.ein.map((c) => `<button class="fchip" data-action="plan-inc" data-arg="${esc(c)}" aria-pressed="${D.incCats.includes(c)}">${esc(c)}</button>`).join("")}</div>
+      </details></section>
+      <p class="hint">Estimate with the 2026 rules: income tax tariff, social insurance with an average health insurance extra of 2.9 %, Werkstudent status up to 20 h a week. Not financial or tax advice.</p>`;
   }
 
   /* ---------- Recently deleted ---------- */
@@ -2256,7 +2677,7 @@ function buildRecords(imp, existing, learned, today) {
       <p class="hint">Deleting a category keeps its transactions – they keep the name until you change them. “${esc(rn("Other"))}” and “${esc(rn("Other income"))}” can be renamed but not deleted.</p>`;
   }
 
-  const VIEWS = { hub: viewHub, cashflow: viewHome, cat: viewCat, budgets: viewBudgets, list: viewList, project: viewProject, data: viewData, import: viewImport, fixed: viewFixed, calc: viewCalc, balance: viewBalance, trash: viewTrash, categories: viewCategories };
+  const VIEWS = { hub: viewHub, cashflow: viewHome, cat: viewCat, budgets: viewBudgets, list: viewList, project: viewProject, data: viewData, import: viewImport, fixed: viewFixed, calc: viewCalc, balance: viewBalance, trash: viewTrash, categories: viewCategories, search: viewSearch, tax: viewTax, plan: viewPlan };
 
   function render() {
     const top = state.stack[state.stack.length - 1], root = $("view");
@@ -2359,6 +2780,19 @@ function buildRecords(imp, existing, learned, today) {
       case "rec-edit": openRec(state.settings.recurring.find((r) => r.id === arg)); break;
       case "bal-new": if (arg === "asset") { closeSheets(); showSheet("chooseSheet"); } else openBal(null, arg); break;
       case "bal-item": { const it = state.settings.balance.items.find((i) => i.id === arg); if (it && it.kind === "asset") openObj(it); else openBal(it); break; }
+      case "search": go("search"); { const i = $("q"); if (i) i.focus(); } break;
+      case "q-type": state.q.type = arg; render(); break;
+      case "q-f": state.q.f = state.q.f === arg ? "any" : arg; state.sel = null; render(); break;
+      case "q-clear": state.q.text = ""; render(); { const i = $("q"); if (i) i.focus(); } break;
+      case "tax-study": patchSettings({ tax: { ...state.settings.tax, study: arg } }).catch((err) => toast(writeError(err))); break;
+      case "tax-tag": { const [id, k] = arg.split("|"), e = state.entries.find((x) => x.id === id); if (e && TAX_KINDS[k]) store.put({ ...e, tax: { kind: k, share: 100, receipt: false } }).then(() => toast(`Added as ${TAX_KINDS[k].label}`)).catch((err) => toast(writeError(err))); break; }
+      case "tax-no": { const e = state.entries.find((x) => x.id === arg); if (e) store.put({ ...e, taxNo: true }).catch((err) => toast(writeError(err))); break; }
+      case "tax-export": exportTaxCsv(state.taxYear || String(curYear())); break;
+      case "plan-basis": case "plan-savings": patchSettings({ plan: { ...state.settings.plan, [a.dataset.action === "plan-basis" ? "basis" : "savings"]: Number(arg) } }).catch((err) => toast(writeError(err))); break;
+      case "plan-new": openPlan(null, arg); break;
+      case "plan-item": { const it = state.settings.plan.items.find((i) => i.id === arg); if (it) openPlan(it); break; }
+      case "plan-toggle": { const P = state.settings.plan; patchSettings({ plan: { ...P, items: P.items.map((i) => (i.id === arg ? { ...i, on: i.on === false } : i)) } }).catch((err) => toast(writeError(err))); break; }
+      case "plan-inc": { const set = new Set(planIncCats()); if (set.has(arg)) set.delete(arg); else set.add(arg); patchSettings({ plan: { ...state.settings.plan, incomeCats: CATS.ein.filter((c) => set.has(c)) } }).catch((err) => toast(writeError(err))); break; }
       case "chart-full": openFull(arg); break;
       case "full-close": closeFull(); break;
       case "full-play": sim.playing ? simPause() : simPlay(); break;
@@ -2377,10 +2811,33 @@ function buildRecords(imp, existing, learned, today) {
     if (t.id === "importFile") return importBackup(t);
     if (t.id === "csvFile") return loadCsv(t);
     if (t.id === "project") { $("entryNewProj").hidden = t.value !== "__new"; if (t.value === "__new") $("entryNewProjName").focus(); return; }
-    if (t.id === "spreadMonths") { if (Number(t.value) > 1 && !$("spreadStart").value) $("spreadStart").value = ($("date").value || todayISO()).slice(0, 7); syncSpreadUI(); return; }
+    if (t.id === "spreadMonths") { if ((t.value === "custom" || Number(t.value) > 1) && !$("spreadStart").value) $("spreadStart").value = ($("date").value || todayISO()).slice(0, 7); syncSpreadUI(); if (t.value === "custom") $("spreadCustom").focus(); return; }
+    if (t.id === "taxKind") { syncTaxUI(); return; }
+    if (t.id === "bulkSpread") { $("bulkSpreadCustom").hidden = t.value !== "custom"; if (t.value === "custom") $("bulkSpreadCustom").focus(); return; }
     if (t.id === "recEvery" || t.id === "recStart") { syncRecUI(); return; }
     if (t.id === "openModeSel") { try { localStorage.setItem(OPEN_KEY, t.value); } catch { /* ignore */ } toast("Saved"); return; }
     if (act === "balat") { state.balAt = t.value; render(); return; }
+    if (act === "taxyear") { state.taxYear = t.value; render(); return; }
+    if (act === "tax-set") {
+      const y = state.taxYear || String(curYear()), n = parseNum(t.value), T = state.settings.tax, cur = T.years[y] || {};
+      const v = n == null || n < 0 ? null : t.dataset.arg.endsWith("Days") ? Math.min(366, Math.round(n)) : Math.min(500, Math.round(n * 10) / 10);
+      patchSettings({ tax: { ...T, years: { ...T.years, [y]: { ...cur, [t.dataset.arg]: v } } } }).catch((err) => toast(writeError(err)));
+      return;
+    }
+    if (act === "tax-check") {
+      const y = state.taxYear || String(curYear()), T = state.settings.tax, cur = T.years[y] || {};
+      patchSettings({ tax: { ...T, years: { ...T.years, [y]: { ...cur, check: { ...(cur.check || {}), [t.dataset.arg]: t.checked } } } } }).catch((err) => toast(writeError(err)));
+      return;
+    }
+    if (act === "plan-set") {
+      const k = t.dataset.arg, P = state.settings.plan; let v;
+      if (k === "childless") v = t.checked;
+      else if (k === "church") v = Number(t.value) || 0;
+      else if (k === "wage") { const n = parseNum(t.value); v = n == null || n <= 0 ? 0 : Math.round(n * 100); }
+      else { const n = parseNum(t.value); if (n == null) { render(); return; } v = k === "hours" ? Math.max(1, Math.min(60, Math.round(n))) : Math.max(0, Math.min(6, Math.round(n * 100) / 100)); }
+      patchSettings({ plan: { ...P, [k]: v } }).catch((err) => toast(writeError(err)));
+      return;
+    }
     if (act === "selmonth") { state.pkind = "std"; state.mon = Number(t.value); state.cfShowAll = false; state.calcShowAll = false; render(); }
     else if (t.id.startsWith("rangeFrom") || t.id.startsWith("rangeTo")) {
       if (/^\d{4}-\d{2}-\d{2}$/.test(t.value)) {
@@ -2399,13 +2856,15 @@ function buildRecords(imp, existing, learned, today) {
     else if (act === "impproj" && state.imp) { const mp = state.imp.catMap[t.dataset.src] || (state.imp.catMap[t.dataset.src] = { aus: AUTO, ein: AUTO, project: "" }); mp.project = t.value; render(); }
     else if (act === "impopt" && state.imp) { state.imp[t.dataset.field] = t.type === "checkbox" ? t.checked : t.value; render(); }
   });
+  document.addEventListener("input", (ev) => { if (ev.target.id === "q") { state.q.text = ev.target.value; clearTimeout(qTimer); qTimer = setTimeout(updateSearch, 120); } });
+  document.addEventListener("keydown", (e) => { if (e.key === "Enter" && e.target && e.target.id === "q") e.target.blur(); });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") { if (state.full && SHEETS.every((id) => $(id).hidden)) closeFull(); else closeSheets(); } });
   $("backdrop").addEventListener("click", closeSheets);
   $("addBtn").addEventListener("click", () => openEntry(null));
 
   function showSheet(id) { $("backdrop").hidden = false; $(id).hidden = false; }
   function closeSheets() {
-    ["entrySheet", "limitSheet", "projectSheet", "recSheet", "balSheet", "bulkSheet", "objSheet", "chooseSheet"].forEach((id) => { $(id).hidden = true; });
+    ["entrySheet", "limitSheet", "projectSheet", "recSheet", "balSheet", "bulkSheet", "objSheet", "chooseSheet", "planSheet"].forEach((id) => { $(id).hidden = true; });
     $("backdrop").hidden = true; state.editingId = null; state.limitCat = null; state.projectId = null;
   }
   function parseAmount(raw) { const v = parseNum(raw); if (v == null || v <= 0) return null; const c = Math.round(v * 100); return c > 0 ? c : null; }
@@ -2418,7 +2877,7 @@ function buildRecords(imp, existing, learned, today) {
     $("typeIn").setAttribute("aria-pressed", String(t === "ein"));
     $("typeTr").setAttribute("aria-pressed", String(t === "tr"));
     const tr = t === "tr";
-    $("catWrap").hidden = tr; $("projWrap").hidden = tr; $("spreadWrap").hidden = tr; $("toWrap").hidden = !tr;
+    $("catWrap").hidden = tr; $("projWrap").hidden = tr; $("spreadWrap").hidden = tr; $("toWrap").hidden = !tr; $("taxMore").hidden = t !== "aus";
     $("accountLabel").textContent = tr ? "From" : "Account";
     $("note").placeholder = tr ? "e.g. Savings plan" : "e.g. Weekly groceries";
     if (tr) { $("catChips").innerHTML = ""; return; }
@@ -2450,9 +2909,12 @@ function buildRecords(imp, existing, learned, today) {
     fillProjects(projSel);
     $("note").value = entry ? (entry.note || "") : "";
     const sp = entry && entry.spread;
-    const sm = $("spreadMonths");
-    if (sp && ![...sm.options].some((o) => o.value === String(sp.months))) sm.insertAdjacentHTML("beforeend", `<option value="${sp.months}">${sp.months} months</option>`);
-    sm.value = String(sp ? sp.months : 1);
+    const sm = $("spreadMonths"), known = sp && [...sm.options].some((o) => o.value === String(sp.months));
+    sm.value = sp ? (known ? String(sp.months) : "custom") : "1";
+    $("spreadCustom").value = sp && !known ? String(sp.months) : "";
+    const tx = entry && entry.tax;
+    $("taxKind").value = tx ? tx.kind : ""; $("taxShare").value = tx && tx.share && tx.share !== 100 ? String(tx.share) : ""; $("taxReceipt").checked = !!(tx && tx.receipt);
+    $("taxMore").open = !!tx; syncTaxUI();
     $("spreadStart").value = sp ? (sp.start || entry.date.slice(0, 7)) : "";
     syncSpreadUI();
     $("makeRecurring").hidden = !entry || !!entry.recurring;
@@ -2476,7 +2938,7 @@ function buildRecords(imp, existing, learned, today) {
     if (state.type === "tr") {
       const from = $("account").value, to = $("toAccount").value;
       if (from === to) { $("entryErr").textContent = "Pick two different accounts."; return; }
-      const { project: _p, spread: _s, payee: _y, memo: _m, ...base } = old || {};
+      const { project: _p, spread: _s, payee: _y, memo: _m, tax: _tx, ...base } = old || {};
       const entry = { ...base, id: old ? old.id : newId(), type: "tr", cents, cat: "Transfer", date, account: from, toAccount: to, note: $("note").value.trim(), created: old ? old.created : new Date().toISOString() };
       $("saveBtn").disabled = true;
       try { await store.put(entry); closeSheets(); toast(old ? "Transfer updated" : `Transfer to ${to} saved`); }
@@ -2493,7 +2955,10 @@ function buildRecords(imp, existing, learned, today) {
     if (pj === "__new") pj = $("entryNewProjName").value.trim() ? await quickProject() : "";
     if (pj) entry.project = pj;
     delete entry.spread;
-    const spm = Number($("spreadMonths").value);
+    const spm = spreadPick("spreadMonths", "spreadCustom");
+    if ($("spreadMonths").value === "custom" && !(spm >= 2 && spm <= 120)) { $("entryErr").textContent = "Enter how many months the cost belongs to – between 2 and 120."; $("spreadCustom").focus(); return; }
+    delete entry.tax;
+    if (state.type === "aus" && $("taxKind").value) { const sh = parseInt($("taxShare").value, 10); entry.tax = { kind: $("taxKind").value, share: sh >= 1 && sh <= 100 ? sh : 100, receipt: $("taxReceipt").checked }; }
     if (spm > 1) { let st = $("spreadStart").value.trim(); if (!/^\d{4}-\d{2}$/.test(st)) st = date.slice(0, 7); entry.spread = { months: spm, start: st }; }
     $("saveBtn").disabled = true;
     try {
@@ -2725,10 +3190,10 @@ function buildRecords(imp, existing, learned, today) {
   function exportCsv() {
     const rows = state.entries.slice().sort((a, b) => a.date.localeCompare(b.date));
     const q = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
-    const lines = ["Date;Type;Category;Account;To account;Amount;Description;Project"].concat(rows.map((e) => {
+    const lines = ["Date;Type;Category;Account;To account;Amount;Description;Project;Tax;Tax share %"].concat(rows.map((e) => {
       const p = e.project && projById(e.project);
       return [e.date.split("-").reverse().join("."), e.type === "ein" ? "Income" : e.type === "tr" ? "Transfer" : "Expense", q(e.cat), q(e.account), q(e.toAccount || ""),
-        ((e.type === "aus" ? -1 : 1) * e.cents / 100).toFixed(2).replace(".", ","), q(e.note), q(p ? p.name : "")].join(";");
+        ((e.type === "aus" ? -1 : 1) * e.cents / 100).toFixed(2).replace(".", ","), q(e.note), q(p ? p.name : ""), q(e.tax ? TAX_KINDS[e.tax.kind].de : ""), e.tax ? e.tax.share || 100 : ""].join(";");
     }));
     offer(`pfm-${todayISO()}.csv`, "﻿" + lines.join("\r\n"));
   }
@@ -2774,7 +3239,7 @@ function buildRecords(imp, existing, learned, today) {
   }
 
   /* ================= Fixed costs logic ================= */
-  const FREQ = { 1: "Monthly", 3: "Quarterly", 6: "Every 6 months", 12: "Yearly" };
+  const FREQ = { 1: "Monthly", 3: "Quarterly", 6: "Every 6 months", 12: "Yearly", 24: "Every 2 years" };
   const addDays = (iso, k) => { const d = isoDate(iso); d.setDate(d.getDate() + k); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };
   const addMonthsISO = (iso, k) => { const [y, m, d] = iso.split("-").map(Number); const t = new Date(y, m - 1 + k, 1); const dim = new Date(t.getFullYear(), t.getMonth() + 1, 0).getDate(); return `${t.getFullYear()}-${pad(t.getMonth() + 1)}-${pad(Math.min(d, dim))}`; };
   const monthEnd = (ym) => `${ym}-${pad(daysIn(ym))}`;
@@ -2841,7 +3306,14 @@ function buildRecords(imp, existing, learned, today) {
     const st = $("recStart").value;
     $("recBackfillWrap").hidden = !(state.recId == null && st && st < todayISO());
   }
-  function syncSpreadUI() { $("spreadStartWrap").hidden = Number($("spreadMonths").value) <= 1; }
+  const spreadPick = (selId, customId) => { const v = $(selId).value; return v === "custom" ? parseInt($(customId).value, 10) : Number(v); };
+  function syncSpreadUI() { const v = $("spreadMonths").value; $("spreadCustom").hidden = v !== "custom"; $("spreadStartWrap").hidden = !(v === "custom" || Number(v) > 1); }
+  function syncTaxUI() {
+    const k = $("taxKind").value, K = TAX_KINDS[k];
+    $("taxSum").textContent = K ? `Tax return · ${K.label}` : "Tax return";
+    $("taxFields").hidden = !K;
+    $("taxHint").textContent = K ? K.hint : "Mark costs you can claim in your tax return. The Tax view in the menu adds them up for each year.";
+  }
   function openRec(r, fromEntry) {
     closeSheets();
     state.recId = r ? r.id : null; state.recArmed = false;
@@ -3108,7 +3580,8 @@ function buildRecords(imp, existing, learned, today) {
       const t = types[0];
       $("bulkCat").innerHTML = `<option value="">Keep</option>` + CATS[t].map((c) => `<option>${esc(c)}</option>`).join("") + (t === "ein" ? `<optgroup label="Money back for">${CATS.aus.map((c) => `<option value="${esc(c)}">${esc(c)} (money back)</option>`).join("")}</optgroup>` : "");
     }
-    $("bulkSpread").value = "";
+    $("bulkSpread").value = ""; $("bulkSpreadCustom").value = ""; $("bulkSpreadCustom").hidden = true;
+    $("bulkTax").value = ""; $("bulkTaxWrap").hidden = !(types.length === 1 && types[0] === "aus");
     $("bulkErr").textContent = "";
     showSheet("bulkSheet");
   }
@@ -3116,14 +3589,17 @@ function buildRecords(imp, existing, learned, today) {
   $("bulkForm").addEventListener("submit", async (ev) => {
     ev.preventDefault();
     if (!state.sel) return;
-    const acc = $("bulkAccount").value, pj = $("bulkProject").value, cat = $("bulkCatWrap").hidden ? "" : $("bulkCat").value, sp = $("bulkSpread").value;
-    if (!acc && !pj && !cat && !sp) { $("bulkErr").textContent = "Pick at least one thing to change."; return; }
+    const acc = $("bulkAccount").value, pj = $("bulkProject").value, cat = $("bulkCatWrap").hidden ? "" : $("bulkCat").value, tx = $("bulkTaxWrap").hidden ? "" : $("bulkTax").value;
+    let sp = $("bulkSpread").value;
+    if (sp === "custom") { const n = parseInt($("bulkSpreadCustom").value, 10); if (!(n >= 2 && n <= 120)) { $("bulkErr").textContent = "Enter how many months – between 2 and 120."; return; } sp = String(n); }
+    if (!acc && !pj && !cat && !sp && !tx) { $("bulkErr").textContent = "Pick at least one thing to change."; return; }
     const list = state.entries.filter((e) => state.sel.ids.has(e.id)).map((e) => {
       const x = { ...e };
       if (acc) x.account = acc;
       if (pj === "__none") delete x.project; else if (pj) x.project = pj;
       if (cat) x.cat = cat;
       if (sp === "1") delete x.spread; else if (sp) x.spread = { months: Number(sp), start: x.date.slice(0, 7) };
+      if (tx === "__none") { delete x.tax; x.taxNo = true; } else if (tx && x.type === "aus") { x.tax = { kind: tx, share: (x.tax && x.tax.share) || 100, receipt: !!(x.tax && x.tax.receipt) }; delete x.taxNo; }
       return x;
     });
     $("bulkSave").disabled = true;
@@ -3387,6 +3863,9 @@ function buildRecords(imp, existing, learned, today) {
   $("objRate").addEventListener("input", () => { objRateDirty = true; });
   $("objForm").addEventListener("input", updateObjPreview);
   $("objForm").addEventListener("change", updateObjPreview);
+  const taxOpts = Object.entries(TAX_KINDS).map(([k, v]) => `<option value="${k}">${esc(v.label)}</option>`).join("");
+  $("taxKind").innerHTML = `<option value="">Not relevant</option>${taxOpts}`;
+  $("bulkTax").innerHTML = `<option value="">Keep</option><option value="__none">Not relevant</option>${taxOpts}`;
   $("makeAsset").addEventListener("click", () => { const e = state.entries.find((x) => x.id === state.editingId); if (e) openObj(null, e); });
   $("objForm").addEventListener("submit", async (ev) => {
     ev.preventDefault();
@@ -3415,6 +3894,39 @@ function buildRecords(imp, existing, learned, today) {
     if (!state.objArmed) { state.objArmed = true; b.classList.add("armed"); b.textContent = "Really delete?"; return; }
     try { await patchSettings({ balance: { items: state.settings.balance.items.filter((x) => x.id !== state.objId) } }); txAssetCache = null; closeSheets(); toast("Deleted"); }
     catch (err) { $("objErr").textContent = writeError(err); }
+  });
+
+  /* ================= Independence plan: items paid by parents ================= */
+  function openPlan(item, preset) {
+    closeSheets(); state.planId = item ? item.id : null; state.planArmed = false;
+    const pr = PLAN_PRESETS[preset] || ["", false];
+    $("planTitle").textContent = item ? "Paid by your parents" : "Add what your parents pay";
+    $("planName").value = item ? item.name : pr[0];
+    $("planAmt").value = item ? toInput(item.cents) : "";
+    $("planEvery").value = String(item ? item.every : 1);
+    $("planPayroll").checked = item ? !!item.payroll : pr[1];
+    const d = $("planDelete"); d.hidden = !item; d.textContent = "Delete"; d.classList.remove("armed");
+    $("planErr").textContent = "";
+    showSheet("planSheet");
+  }
+  $("planForm").addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const name = $("planName").value.trim(), cents = parseAmount($("planAmt").value);
+    if (!name) { $("planErr").textContent = "Give it a name, e.g. Health insurance."; return; }
+    if (!cents) { $("planErr").textContent = "Enter the amount, e.g. 120.00."; return; }
+    const P = state.settings.plan, items = P.items || [], old = state.planId ? items.find((i) => i.id === state.planId) : null;
+    const it = { ...(old || {}), id: old ? old.id : "p" + Date.now().toString(36), name: name.slice(0, 40), cents, every: Number($("planEvery").value) || 1, payroll: $("planPayroll").checked };
+    $("planSave").disabled = true;
+    try { await patchSettings({ plan: { ...P, items: old ? items.map((i) => (i.id === old.id ? it : i)) : items.concat(it) } }); closeSheets(); toast(old ? "Saved" : `“${it.name}” added`); }
+    catch (err) { $("planErr").textContent = writeError(err); }
+    finally { $("planSave").disabled = false; }
+  });
+  $("planDelete").addEventListener("click", async () => {
+    const b = $("planDelete");
+    if (!state.planArmed) { state.planArmed = true; b.classList.add("armed"); b.textContent = "Really delete?"; return; }
+    const P = state.settings.plan;
+    try { await patchSettings({ plan: { ...P, items: P.items.filter((i) => i.id !== state.planId) } }); closeSheets(); toast("Deleted"); }
+    catch (err) { $("planErr").textContent = writeError(err); }
   });
 
   async function resort() {
@@ -3501,7 +4013,7 @@ function buildRecords(imp, existing, learned, today) {
   });
 
   /* Swipe from the left edge to go back */
-  const SHEETS = ["entrySheet", "limitSheet", "projectSheet", "recSheet", "balSheet", "bulkSheet", "objSheet", "chooseSheet"];
+  const SHEETS = ["entrySheet", "limitSheet", "projectSheet", "recSheet", "balSheet", "bulkSheet", "objSheet", "chooseSheet", "planSheet"];
   let swipe = null;
   function swipeReset(v) { v.style.transition = "transform .2s ease-out, opacity .2s ease-out"; v.style.transform = ""; v.style.opacity = ""; }
   document.addEventListener("touchstart", (e) => {
@@ -3578,8 +4090,8 @@ function buildRecords(imp, existing, learned, today) {
   let deep = "";
   try { deep = (location.hash || "").replace(/^#/, "").toLowerCase(); } catch { deep = ""; }
   if (deep === "add" || (!deep && openMode() === "add")) pendingAdd = true;
-  else if (["cashflow", "calc", "balance", "fixed", "budgets"].includes(deep)) state.stack.push({ v: deep });
-  if (deep && (["add", "cashflow", "calc", "balance", "fixed", "budgets"].includes(deep))) { $("splash").hidden = true; splashDone = true; }
+  else if (["cashflow", "calc", "balance", "fixed", "budgets", "search", "tax", "plan"].includes(deep)) state.stack.push({ v: deep });
+  if (deep && (["add", "cashflow", "calc", "balance", "fixed", "budgets", "search", "tax", "plan"].includes(deep))) { $("splash").hidden = true; splashDone = true; }
   else if (!splashEnabled()) { $("splash").hidden = true; splashDone = true; }
   else {
     $("splash").addEventListener("click", hideSplash);
