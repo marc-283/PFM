@@ -27,7 +27,7 @@ img { max-width: 100%; }
 </style>
 <script>
 window.PFM_STANDALONE = true;
-window.PFM_VERSION = "1.4.0";
+window.PFM_VERSION = "1.5.0";
 if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
 </script>
 </head>
@@ -288,6 +288,30 @@ tr:last-child td { border-bottom: 0; }
 .copybox .more { align-self: flex-start; }
 .heroval.pos { color: var(--pos); }
 .heroval.neg { color: var(--neg); }
+.dupe { padding: 10px 0; border-bottom: 1px solid var(--line); }
+.dupe .split { align-items: center; }
+.notice-box { border: 1px dashed var(--accent); border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
+.notice-box p { margin: 0; color: var(--ink); }
+.recon { border-radius: 12px; padding: 10px 12px; font-size: 14.5px; margin-top: 10px; border: 1px solid var(--line); }
+.recon.ok { border-color: var(--pos); }
+.recon.off { border-color: var(--accent); }
+.hist { display: flex; flex-direction: column; margin-top: 6px; }
+.hrow { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 14.5px; }
+.hrow b { font-variant-numeric: tabular-nums; }
+.mbtn.sm { width: 28px; height: 28px; font-size: 12px; }
+.warnt { color: var(--accent); }
+.hubright { display: flex; align-items: center; gap: 10px; }
+.gear { width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); color: var(--ink); display: grid; place-items: center; flex: none; }
+.sparks { display: flex; flex-direction: column; gap: 4px; }
+.calcv { color: var(--accent); font-weight: 600; }
+.seg.basis { margin-bottom: -14px; }
+.basis-hint { margin-top: -6px; }
+details.calcmore { display: flex; flex-direction: column; gap: 16px; }
+details.calcmore[open] > section + section { margin-top: 16px; }
+#entryMore summary { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+#entryMore .moresum { color: var(--muted); font-weight: 400; font-size: 14px; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.morebody { display: flex; flex-direction: column; gap: 16px; }
+#catHint { color: var(--accent); }
 /* Full-screen chart */
 .cfoot { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
 .expbtn { flex: none; border: 1px solid var(--line); background: transparent; color: var(--muted); border-radius: 999px; padding: 6px 12px; font-size: 13px; font-weight: 600; white-space: nowrap; }
@@ -441,35 +465,40 @@ tfoot td { font-weight: 700; border-top: 2px solid var(--line); border-bottom: 0
       <label class="label" for="amount">Amount</label>
       <div class="amount"><span>€</span><input id="amount" inputmode="decimal" autocomplete="off" placeholder="0.00"></div>
     </div>
+    <div class="field" id="noteWrap"><label class="label" for="note">Description</label><input id="note" maxlength="120" autocomplete="off" placeholder="e.g. Rewe, Spotify, rent">
+      <span class="hint" id="catHint" hidden></span></div>
     <div class="field" id="catWrap"><span class="label" id="catLabel">Category</span><div class="chips" id="catChips" role="radiogroup" aria-labelledby="catLabel"></div>
       <div class="newcat" id="entryNewCat" hidden><input id="entryNewCatName" maxlength="30" placeholder="New category name" aria-label="New category name"><button type="button" class="btn" id="entryNewCatAdd">Add</button></div></div>
-    <div class="two">
-      <div class="field"><label class="label" for="date">Date</label><input type="date" id="date"></div>
-      <div class="field"><label class="label" for="account" id="accountLabel">Account</label><select id="account"></select></div>
-    </div>
-    <div class="field" id="toWrap" hidden><label class="label" for="toAccount">To</label><select id="toAccount"></select>
-      <span class="hint">Moving money between your own accounts, e.g. into Trade Republic. Not counted as spending or income.</span></div>
-    <div class="field" id="projWrap"><label class="label" for="project">Project</label><select id="project"></select>
-      <div class="newcat" id="entryNewProj" hidden><input id="entryNewProjName" maxlength="40" placeholder="New project name, e.g. Trip to Naples" aria-label="New project name"><button type="button" class="btn" id="entryNewProjAdd">Add</button></div></div>
-    <div class="two" id="spreadWrap">
-      <div class="field"><label class="label" for="spreadMonths">Cost belongs to</label>
-        <select id="spreadMonths"><option value="1">This month only</option><option value="2">2 months</option><option value="3">3 months</option><option value="6">6 months</option><option value="12">1 year (12 months)</option><option value="24">2 years (24 months)</option><option value="36">3 years (36 months)</option><option value="48">4 years (48 months)</option><option value="custom">Other number of months…</option></select>
-        <input id="spreadCustom" inputmode="numeric" placeholder="Months, e.g. 18" aria-label="Number of months" hidden>
+    <details class="more" id="entryMore"><summary><span>More</span><span class="moresum" id="moreSum"></span></summary>
+      <div class="morebody">
+      <div class="two">
+        <div class="field"><label class="label" for="date">Date</label><input type="date" id="date"></div>
+        <div class="field"><label class="label" for="account" id="accountLabel">Account</label><select id="account"></select></div>
       </div>
-      <div class="field" id="spreadStartWrap" hidden><label class="label" for="spreadStart">Starting</label><input type="month" id="spreadStart" placeholder="YYYY-MM"></div>
-    </div>
-    <div class="field"><label class="label" for="note">Description</label><input id="note" maxlength="120" placeholder="e.g. Weekly groceries"></div>
-    <details class="more" id="taxMore">
-      <summary id="taxSum">Tax return</summary>
-      <div class="field"><label class="label" for="taxKind">Counts in your tax return as</label><select id="taxKind"></select></div>
-      <div class="field" id="taxSubWrap" hidden style="margin-top:12px"><label class="label" for="taxSub">Type</label><select id="taxSub"></select></div>
-      <div id="taxFields" hidden>
-        <div class="tline" style="margin-top:12px">
-          <label class="check"><input type="checkbox" id="taxReceipt"><span>I have the receipt or invoice</span></label>
-          <div class="field"><label class="label" for="taxShare">Share %</label><input id="taxShare" inputmode="numeric" placeholder="100"></div>
+      <div class="field" id="toWrap" hidden><label class="label" for="toAccount">To</label><select id="toAccount"></select>
+        <span class="hint">Moving money between your own accounts, e.g. into Trade Republic. Not counted as spending or income.</span></div>
+      <div class="field" id="projWrap"><label class="label" for="project">Project</label><select id="project"></select>
+        <div class="newcat" id="entryNewProj" hidden><input id="entryNewProjName" maxlength="40" placeholder="New project name, e.g. Trip to Naples" aria-label="New project name"><button type="button" class="btn" id="entryNewProjAdd">Add</button></div></div>
+      <div class="two" id="spreadWrap">
+        <div class="field"><label class="label" for="spreadMonths">Cost belongs to</label>
+          <select id="spreadMonths"><option value="1">This month only</option><option value="2">2 months</option><option value="3">3 months</option><option value="6">6 months</option><option value="12">1 year (12 months)</option><option value="24">2 years (24 months)</option><option value="36">3 years (36 months)</option><option value="48">4 years (48 months)</option><option value="custom">Other number of months…</option></select>
+          <input id="spreadCustom" inputmode="numeric" placeholder="Months, e.g. 18" aria-label="Number of months" hidden>
         </div>
+        <div class="field" id="spreadStartWrap" hidden><label class="label" for="spreadStart">Starting</label><input type="month" id="spreadStart" placeholder="YYYY-MM"></div>
       </div>
-      <p class="hint" id="taxHint" style="margin-top:10px"></p>
+      <details class="more" id="taxMore">
+        <summary id="taxSum">Tax return</summary>
+        <div class="field"><label class="label" for="taxKind">Counts in your tax return as</label><select id="taxKind"></select></div>
+        <div class="field" id="taxSubWrap" hidden style="margin-top:12px"><label class="label" for="taxSub">Type</label><select id="taxSub"></select></div>
+        <div id="taxFields" hidden>
+          <div class="tline" style="margin-top:12px">
+            <label class="check"><input type="checkbox" id="taxReceipt"><span>I have the receipt or invoice</span></label>
+            <div class="field"><label class="label" for="taxShare">Share %</label><input id="taxShare" inputmode="numeric" placeholder="100"></div>
+          </div>
+        </div>
+        <p class="hint" id="taxHint" style="margin-top:10px"></p>
+      </details>
+      </div>
     </details>
     <div class="err" id="entryErr" role="alert"></div>
     <div class="btnrow">
@@ -545,6 +574,9 @@ tfoot td { font-weight: 700; border-top: 2px solid var(--line); border-bottom: 0
       <div class="field"><label class="label" for="recAccount" id="recAccountLabel">Account</label><select id="recAccount"></select></div>
       <div class="field"><label class="label" for="recProject">Project</label><select id="recProject"></select></div>
     </div>
+    <div class="field" id="recModeWrap"><span class="label">How it gets into PFM</span>
+      <div class="seg" role="group" aria-label="Booking"><button type="button" id="recModeAuto" aria-pressed="true">Books itself</button><button type="button" id="recModeImp" aria-pressed="false">Comes via import</button></div>
+      <span class="hint" id="recModeHint"></span></div>
     <label class="check" id="recSpreadWrap"><input type="checkbox" id="recSpread" checked><span>Spread each payment over the months it covers<br><span class="hint">A yearly €480 then counts as €40 per month in the calculated view.</span></span></label>
     <label class="check" id="recBackfillWrap"><input type="checkbox" id="recBackfill"><span>Also book the past payments since the first date<br><span class="hint">Leave this off if they're already in PFM, e.g. from an import.</span></span></label>
     <div class="err" id="recErr" role="alert"></div>
@@ -572,12 +604,13 @@ tfoot td { font-weight: 700; border-top: 2px solid var(--line); border-bottom: 0
       <div class="field"><label class="label" for="balMonth">As of</label><input type="month" id="balMonth" placeholder="YYYY-MM"></div>
     </div>
     <div id="balAccountWrap" hidden>
-      <p class="hint">The value moves with every transaction booked on this account. Enter the balance from a day you know it, e.g. from your banking app.</p>
+      <p class="hint" id="balAccHint">The value moves with every transaction booked on this account. Enter the balance from your banking app now and then – PFM keeps every one and shows if something is missing.</p>
       <div class="two" style="margin-top:12px">
         <div class="field"><label class="label" for="balAccount">Account</label><select id="balAccount"></select></div>
         <div class="field"><label class="label" for="balOpeningDate">Balance on</label><input type="date" id="balOpeningDate"></div>
       </div>
-      <div class="field" style="margin-top:12px"><label class="label" for="balOpening">Balance that day</label><div class="amount"><span>€</span><input id="balOpening" inputmode="decimal" autocomplete="off" placeholder="0.00"></div></div>
+      <div class="field" style="margin-top:12px"><label class="label" for="balOpening" id="balOpeningLabel">Balance at the bank</label><div class="amount"><span>€</span><input id="balOpening" inputmode="decimal" autocomplete="off" placeholder="0.00"></div></div>
+      <div class="recon" id="balRecon" hidden></div>
     </div>
     <div id="balDepotWrap" hidden>
       <p class="hint">For Trade Republic, a depot or savings plan. Enter the current total value from the app now and then – transfers you book to this account are added in between automatically.</p>
@@ -939,6 +972,7 @@ function parseDate(raw, order) {
   return null;
 }
 const dedupeKey = (e) => `${e.date}|${e.cents}|${e.type}|${normPayee(e.payee || e.note || "")}`;
+const isoDays = (a, b) => { const p = (x) => Date.UTC(+x.slice(0, 4), +x.slice(5, 7) - 1, +x.slice(8, 10)); return Math.round((p(b) - p(a)) / 864e5); };
 
 const TYPE_IN = /^(einnahme|income|eingang|zahlungseingang|gutschrift)/, TYPE_OUT = /^(ausgabe|expense|ausgang)/;
 function fileHasTypeInfo(imp) {
@@ -956,8 +990,8 @@ function buildRecords(imp, existing, learned, today) {
   const amounts = imp.data.map((r) => parseNum(col(r, "amount")));
   const anyNeg = amounts.some((a) => a != null && a < 0);
   const bankLike = ["DKB", "Credit card", "Savings"].includes(imp.account);
-  const counts = {};
-  for (const e of existing) { const k = dedupeKey(e); counts[k] = (counts[k] || 0) + 1; }
+  const counts = {}, byCents = new Map(), claimed = new Set();
+  for (const e of existing) { const k = dedupeKey(e); counts[k] = (counts[k] || 0) + 1; if (!byCents.has(e.cents)) byCents.set(e.cents, []); byCents.get(e.cents).push(e); }
   imp.data.forEach((r, k) => {
     let date;
     if (ymd) { const y = parseInt(col(r, "year"), 10), mo = parseInt(col(r, "month"), 10), d = parseInt(col(r, "day"), 10); date = y && mo && d ? parseDate(`${y}-${mo}-${d}`) : null; }
@@ -1001,6 +1035,11 @@ function buildRecords(imp, existing, learned, today) {
     if (!rec.flag) {
       const key = dedupeKey(rec.entry);
       if (counts[key] > 0) { counts[key]--; rec.flag = "duplicate"; }
+    }
+    if (!rec.flag) {
+      /* Same amount within ±3 days on this account (or one without account) – maybe already entered by hand or by a fixed cost */
+      const near = (byCents.get(rec.entry.cents) || []).find((x) => !claimed.has(x.id) && x.type === rec.entry.type && (x.account === imp.account || !x.account || x.account === "Not specified") && Math.abs(isoDays(x.date, rec.entry.date)) <= 3);
+      if (near) { claimed.add(near.id); rec.flag = "maybe"; rec.near = near; }
     }
     out.push(rec);
   });
@@ -1706,7 +1745,7 @@ function buildRecords(imp, existing, learned, today) {
       </span>
       <span></span><span class="chev" aria-hidden="true">›</span></button>`;
   }
-  const VIEW_LABEL = { hub: "Menu", cashflow: "Cash flows", cat: "Category", budgets: "Budgets", list: "Transactions", project: "Project", data: "Data & backup", import: "Import", fixed: "Fixed costs", calc: "Calculated costs", balance: "Balance sheet", trash: "Recently deleted", categories: "Categories", search: "Search", tax: "Tax return", plan: "Independence plan" };
+  const VIEW_LABEL = { hub: "Menu", cashflow: "Cash flows", cat: "Category", budgets: "Budgets", list: "Transactions", project: "Project", data: "Data & backup", import: "Import", fixed: "Fixed costs", calc: "Cash flows", balance: "Balance sheet", trash: "Recently deleted", categories: "Categories", search: "Search", tax: "Tax return", plan: "Independence plan", manage: "Settings" };
   const backBar = () => { const prev = state.stack[state.stack.length - 2]; return `<button class="backbtn" data-action="back"><span aria-hidden="true">‹</span>${esc(prev ? VIEW_LABEL[prev.v] || "Back" : "Menu")}</button>`; };
   let renderIds = [], scopeIds = [];
   function selToolbar(startLabel) {
@@ -1746,7 +1785,8 @@ function buildRecords(imp, existing, learned, today) {
     }).join("");
   }
   function viewHome() {
-    const list = periodEntries(), { i, o } = totals(list), bal = i - o, info = periodInfo();
+    if (state.basis === "calc") return viewCalc();
+    const list = periodEntries();
     const chipCats = cfChipCats(state.cfMode);
     if (state.cfMode !== "all" && !chipCats.includes(state.homeCat)) state.homeCat = "All";
     const chips = chipRowHTML("filter", state.cfMode, state.homeCat, chipCats);
@@ -1767,59 +1807,22 @@ function buildRecords(imp, existing, learned, today) {
           ${flist.length > shown.length ? `<div class="btnrow" style="margin-top:12px"><button class="btn" data-action="cf-showall">Show all ${flist.length}</button></div>` : ""}
         </section>`;
 
-    const limited = Object.keys(limits()).filter((c) => CATS.aus.includes(c))
-      .map((c) => ({ c, pct: spentInPeriod(c) / (limits()[c] * info.months) })).sort((a, b) => b.pct - a.pct).slice(0, 3);
-    const budgets = limited.length ? limited.map(({ c }) => budgetRow(c, info)).join("")
-      : navRow("nav", "budgets", { text: "Set monthly limits" }, "Decide how much you want to spend per category");
-    const byCat = Object.entries(spentByCat(list)).filter(([, v]) => v !== 0).sort((a, b) => b[1] - a[1]);
-    const cats = byCat.length ? byCat.map(([c, v]) => {
-      const n = list.filter((e) => e.cat === c).length, lim = limits()[c];
-      return navRow("cat", c, { text: c, badge: badge(c) }, `${o > 0 ? Math.round(v / o * 100) + "% · " : ""}${n} ${n === 1 ? "transaction" : "transactions"}`,
-        `${money(v)}${lim ? `<small>of ${axisMoney(lim * info.months)}</small>` : ""}`);
-    }).join("") : `<p class="hint" style="padding:12px 0">No spending in ${esc(periodLabel())}.</p>`;
-    const projects = state.settings.projects.map((p) => {
-      const t = projTotals(p);
-      return navRow("project", p.id, { text: p.name, badge: `<span class="badge" style="color:${p.color};background:${p.color}24" aria-hidden="true">${esc(p.name.slice(0, 2))}</span>` },
-        `${projRange(p)}${p.isDefault ? " · default" : ""}`, money(t.o));
-    }).join("") + navRow("new-project", "", { text: "New project" }, "e.g. semester abroad, a trip, moving house");
     const unc = uncategorized().length;
     return `
       ${backBar()}
       <h1 class="vtitle">Cash flows</h1>
+      ${basisSeg()}
       ${periodNav()}
       ${catChart("chHome", state.cfMode === "all" ? "All" : state.homeCat, state.cfMode, seg + chips)}
       ${state.cfMode === "all" ? netBlock("chNet", series("All", "all")) : ""}
-      ${listHTML}
-      <section class="stats" aria-label="Period in numbers">
-        <div class="stat"><span class="label">Income</span><span class="v pos">${money(i)}</span></div>
-        <div class="stat"><span class="label">Balance</span><span class="v ${bal > 0 ? "pos" : bal < 0 ? "neg" : ""}">${signed(bal)}</span></div>
-        <div class="stat"><span class="label">Savings rate</span><span class="v">${i > 0 ? Math.round(bal / i * 100) + "%" : "–"}</span></div>
-      </section>
       ${unc ? `<section class="sec">${navRow("review", "", { text: `${unc} ${unc === 1 ? "transaction needs" : "transactions need"} a category`, badge: badge(UNCAT) }, "Tap to sort them – the app learns from your choices")}</section>` : ""}
-      <section class="sec" aria-labelledby="hBud">
-        <div class="sechead"><h2 class="sectitle" id="hBud">Budgets</h2>${limited.length ? `<button class="more" data-action="nav" data-arg="budgets">All ›</button>` : ""}</div>
-        ${budgets}
-      </section>
-      <section class="sec" aria-labelledby="hPlan">
-        <div class="sechead"><h2 class="sectitle" id="hPlan">Fixed costs</h2></div>
-        ${planRows()}
-      </section>
-      <section class="sec" aria-labelledby="hProj">
-        <div class="sechead"><h2 class="sectitle" id="hProj">Projects</h2></div>
-        ${projects}
-      </section>
-      <section class="sec" aria-labelledby="hCat">
-        <div class="sechead"><h2 class="sectitle" id="hCat">Categories</h2><button class="more" data-action="nav" data-arg="categories">Edit ›</button></div>
-        ${cats}
-      </section>
-      <section class="sec" aria-labelledby="hMore">
-        <div class="sechead"><h2 class="sectitle" id="hMore">More</h2></div>
-        ${navRow("nav", "import", { text: "Import CSV" }, "DKB, PayPal, Expenses app or any bank export")}
-        ${navRow("nav", "data", { text: "Data & backup" }, "Export, backup, start screen, undo imports")}
-      </section>
-      <footer class="motto"><span>Sometimes I feel like giving up.</span><span>Then I remember I have a lot of people to prove wrong.</span></footer>`;
+      ${listHTML}`;
   }
-
+  function basisSeg() {
+    const b = state.basis === "calc" ? "calc" : "paid";
+    return `<div class="seg basis" role="group" aria-label="Count by"><button type="button" data-action="basis" data-arg="paid" aria-pressed="${b === "paid"}">Paid</button><button type="button" data-action="basis" data-arg="calc" aria-pressed="${b === "calc"}">Calculated</button></div>
+      <p class="hint basis-hint">${b === "paid" ? "When the money left or arrived (Auszahlung)." : "What each month really cost – yearly payments spread over their months (Aufwand)."}</p>`;
+  }
   function viewCat(v) {
     const cat = v.p, info = periodInfo();
     const list = periodEntries().filter((e) => e.cat === cat).sort(byDateDesc);
@@ -2005,17 +2008,55 @@ function buildRecords(imp, existing, learned, today) {
   const FIELD_LABELS = [["date", "Date", true], ["year", "Year"], ["month", "Month"], ["day", "Day"], ["amount", "Amount", true], ["payee", "Payee / merchant"], ["note", "Description"], ["category", "Category"], ["type", "Type"], ["payer", "Payer (income)"], ["currency", "Currency"], ["status", "Status"]];
   const FLAG_TEXT = {
     duplicate: "Already in PFM (skipped)", paypal: "PayPal debits on your bank account", transfer: "Transfers & top-ups inside PayPal",
-    currency: "Other currencies (skipped for now)", future: "Planned transactions in the future", pending: "Pending or cancelled (skipped)", invalid: "Rows without date or amount (skipped)", zero: "Zero amounts (skipped)"
+    currency: "Other currencies (skipped for now)", future: "Planned transactions in the future", pending: "Pending or cancelled (skipped)", invalid: "Rows without date or amount (skipped)", zero: "Zero amounts (skipped)",
+    maybe: "Same amount ±3 days already in PFM", fixedrep: "Replace a payment PFM booked by itself"
   };
-  const skipFlag = (imp, flag) => !!flag && (flag === "paypal" || flag === "transfer" ? imp.skipTransfers : flag === "future" ? !imp.includeFuture : true);
+  const skipFlag = (imp, flag, r) => !!flag && (flag === "paypal" || flag === "transfer" ? imp.skipTransfers : flag === "future" ? !imp.includeFuture
+    : flag === "maybe" ? !(imp.keep && r && imp.keep[r.k]) : flag === "fixedrep" ? imp.replaceFixed === false : true);
+  /* Which fixed cost does an imported booking belong to? Same type, amount ±3 %, name in the description, due date ±5 days */
+  function fixedMatch(entry, used) {
+    const pk = normPayee(entry.payee || entry.note || ""), text = normText(`${entry.payee || ""} ${entry.note || ""} ${entry.memo || ""}`);
+    let best = null;
+    for (const r of state.settings.recurring) {
+      if (r.type === "tr" ? entry.type !== "aus" || r.account !== entry.account : r.type !== entry.type) continue;
+      if (Math.abs(r.cents - entry.cents) > Math.max(1, Math.round(r.cents * 0.03))) continue;
+      const words = normText(r.name).split(/[^a-z0-9äöüß]+/).filter((w) => w.length >= 3);
+      if (!((r.payeeKey && r.payeeKey === pk) || words.some((w) => text.includes(w)))) continue;
+      const dues = occurrences(r, addDays(entry.date, -6), addDays(entry.date, 5));
+      if (!dues.length) continue;
+      const due = dues.reduce((a, d) => (Math.abs(dayDiff(d, entry.date)) < Math.abs(dayDiff(a, entry.date)) ? d : a));
+      const score = Math.abs(dayDiff(due, entry.date)) + (r.cents === entry.cents ? 0 : 3);
+      if (!best || score < best.score) best = { rule: r, due, score };
+    }
+    if (!best) return null;
+    const auto = state.entries.find((x) => x.recurring === best.rule.id && !x.batch && !used.has(x.id) && Math.abs(dayDiff(x.date, best.due)) <= 6);
+    return { ...best, auto: auto || null };
+  }
+  function annotateImport(recs) {
+    const used = new Set();
+    for (const r of recs) {
+      if (!r.entry || (r.flag && r.flag !== "maybe")) continue;
+      const m = fixedMatch(r.entry, used);
+      if (!m) continue;
+      r.fixed = m;
+      if (m.auto) { used.add(m.auto.id); r.flag = "fixedrep"; r.near = m.auto; }
+      if (m.rule.type === "tr") { r.entry = { ...r.entry, type: "tr", cat: "Transfer", toAccount: m.rule.toAccount || "Savings", recurring: m.rule.id }; continue; }
+      r.entry = { ...r.entry, cat: m.rule.cat, recurring: m.rule.id };
+      if (m.rule.project) r.entry.project = m.rule.project;
+      if (m.rule.spread !== false && m.rule.every > 1) r.entry.spread = { months: m.rule.every, start: m.due.slice(0, 7) };
+    }
+    return recs;
+  }
 
   function viewImport() {
     const imp = state.imp;
     if (imp && imp.running) return `${backBar()}<h1 class="vtitle">Importing</h1><section class="card"><p id="impProgress">Saving ${imp.running.done} of ${imp.running.total} …</p><p>Keep this page open until it's done.</p></section>`;
     if (imp && imp.done) return `${backBar()}<h1 class="vtitle">Import done</h1>
       <section class="card"><h2>${imp.done.count} transactions added</h2>
-        <p>${imp.done.review ? `${imp.done.review} of them have no category yet – you'll find them under “To review” on the overview.` : "Everything got a category."}</p>
-        <div class="btnrow"><button class="btn primary" data-action="back">Go to overview</button><button class="btn" data-action="imp-reset">Import another file</button><button class="btn danger${state.armedBatch === imp.done.batch ? " armed" : ""}" data-action="undo-batch" data-arg="${esc(imp.done.batch)}">${state.armedBatch === imp.done.batch ? "Delete them again?" : "Undo import"}</button></div>
+        <p>${imp.done.review ? `${imp.done.review} of them have no category yet – you'll find them under “To review” on the overview.` : "Everything got a category."}${imp.done.fixed ? ` ${imp.done.fixed} linked to your fixed costs${imp.done.replaced ? `, ${imp.done.replaced} automatic ${imp.done.replaced === 1 ? "booking" : "bookings"} replaced` : ""}.` : ""}</p>
+        ${imp.done.autoRules && imp.done.autoRules.length ? `<div class="notice-box"><p><b>${imp.done.autoRules.map((id) => esc((state.settings.recurring.find((x) => x.id === id) || {}).name || "")).join(", ")}</b> ${imp.done.autoRules.length === 1 ? "comes" : "come"} from your bank. Switch to “comes via import”, so PFM stops booking ${imp.done.autoRules.length === 1 ? "it" : "them"} by itself?</p><button class="btn" data-action="rec-to-import">Switch ${imp.done.autoRules.length === 1 ? "it" : `all ${imp.done.autoRules.length}`}</button></div>` : ""}
+        <div class="notice-box"><p><b>Save a backup now?</b> An import adds the most data at once – a backup keeps it safe${STANDALONE ? ` (last one: ${esc(lastBackupText())})` : ""}.</p><button class="btn primary" data-action="export-json">Save backup</button></div>
+        <div class="btnrow"><button class="btn" data-action="back">Go to overview</button><button class="btn" data-action="imp-reset">Import another file</button><button class="btn danger${state.armedBatch === imp.done.batch ? " armed" : ""}" data-action="undo-batch" data-arg="${esc(imp.done.batch)}">${state.armedBatch === imp.done.batch ? "Delete them again?" : "Undo import"}</button></div>
       </section>`;
     const intro = `
       <section class="card">
@@ -2040,7 +2081,7 @@ function buildRecords(imp, existing, learned, today) {
         imp.catMap[c] = g;
       });
     }
-    const recs = buildRecords(imp, state.entries, state.settings.rules, todayISO());
+    const recs = annotateImport(buildRecords(imp, state.entries, state.settings.rules, todayISO()));
     const opts = (sel) => `<option value="-1"${sel < 0 ? " selected" : ""}>—</option>` + imp.header.map((h, i) => `<option value="${i}"${sel === i ? " selected" : ""}>${esc(h || `Column ${i + 1}`)}</option>`).join("");
     const ymd = map.date < 0 && map.year >= 0 && map.month >= 0 && map.day >= 0;
     const fields = FIELD_LABELS.filter(([k, , req]) => (k === "date" ? !(ymd && imp.detected.date < 0) : req) || ["payee", "note", "category", "type"].includes(k) || imp.detected[k] >= 0);
@@ -2071,11 +2112,12 @@ function buildRecords(imp, existing, learned, today) {
         <p><b>Auto</b> sorts by the description (Conad → Groceries, Lime → Transport). <b>Money back</b> is for friends paying their share or refunds: it lowers the spending of that category instead of counting as income. A <b>project</b> keeps a category like a semester abroad together as one total.</p>
         <div class="catmap">${rows}</div></section>`;
     } else if (ok) {
-      const unc = recs.filter((r) => r.entry && !skipFlag(imp, r.flag) && r.entry.cat === UNCAT).length;
+      const unc = recs.filter((r) => r.entry && !skipFlag(imp, r.flag, r) && r.entry.cat === UNCAT).length;
       catCard = `<section class="card"><h2>Categories</h2><p>This file has no categories, so PFM assigns them from merchant names (REWE → Groceries, Spotify → Subscriptions …).${unc ? ` ${unc} transactions couldn't be matched and will land in “To review”. Once you sort them, PFM learns the merchant.` : ""}</p></section>`;
     }
 
-    const eligible = recs.filter((r) => r.entry && !skipFlag(imp, r.flag));
+    const eligible = recs.filter((r) => r.entry && !skipFlag(imp, r.flag, r));
+    const maybes = recs.filter((r) => r.flag === "maybe"), fixedHits = recs.filter((r) => r.fixed);
     const flagCounts = {};
     recs.forEach((r) => { if (r.flag) flagCounts[r.flag] = (flagCounts[r.flag] || 0) + 1; });
     const sumOf = (fn) => eligible.filter((r) => fn(r.entry)).reduce((a, r) => a + r.entry.cents, 0);
@@ -2111,6 +2153,14 @@ function buildRecords(imp, existing, learned, today) {
           ${preview.map((r) => `<tr><td>${esc(dateFmt.format(isoDate(r.entry.date)))}</td><td>${esc(r.entry.note.slice(0, 32))}</td><td style="color:${colorOf(r.entry.cat)}">${esc(r.entry.cat)}${isRefund(r.entry) ? " ↺" : ""}</td><td class="r ${r.entry.type === "ein" && !isRefund(r.entry) ? "pos" : ""}">${r.entry.type === "ein" ? "+" : "−"}${money(r.entry.cents)}</td></tr>`).join("")}
         </tbody></table></div>` : `<p>Nothing new to import.</p>`}
       </section>
+      ${maybes.length ? `<section class="card"><h2>Already in PFM?</h2>
+        <p>Same amount within 3 days already exists – probably entered by hand. These are skipped unless you tick “Import anyway”.</p>
+        ${maybes.map((r) => `<div class="dupe"><div class="split"><span><b>${esc(r.entry.note.slice(0, 40))}</b><br><span class="hint">File: ${esc(dateFmt.format(isoDate(r.entry.date)))} · ${r.entry.type === "ein" ? "+" : "−"}${money(r.entry.cents)}</span><br><span class="hint">PFM: ${esc((r.near.note || r.near.cat).slice(0, 40))} · ${esc(dateFmt.format(isoDate(r.near.date)))} · ${esc(r.near.account || "")}</span></span>
+          <label class="check"><input type="checkbox" data-action="impkeep" data-arg="${r.k}"${imp.keep && imp.keep[r.k] ? " checked" : ""}><span>Import anyway</span></label></div></div>`).join("")}</section>` : ""}
+      ${fixedHits.length ? `<section class="card"><h2>Fixed costs found</h2>
+        <p>These bookings belong to your fixed costs. PFM links them, uses the category and spreads them like the fixed cost.</p>
+        <div class="sumlist">${fixedHits.map((r) => `<div><span>${esc(r.entry.note.slice(0, 32))} → <b>${esc(r.fixed.rule.name)}</b>${r.entry.spread ? ` · ÷${r.entry.spread.months}` : ""}${r.flag === "fixedrep" ? `<br><span class="hint">replaces PFM's own booking from ${esc(dateFmt.format(isoDate(r.fixed.auto.date)))}</span>` : ""}</span><b>${money(r.entry.cents)}</b></div>`).join("")}</div>
+        ${fixedHits.some((r) => r.flag === "fixedrep") ? `<label class="check"><input type="checkbox" data-action="impopt" data-field="replaceFixed"${imp.replaceFixed !== false ? " checked" : ""}><span>Replace PFM's own bookings with the bank's<br><span class="hint">The automatic ones go to “Recently deleted”, so nothing counts twice.</span></span></label>` : ""}</section>` : ""}
       <section class="card">
         <h2>Summary</h2>
         <div class="sumlist">
@@ -2144,15 +2194,17 @@ function buildRecords(imp, existing, learned, today) {
     const next30 = upcoming(addDays(todayISO(), 30));
     const dueM = upcoming(monthEnd(curMonth())).filter((u) => u.r.type === "aus").reduce((a, u) => a + u.r.cents, 0);
     const row = (r) => {
-      const nd = nextDue(r), ended = r.end && r.end < todayISO();
-      return `<button class="row" data-action="rec-edit" data-arg="${esc(r.id)}">${r.type === "tr" ? `<span class="badge" style="color:#9AA3AD;background:#9AA3AD24" aria-hidden="true">⇄</span>` : badge(r.cat)}<span class="main"><span class="t1">${esc(r.name)}</span><span class="t2">${r.type === "tr" ? `${esc(r.account)} → ${esc(r.toAccount || "")} · ` : ""}${esc(FREQ[r.every])}${r.every > 1 ? " · " + money(r.cents) : ""} · ${ended ? "ended" : nd ? "next " + esc(dayFmt.format(isoDate(nd))) : "no more payments"}</span></span><span class="val ${r.type === "ein" ? "pos" : ""}">${money(Math.round(monthlyEq(r)))}<small>per month</small></span><span class="chev" aria-hidden="true">›</span></button>`;
+      const nd = nextDue(r), ended = r.end && r.end < todayISO(), imp = r.mode === "import";
+      const lastSeen = imp ? state.entries.filter((e) => e.recurring === r.id && e.batch).map((e) => e.date).sort().pop() : null;
+      const check = !imp && IMPORTED_ACCOUNTS.includes(r.account) && state.entries.some((e) => e.batch && e.account === r.account);
+      return `<button class="row" data-action="rec-edit" data-arg="${esc(r.id)}">${r.type === "tr" ? `<span class="badge" style="color:#9AA3AD;background:#9AA3AD24" aria-hidden="true">⇄</span>` : badge(r.cat)}<span class="main"><span class="t1">${esc(r.name)}<span class="tag${check ? " attn" : ""}">${imp ? "Via import" : check ? "Imported too?" : "Books itself"}</span></span><span class="t2">${imp ? (lastSeen ? `last from bank ${esc(dayFmt.format(isoDate(lastSeen)))} · ` : "waiting for an import · ") : ""}${r.type === "tr" ? `${esc(r.account)} → ${esc(r.toAccount || "")} · ` : ""}${esc(FREQ[r.every])}${r.every > 1 ? " · " + money(r.cents) : ""} · ${ended ? "ended" : nd ? "next " + esc(dayFmt.format(isoDate(nd))) : "no more payments"}</span></span><span class="val ${r.type === "ein" ? "pos" : ""}">${money(Math.round(monthlyEq(r)))}<small>per month</small></span><span class="chev" aria-hidden="true">›</span></button>`;
     };
     return `
       ${backBar()}
       <h1 class="vtitle">Fixed costs</h1>
       <section class="hero"><span class="label">Fixed costs per month</span><div class="heroval">${heroHTML(Math.round(fx))}</div>
         <div class="herosub">${rules.length ? `Fixed income ${money(Math.round(fi))} / month · ${money(dueM)} still due in ${esc(monthName.format(new Date()))}` : "Nothing set up yet"}</div></section>
-      <section class="card"><p>Set up what you pay regularly. PFM books each payment automatically on its due date. Quarterly, half-yearly and yearly payments count with their monthly share here – €480 car insurance per year shows as €40 per month.</p>
+      <section class="card"><p>Set up what you pay regularly. <b>Books itself</b>: PFM adds the payment on its due date – for cash. <b>Comes via import</b>: only planned – when the bank's booking arrives with your DKB or PayPal CSV, PFM links it and spreads it. Rule of thumb: DKB and PayPal only via import, cash by hand. Yearly payments count with their monthly share – €480 car insurance shows as €40 per month.</p>
         <div class="btnrow"><button class="btn primary" data-action="rec-new">+ Add fixed cost</button></div></section>
       ${next30.length ? `<section class="sec"><div class="sechead"><h2 class="sectitle">Next 30 days</h2></div>${next30.map((u) => `<div class="row nochev">${badge(u.r.cat)}<span class="main"><span class="t1">${esc(u.r.name)}<span class="tag plan">Planned</span></span><span class="t2">${esc(dayFmt.format(isoDate(u.d)))} · ${esc(u.r.account || "")}</span></span><span class="val ${u.r.type === "ein" ? "pos" : u.r.type === "tr" ? "" : "neg"}">${u.r.type === "ein" ? "+" : u.r.type === "tr" ? "⇄ " : "−"}${money(u.r.cents)}</span></div>`).join("")}</section>` : ""}
       ${out.length ? `<section class="sec"><div class="sechead"><h2 class="sectitle">Spending</h2><span class="hint">${money(Math.round(fx))} / month</span></div>${out.map(row).join("")}</section>` : ""}
@@ -2197,7 +2249,8 @@ function buildRecords(imp, existing, learned, today) {
     const spread = state.entries.filter((e) => e.spread && e.spread.months > 1).filter((e) => { const st = e.spread.start || e.date.slice(0, 7), en = shiftMonth(st, e.spread.months - 1); return st <= r.to.slice(0, 7) && en >= r.from.slice(0, 7); }).sort((a, b) => b.cents - a.cents);
     return `
       ${backBar()}
-      <h1 class="vtitle">Calculated costs</h1>
+      <h1 class="vtitle">Cash flows</h1>
+      ${basisSeg()}
       ${periodNav()}
       ${catChart("chCalc", cat, mode, between, true)}
       ${mode === "all" ? netBlock("chCalcNet", series("All", "all", true)) : ""}
@@ -2207,17 +2260,13 @@ function buildRecords(imp, existing, learned, today) {
         ${shares.length ? shown.map(row).join("") : `<p class="hint" style="padding:12px 0">Nothing counts towards ${esc(periodLabel())}.</p>`}
         ${shares.length > shown.length ? `<div class="btnrow" style="margin-top:12px"><button class="btn" data-action="calc-showall">Show all ${shares.length}</button></div>` : ""}
       </section>
-      <section class="stats" aria-label="Calculated totals">
-        <div class="stat"><span class="label">Income (calc.)</span><span class="v pos">${money(Math.round(cInc))}</span></div>
-        <div class="stat"><span class="label">Result (calc.)</span><span class="v ${cInc - cOut >= 0 ? "pos" : "neg"}">${signed(Math.round(cInc - cOut))}</span></div>
-        <div class="stat"><span class="label">Fixed / mo</span><span class="v">${money(Math.round(fixedMonthly("aus")))}</span></div>
-      </section>
-      <section class="card"><p><b>Cash out</b> counts a payment on the day the money leaves your account (Auszahlung). <b>Calculated</b> assigns it to the months it is for (Aufwand) – a yearly insurance becomes 12 equal monthly shares, spread evenly over the days of each month. Open a payment and set “Cost belongs to”, or select several and use Edit. Yearly fixed costs are spread automatically.</p></section>
+      <details class="more calcmore"><summary>How “calculated” works · month by month · spread payments</summary>
+      <section class="card"><p>Result (calculated) in this period: <b class="${cInc - cOut >= 0 ? "pos" : "neg"}">${signed(Math.round(cInc - cOut))}</b> · fixed costs ${money(Math.round(fixedMonthly("aus")))} a month.</p><p><b>Cash out</b> counts a payment on the day the money leaves your account (Auszahlung). <b>Calculated</b> assigns it to the months it is for (Aufwand) – a yearly insurance becomes 12 equal monthly shares, spread evenly over the days of each month. Open a payment and set “Cost belongs to”, or select several and use Edit. Yearly fixed costs are spread automatically.</p></section>
       ${table}
       <section class="sec"><div class="sechead"><h2 class="sectitle">Spread payments</h2><span class="hint">${spread.length}</span></div>
         ${spread.length ? spread.map((e) => { const st = e.spread.start || e.date.slice(0, 7), en = shiftMonth(st, e.spread.months - 1); return `<button class="row nochev" data-action="entry" data-arg="${esc(e.id)}">${badge(e.cat)}<span class="main"><span class="t1">${esc(e.note || e.cat)}</span><span class="t2">${money(e.cents)} over ${e.spread.months} months · ${esc(mShort(st))} ${st.slice(0, 4)} – ${esc(mShort(en))} ${en.slice(0, 4)}</span></span><span class="val">${money(Math.round(e.cents / e.spread.months))}<small>per month</small></span></button>`; }).join("")
           : `<p class="hint" style="padding:12px 0">None in this period. Open e.g. your car insurance or semester fee and set “Cost belongs to” to 12 or 6 months.</p>`}
-      </section>`;
+      </section></details>`;
   }
 
   /* ---------- Balance sheet view ---------- */
@@ -2259,7 +2308,10 @@ function buildRecords(imp, existing, learned, today) {
       if (v == null && it.kind === "asset") return "";
       const pv = prevD ? valAt(it, prevD.key) : null;
       let t2 = "";
-      if (it.kind === "account") t2 = `Follows ${it.account} transactions`;
+      if (it.kind === "account") {
+        const sn = accSnaps(it), ks = Object.keys(sn).sort(), last = ks[ks.length - 1], e = last ? expectedAt(it, last) : null, diff = e == null ? null : sn[last] - e;
+        t2 = last ? `Checked ${dateFmt.format(isoDate(last))}${diff == null ? "" : Math.abs(diff) < 1 ? " · ✓ matched" : ` · ${signed(diff)} vs PFM`}${last < addDays(todayISO(), -30) ? " · tap to check" : ""}` : "Tap to enter the balance";
+      }
       else if (it.kind === "depot") { const ks = Object.keys(it.snaps || {}).sort(), last = ks[ks.length - 1]; t2 = last ? `Value from ${dateFmt.format(isoDate(last))} + transfers since${last < addDays(todayISO(), -30) ? " · tap to update" : ""}` : "Tap to enter the value"; }
       else if (it.kind === "asset") { const T = ASSET_TYPES[it.atype] || ASSET_TYPES.other, ml = monthlyLoss(it); t2 = `${T.label} · ${money(it.cost)} in ${mShort(it.date.slice(0, 7))} ${it.date.slice(0, 4)}${ml ? ` · −${money(ml)}/month` : it.method === "none" ? " · keeps value" : ""}`; }
       else { const ks = Object.keys(it.values || {}).sort(), last = ks[ks.length - 1]; t2 = last ? `Value from ${monthFmt.format(ymDate(last))}${last < now ? " · tap to update" : ""}` : ""; }
@@ -2339,25 +2391,22 @@ function buildRecords(imp, existing, learned, today) {
     return `
       <header class="hubhead">
         <div class="brand"><h1 class="wordmark">P<b>F</b>M</h1><span class="label">Personal Finance Management</span></div>
-        <span class="sync" data-mode="${syncMode}">${esc(syncText)}</span>
+        <div class="hubright"><span class="sync" data-mode="${syncMode}">${esc(syncText)}</span><button class="gear" data-action="nav" data-arg="manage" aria-label="Settings and tools">${ICON_GEAR}</button></div>
       </header>
       <button class="addbig" data-action="add"><span aria-hidden="true">+</span>Add transaction</button>
       <button class="searchbar hubsearch" data-action="search">${ICON_SEARCH}<span>Search transactions</span></button>
       ${STANDALONE && state.entries.length && (lastBackupDays() == null || lastBackupDays() > 14) ? `<button class="notice" data-action="export-json">Last backup: ${esc(lastBackupText())} · Save a backup now ›</button>` : ""}
       <nav class="tiles" aria-label="Menu">
         <button class="tile" data-action="nav" data-arg="cashflow">
-          <span class="tile-l"><span class="tile-t">Cash flows</span><span class="tile-v">${money(mt.o)} <span class="tile-s">spent in ${esc(monthName.format(new Date()))}</span></span><span class="tile-s">Income &amp; spending · balance <span class="${bal >= 0 ? "pos" : "neg"}">${signed(bal)}</span></span></span>
-          ${spark(last6, "var(--ink)")}<span class="chev" aria-hidden="true">›</span></button>
-        <button class="tile" data-action="nav" data-arg="calc">
-          <span class="tile-l"><span class="tile-t">Calculated costs</span><span class="tile-v">${money(Math.round(avg))} <span class="tile-s">per month</span></span><span class="tile-s">Yearly payments spread over their months</span></span>
-          ${spark(calcVals, "var(--accent)")}<span class="chev" aria-hidden="true">›</span></button>
+          <span class="tile-l"><span class="tile-t">Cash flows</span><span class="tile-v">${money(mt.o)} <span class="tile-s">paid in ${esc(monthName.format(new Date()))}</span></span><span class="tile-s">Calculated <b class="calcv">${money(Math.round(avg))}</b> a month · balance <span class="${bal >= 0 ? "pos" : "neg"}">${signed(bal)}</span></span></span>
+          <span class="sparks">${spark(last6, "var(--ink)")}${spark(calcVals, "var(--accent)")}</span><span class="chev" aria-hidden="true">›</span></button>
         <button class="tile" data-action="nav" data-arg="balance">
           <span class="tile-l"><span class="tile-t">Balance sheet</span>${hasBal ? `<span class="tile-v">${money(balanceAt(cm).net)} <span class="tile-s">net worth</span></span>` : ""}<span class="tile-s">${hasBal ? "Assets, liabilities, equity" : "Set up assets and liabilities"}</span></span>
           ${spark(nets, "var(--accent)")}<span class="chev" aria-hidden="true">›</span></button>
       </nav>
       <div class="minitiles">
         <button class="mtile" data-action="nav" data-arg="plan"><span class="tile-t">Independence</span>${pd ? `<span class="tile-v">${Math.round(pd.cov * 100)} %</span><span class="tile-s">paid by yourself</span>` : `<span class="tile-s">What you'd need to earn to pay everything yourself</span>`}</button>
-        <button class="mtile" data-action="nav" data-arg="tax"><span class="tile-t">Tax return</span>${txs.hasEmp ? `<span class="tile-v ${txs.refund >= 0 ? "pos" : "neg"}">${signed(txs.refund)}</span><span class="tile-s">estimated ${txs.refund >= 0 ? "refund" : "to pay"} ${y}</span>` : txs.deductible ? `<span class="tile-v">${money(txs.deductible)}</span><span class="tile-s">deductible in ${y}</span>` : `<span class="tile-s">Collect deductible costs for ${y}</span>`}</button>
+        <button class="mtile" data-action="nav" data-arg="tax"><span class="tile-t">Tax return</span>${txs.hasEmp ? `<span class="tile-v ${txs.refund >= 0 ? "pos" : "neg"}">${signed(txs.refund)}</span><span class="tile-s">estimated ${txs.refund >= 0 ? "refund" : "to pay"} ${y}${txs.R.stale ? ` (${RULES_LATEST} rules)` : ""}</span>` : txs.deductible ? `<span class="tile-v">${money(txs.deductible)}</span><span class="tile-s">deductible in ${y}</span>` : `<span class="tile-s">Collect deductible costs for ${y}</span>`}</button>
       </div>
       <section class="accounts" aria-label="Accounts">
         <span class="label">${hasInv ? "Accounts &amp; investments" : "Account balance"}</span>
@@ -2370,6 +2419,7 @@ function buildRecords(imp, existing, learned, today) {
 
 
   /* ---------- Search ---------- */
+  const ICON_GEAR = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="12" cy="12" r="7.6" fill="none" stroke="currentColor" stroke-width="3.4" stroke-dasharray="2.9 3.07"/><circle cx="12" cy="12" r="5.4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg>';
   const ICON_SEARCH = '<svg class="ic" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M15.5 15.5L20.5 20.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>';
   const fold = (x) => String(x || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
   function hay(e) {
@@ -2466,18 +2516,28 @@ function buildRecords(imp, existing, learned, today) {
     ["receipts", "Receipts for everything marked", "Invoices for equipment, books and tickets. A photo in one folder per year is enough."],
     ["elster", "ELSTER login or your tax app", "You need your tax ID and the IBAN for the refund."]
   ];
+  /* ===== Tax & social insurance rules per year – the ONE place to update every January =====
+     tariff § 32a EStG: [basic allowance, end zone 2, end zone 3, coeff. zone 2, coeff. zone 3, const zone 3, const 42 %, const 45 %]; money in cents */
+  const RULES_BY_YEAR = {
+    2024: { tariff: [11784, 17005, 66760, 954.8, 181.19, 991.21, 10636.31, 18971.06], flat: 123000, saver: 100000, trainer: 300000, honorary: 84000, soliFree: 18130 },
+    2025: { tariff: [12096, 17443, 68480, 932.3, 176.64, 1015.13, 10911.92, 19246.67], flat: 123000, saver: 100000, trainer: 300000, honorary: 84000, soliFree: 19950 },
+    2026: { tariff: [12348, 17799, 69878, 914.51, 173.1, 1034.87, 11135.63, 19470.38], flat: 123000, saver: 100000, trainer: 330000, honorary: 96000, soliFree: 20350,
+      sv: { kv: 14.6, zusatz: 2.9, pv: 3.6, pvChildless: 0.6, rv: 18.6, av: 2.6, bbgKV: 581250, bbgRV: 845000, mini: 60300, midi: 200000 } }
+  };
+  const RULES_LATEST = Math.max(...Object.keys(RULES_BY_YEAR).map(Number));
+  function rulesFor(y) { const k = Math.max(2024, Math.min(RULES_LATEST, y)); return { ...RULES_BY_YEAR[k], year: k, stale: y > RULES_LATEST }; }
+  function svFor(y) { for (let k = Math.min(RULES_LATEST, y); k >= 2024; k--) if (RULES_BY_YEAR[k].sv) return { ...RULES_BY_YEAR[k].sv, year: k, stale: y > RULES_LATEST }; return { ...RULES_BY_YEAR[RULES_LATEST].sv, year: RULES_LATEST, stale: false }; }
+  const staleNote = (y) => `PFM knows the rules up to ${RULES_LATEST}. For ${y} it uses tariff and allowances of ${RULES_LATEST}, so the estimate may be off. Ask Claude in January to update PFM – collecting costs works as usual.`;
   const TAXR = (y) => ({
-    flat: y >= 2023 ? 123000 : 100000, saver: y >= 2023 ? 100000 : 80100,
-    trainer: y >= 2026 ? 330000 : 300000, honorary: y >= 2026 ? 96000 : 84000,
+    ...(() => { const Q = rulesFor(y); return { flat: y >= 2023 ? Q.flat : 100000, saver: y >= 2023 ? Q.saver : 80100, trainer: Q.trainer, honorary: Q.honorary, soliFree: Q.soliFree, rulesYear: Q.year, stale: Q.stale }; })(),
     ho: y >= 2023 ? 600 : 500, hoMax: y >= 2023 ? 210 : 120, perDiem: 1400, carKm: 30,
-    soliFree: y >= 2026 ? 20350 : y === 2025 ? 19950 : 18130,
     kmText: y >= 2026 ? "€0.38 per km one way from the first km" : "€0.30 per km one way, from km 21 €0.38",
     km: (km) => Math.round(y >= 2026 ? km * 38 : Math.min(km, 20) * 30 + Math.max(0, km - 20) * (y >= 2022 ? 38 : 35))
   });
   /* Income tax tariff § 32a EStG (euros in, euros out) for 2024, 2025 and 2026+ */
   function tariff(zve, y) {
     zve = Math.floor(Math.max(0, zve));
-    const T = y >= 2026 ? [12348, 17799, 69878, 914.51, 173.1, 1034.87, 11135.63, 19470.38] : y === 2025 ? [12096, 17443, 68480, 932.3, 176.64, 1015.13, 10911.92, 19246.67] : [11784, 17005, 66760, 954.8, 181.19, 991.21, 10636.31, 18971.06];
+    const T = rulesFor(y).tariff;
     if (zve <= T[0]) return 0;
     if (zve <= T[1]) { const q = (zve - T[0]) / 1e4; return Math.floor((T[3] * q + 1400) * q); }
     if (zve <= T[2]) { const q = (zve - T[1]) / 1e4; return Math.floor((T[4] * q + 2397) * q + T[5]); }
@@ -2665,7 +2725,7 @@ function buildRecords(imp, existing, learned, today) {
       ${backBar()}
       <h1 class="vtitle">Tax return</h1>
       <div class="periodnav"><label><span class="sr">Tax year</span><select class="psel" data-action="taxyear">${years.map((v) => `<option value="${v}"${v === y ? " selected" : ""}>${v}</option>`).join("")}</select></label></div>
-      ${hero}${C.filed ? `<p class="hint">Filed ${C.filed.date ? esc(dateFmt.format(isoDate(C.filed.date))) : ""}${C.filed.tool ? " via " + esc(C.filed.tool) : ""}${C.filed.office ? " · " + esc(C.filed.office) : ""}</p>` : ""}${calc}
+      ${hero}${R.stale ? `<p class="status warn">${esc(staleNote(y))}</p>` : ""}${C.filed ? `<p class="hint">Filed ${C.filed.date ? esc(dateFmt.format(isoDate(C.filed.date))) : ""}${C.filed.tool ? " via " + esc(C.filed.tool) : ""}${C.filed.office ? " · " + esc(C.filed.office) : ""}</p>` : ""}${calc}
       ${canCarry ? `<button class="notice" data-action="tax-carry">Start ${esc(y)} with your jobs and ways to work from ${esc(prevY)} ›</button>` : ""}
       ${sec("jobs", "Jobs · Anlage N", money(T.gross), `
         ${T.emps.map((x) => `<button class="row nobadge" data-action="tax-emp" data-arg="${esc(x.id)}"><span class="main"><span class="t1">${esc(x.name || "Job")}<span class="tag">Class ${x.cls || 1}</span></span><span class="t2">Wage tax ${money(x.lst || 0)}${x.rvAn ? ` · pension ${money(x.rvAn)}` : ""}</span></span><span class="val">${money(x.gross || 0)}</span><span class="chev" aria-hidden="true">›</span></button>`).join("") || `<p class="hint">Add one wage tax certificate per employer – it comes by the end of February. During the year you can enter what you expect.</p>`}
@@ -2760,22 +2820,16 @@ function buildRecords(imp, existing, learned, today) {
   }
 
   /* ---------- Independence plan ---------- */
-  const SV = { kv: 14.6, pv: 3.6, pvChildless: 0.6, rv: 18.6, av: 2.6, bbgKV: 581250, bbgRV: 845000, mini: 60300, midi: 200000, flat: 123000, soliFree: 20350 };
-  function incomeTax(zve) {
-    zve = Math.floor(zve);
-    if (zve <= 12348) return 0;
-    if (zve <= 17799) { const y = (zve - 12348) / 1e4; return Math.floor((914.51 * y + 1400) * y); }
-    if (zve <= 69878) { const z = (zve - 17799) / 1e4; return Math.floor((173.1 * z + 2397) * z + 1034.87); }
-    if (zve <= 277825) return Math.floor(0.42 * zve - 11135.63);
-    return Math.floor(0.45 * zve - 19470.38);
-  }
+  /* Uses the same rules table as the Tax return – for the current year */
+  const SV = (() => { const y = curYear(), r = rulesFor(y); return { ...svFor(y), flat: r.flat, soliFree: r.soliFree, taxYear: y, rulesYear: r.year, stale: r.stale }; })();
+  function incomeTax(zve) { return tariff(zve, SV.taxYear); }
   const soliOf = (t) => (t <= SV.soliFree ? 0 : Math.min(t * 0.055, (t - SV.soliFree) * 0.119));
   /* Employee social insurance per month. mode "ws": Werkstudent (only pension insurance), "ft": regular job */
   function payroll(g, mode, P) {
     if (g <= 0) return { rv: 0, kv: 0, pv: 0, av: 0, sv: 0 };
     if (g <= SV.mini) { const rv = Math.round(g * 0.036); return { rv, kv: 0, pv: 0, av: 0, sv: rv }; }
     const base = g < SV.midi ? SV.midi / (SV.midi - SV.mini) * (g - SV.mini) : g;
-    const rvB = Math.min(base, SV.bbgRV), kvB = Math.min(base, SV.bbgKV), zus = P.zusatz != null ? Number(P.zusatz) : 2.9;
+    const rvB = Math.min(base, SV.bbgRV), kvB = Math.min(base, SV.bbgKV), zus = P.zusatz != null ? Number(P.zusatz) : SV.zusatz;
     const rv = Math.round(rvB * SV.rv / 200);
     if (mode === "ws") return { rv, kv: 0, pv: 0, av: 0, sv: rv };
     const kv = Math.round(kvB * (SV.kv + zus) / 200), pv = Math.round(kvB * (SV.pv / 2 + (P.childless !== false ? SV.pvChildless : 0)) / 100), av = Math.round(rvB * SV.av / 200);
@@ -2868,7 +2922,36 @@ function buildRecords(imp, existing, learned, today) {
         <span class="label" style="display:block;margin-top:14px">Counts as your own income</span>
         <div class="chiprow wrap" style="margin-top:8px">${CATS.ein.map((c) => `<button class="fchip" data-action="plan-inc" data-arg="${esc(c)}" aria-pressed="${D.incCats.includes(c)}">${esc(c)}</button>`).join("")}</div>
       </details></section>
-      <p class="hint">Estimate with the 2026 rules: income tax tariff, social insurance with an average health insurance extra of 2.9 %, Werkstudent status up to 20 h a week. Not financial or tax advice.</p>`;
+      ${SV.stale ? `<p class="status warn">${esc(staleNote(SV.taxYear))}</p>` : ""}
+      <p class="hint">Estimate with the ${SV.rulesYear} rules: income tax tariff, social insurance with an average health insurance extra of ${SV.zusatz} %, Werkstudent status up to 20 h a week. Not financial or tax advice.</p>`;
+  }
+
+  /* ---------- Settings & tools (gear) ---------- */
+  function viewManage() {
+    const lim = Object.keys(limits()).filter((c) => CATS.aus.includes(c)).length, unc = uncategorized().length;
+    const projects = state.settings.projects.map((p) => {
+      const t = projTotals(p);
+      return navRow("project", p.id, { text: p.name, badge: `<span class="badge" style="color:${p.color};background:${p.color}24" aria-hidden="true">${esc(p.name.slice(0, 2))}</span>` }, `${projRange(p)}${p.isDefault ? " · default" : ""}`, money(t.o));
+    }).join("") + navRow("new-project", "", { text: "New project" }, "e.g. semester abroad, a trip, moving house");
+    return `
+      ${backBar()}
+      <h1 class="vtitle">Settings &amp; tools</h1>
+      <section class="sec"><div class="sechead"><h2 class="sectitle">Your data</h2></div>
+        ${navRow("nav", "import", { text: "Import CSV" }, "DKB, PayPal or Expenses app – PFM offers a backup afterwards")}
+        ${navRow("export-json", "", { text: "Save backup" }, STANDALONE ? `Last backup: ${lastBackupText()}` : "All transactions and settings in one file")}
+        ${navRow("nav", "data", { text: "Data & backup" }, "Load a backup, export CSV, undo imports, start screen")}
+      </section>
+      <section class="sec"><div class="sechead"><h2 class="sectitle">Planning</h2></div>
+        ${planRows()}
+        ${navRow("nav", "budgets", { text: "Budgets" }, lim ? `${lim} monthly ${lim === 1 ? "limit" : "limits"}` : "Set monthly limits per category")}
+      </section>
+      <section class="sec"><div class="sechead"><h2 class="sectitle">Projects</h2></div>${projects}</section>
+      <section class="sec"><div class="sechead"><h2 class="sectitle">Organise</h2></div>
+        ${unc ? navRow("review", "", { text: `${unc} to review`, badge: badge(UNCAT) }, "Transactions without a category") : ""}
+        ${navRow("nav", "categories", { text: "Categories" }, "Add, rename and sort")}
+        ${state.trash.length ? navRow("nav", "trash", { text: `Recently deleted (${state.trash.length})` }, "Restore what you deleted in the last 30 days") : ""}
+      </section>
+      <footer class="motto"><span>Sometimes I feel like giving up.</span><span>Then I remember I have a lot of people to prove wrong.</span></footer>`;
   }
 
   /* ---------- Recently deleted ---------- */
@@ -2914,7 +2997,7 @@ function buildRecords(imp, existing, learned, today) {
       <p class="hint">Deleting a category keeps its transactions – they keep the name until you change them. “${esc(rn("Other"))}” and “${esc(rn("Other income"))}” can be renamed but not deleted.</p>`;
   }
 
-  const VIEWS = { hub: viewHub, cashflow: viewHome, cat: viewCat, budgets: viewBudgets, list: viewList, project: viewProject, data: viewData, import: viewImport, fixed: viewFixed, calc: viewCalc, balance: viewBalance, trash: viewTrash, categories: viewCategories, search: viewSearch, tax: viewTax, plan: viewPlan };
+  const VIEWS = { hub: viewHub, cashflow: viewHome, cat: viewCat, budgets: viewBudgets, list: viewList, project: viewProject, data: viewData, import: viewImport, fixed: viewFixed, calc: viewHome, balance: viewBalance, trash: viewTrash, categories: viewCategories, search: viewSearch, tax: viewTax, plan: viewPlan, manage: viewManage };
 
   function render() {
     const top = state.stack[state.stack.length - 1], root = $("view");
@@ -2960,7 +3043,12 @@ function buildRecords(imp, existing, learned, today) {
     if (!a || a.tagName === "SELECT" || a.tagName === "INPUT") return;
     const arg = a.dataset.arg;
     switch (a.dataset.action) {
-      case "nav": if (arg === "import" && state.imp && (state.imp.done || state.imp.error)) state.imp = null; go(arg); break;
+      case "basis": {
+        const to = arg === "calc" ? "calc" : "paid";
+        if (to === "calc") { state.calcMode = state.cfMode; state.calcCat = state.homeCat; } else { state.cfMode = state.calcMode; state.homeCat = state.calcCat; }
+        state.basis = to; state.sel = null; render(); break;
+      }
+      case "nav": if (arg === "calc") { state.basis = "calc"; go("cashflow"); break; } if (arg === "cashflow") state.basis = "paid"; if (arg === "import" && state.imp && (state.imp.done || state.imp.error)) state.imp = null; go(arg); break;
       case "cat": go("cat", arg); break;
       case "project": go("project", arg); break;
       case "review": state.listFilter = "review"; go("list"); break;
@@ -2997,6 +3085,14 @@ function buildRecords(imp, existing, learned, today) {
       case "trash-empty":
         if (!state.armedTrash) { state.armedTrash = true; render(); break; }
         state.armedTrash = false; store.bulkRemove(state.trash.map((e) => e.id)).then(() => toast("Deleted for good")).catch(() => toast("Couldn't delete. Try again.")); break;
+      case "bal-snap-del": {
+        const list = state.settings.balance.items, it = list.find((x) => x.id === state.balId); if (!it) break;
+        let next;
+        if (it.kind === "account") { const sn = accSnaps(it), sa = accSnapsAt(it); delete sn[arg]; delete sa[arg]; const { opening: _o, openingDate: _d, openingSetAt: _s, ...rest } = it; next = { ...rest, snaps: sn, snapsAt: sa }; }
+        else { const sn = { ...(it.snaps || {}) }, sa = { ...(it.snapsAt || {}) }; delete sn[arg]; delete sa[arg]; next = { ...it, snaps: sn, snapsAt: sa }; }
+        patchSettings({ balance: { items: list.map((x) => (x.id === it.id ? next : x)) } }).then(() => { $("balHistory").innerHTML = balHistoryHTML(next); toast("Balance removed"); }).catch((err) => toast(writeError(err)));
+        break;
+      }
       case "acc": { const its = accountItems(arg); if (its.length) openBal(its[0]); else openBal(null, "asset", { account: arg }); break; }
       case "newcat-type": state.newCatType = arg; render(); break;
       case "newcat-add": addCategory(state.newCatType, ($("newCatName") || {}).value || "", "newCatErr").then((n) => { if (n) render(); }); break;
@@ -3012,6 +3108,7 @@ function buildRecords(imp, existing, learned, today) {
       case "export-json": exportJson(); break;
       case "undo-batch": undoBatch(arg); break;
       case "imp-run": runImport(); break;
+      case "rec-to-import": { const ids = new Set((state.imp && state.imp.done && state.imp.done.autoRules) || []); patchSettings({ recurring: state.settings.recurring.map((r) => (ids.has(r.id) ? { ...r, mode: "import" } : r)) }).then(() => { if (state.imp && state.imp.done) state.imp.done.autoRules = []; toast("Switched – PFM now waits for your imports"); render(); }).catch((err) => toast(writeError(err))); break; }
       case "imp-reset": state.imp = null; render(); break;
       case "rec-new": openRec(null); break;
       case "rec-edit": openRec(state.settings.recurring.find((r) => r.id === arg)); break;
@@ -3109,6 +3206,7 @@ function buildRecords(imp, existing, learned, today) {
     else if (act === "impmap" && state.imp) { state.imp.map[t.dataset.field] = Number(t.value); render(); }
     else if (act === "impcat" && state.imp) { const mp = state.imp.catMap[t.dataset.src] || (state.imp.catMap[t.dataset.src] = { aus: AUTO, ein: AUTO, project: "" }); mp[t.dataset.kind] = t.value; render(); }
     else if (act === "impproj" && state.imp) { const mp = state.imp.catMap[t.dataset.src] || (state.imp.catMap[t.dataset.src] = { aus: AUTO, ein: AUTO, project: "" }); mp.project = t.value; render(); }
+    else if (act === "impkeep" && state.imp) { state.imp.keep = { ...(state.imp.keep || {}), [t.dataset.arg]: t.checked }; render(); }
     else if (act === "impopt" && state.imp) { state.imp[t.dataset.field] = t.type === "checkbox" ? t.checked : t.value; render(); }
   });
   document.addEventListener("input", (ev) => { if (ev.target.id === "q") { state.q.text = ev.target.value; clearTimeout(qTimer); qTimer = setTimeout(updateSearch, 120); } });
@@ -3116,6 +3214,10 @@ function buildRecords(imp, existing, learned, today) {
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") { if (state.full && SHEETS.every((id) => $(id).hidden)) closeFull(); else closeSheetsAnimated(); } });
   $("backdrop").addEventListener("click", closeSheetsAnimated);
   $("addBtn").addEventListener("click", () => openEntry(null));
+  $("note").addEventListener("input", suggestCat);
+  $("catChips").addEventListener("change", (ev) => { if (ev.isTrusted) { catTouched = true; $("catHint").hidden = true; } });
+  $("entryForm").addEventListener("input", syncMoreSum);
+  $("entryForm").addEventListener("change", syncMoreSum);
 
   function showSheet(id) { sheetTok++; $("backdrop").hidden = false; $(id).hidden = false; }
   let sheetTok = 0;
@@ -3148,8 +3250,10 @@ function buildRecords(imp, existing, learned, today) {
     $("typeTr").setAttribute("aria-pressed", String(t === "tr"));
     const tr = t === "tr";
     $("catWrap").hidden = tr; $("projWrap").hidden = tr; $("spreadWrap").hidden = tr; $("toWrap").hidden = !tr; $("taxMore").hidden = tr; fillTaxKinds(t);
+    if (tr) $("entryMore").open = true;
+    $("catHint").hidden = true;
     $("accountLabel").textContent = tr ? "From" : "Account";
-    $("note").placeholder = tr ? "e.g. Savings plan" : "e.g. Weekly groceries";
+    $("note").placeholder = tr ? "e.g. Savings plan" : t === "ein" ? "e.g. Salary, Übungsleiter" : "e.g. Rewe, Spotify, rent";
     if (tr) { $("catChips").innerHTML = ""; return; }
     const main = CATS[t].slice(), extra = t === "ein" ? CATS.aus.slice() : [];
     if (keepCat && !main.includes(keepCat) && !extra.includes(keepCat) && (t === "ein" || !CATS.ein.includes(keepCat))) main.push(keepCat);
@@ -3157,6 +3261,33 @@ function buildRecords(imp, existing, learned, today) {
     const chip = (c, i) => `<label class="chip"><input type="radio" name="cat" id="cat-${t}-${i}" value="${esc(c)}"${c === sel ? " checked" : ""}><span>${esc(c)}</span></label>`;
     $("catChips").innerHTML = main.map(chip).join("") + `<button type="button" class="chipbtn" data-action="entry-newcat">+ New category</button>` + (extra.length ? `<span class="chipgroup">Money back for</span>` + extra.map((c, i) => chip(c, main.length + i)).join("") : "");
     $("entryNewCat").hidden = true; $("entryNewCatName").value = "";
+  }
+  const LAST_ACC = "pfm.lastAccount";
+  const lastAccount = () => { try { return localStorage.getItem(LAST_ACC) || ""; } catch { return ""; } };
+  let catTouched = false;
+  function syncMoreSum() {
+    const el = $("moreSum"); if (!el) return;
+    const d = $("date").value, td = todayISO();
+    const parts = [d === td ? "Today" : d === addDays(td, -1) ? "Yesterday" : d ? dayFmt.format(isoDate(d)) : "No date", state.type === "tr" ? `${$("account").value} → ${$("toAccount").value}` : $("account").value];
+    if (state.type !== "tr") {
+      const pj = $("project").value, p = pj && pj !== "__new" ? projById(pj) : null; if (p) parts.push(p.name);
+      const sm = $("spreadMonths").value, n = sm === "custom" ? parseInt($("spreadCustom").value, 10) : Number(sm); if (n > 1) parts.push(`÷${n}`);
+      if ($("taxKind").value) parts.push("Tax");
+    }
+    el.textContent = parts.join(" · ");
+  }
+  /* Suggest the category from the description, with the same merchant rules the import uses (Rewe → Groceries) */
+  function suggestCat() {
+    const hint = $("catHint");
+    if (catTouched || state.type === "tr") { hint.hidden = true; return; }
+    const v = $("note").value.trim();
+    if (v.length < 3) { hint.hidden = true; return; }
+    const g = autoCat(v, "", state.type, state.settings.rules);
+    const ok = state.type === "aus" ? g !== UNCAT && CATS.aus.includes(g) : g !== rn("Other income") && CATS.ein.includes(g);
+    const inp = ok ? [...document.querySelectorAll('#catChips input[name="cat"]')].find((x) => x.value === g) : null;
+    if (!inp) { hint.hidden = true; return; }
+    inp.checked = true;
+    hint.hidden = false; hint.textContent = `Category: ${g} – suggested from the description`;
   }
   function openEntry(entry) {
     closeSheets();
@@ -3169,8 +3300,10 @@ function buildRecords(imp, existing, learned, today) {
     $("amount").value = entry ? toInput(entry.cents) : "";
     const pr = range(), td = todayISO();
     $("date").value = entry ? entry.date : (top.v === "hub" || (td >= pr.from && td <= pr.to) ? td : pr.from);
-    const acc = entry ? entry.account : "DKB";
+    const acc = entry ? entry.account : lastAccount() || "DKB";
     $("account").innerHTML = accountOptions(acc);
+    catTouched = !!entry || top.v === "cat"; $("catHint").hidden = true;
+    $("entryMore").open = !!entry && entry.type === "tr";
     const depot = state.settings.balance.items.find((it) => it.kind === "depot");
     const to = entry && entry.toAccount ? entry.toAccount : depot ? depot.account : "Savings";
     $("toAccount").innerHTML = accountOptions(to, { noUnspecified: true });
@@ -3186,6 +3319,7 @@ function buildRecords(imp, existing, learned, today) {
     $("taxKind").value = tx && taxKindOf(tx.kind) ? tx.kind : ""; syncTaxUI(); if (tx && tx.sub) $("taxSub").value = tx.sub;
     $("taxShare").value = tx && tx.share && tx.share !== 100 ? String(tx.share) : ""; $("taxReceipt").checked = !!(tx && tx.receipt);
     $("taxMore").open = !!tx;
+    syncMoreSum();
     $("spreadStart").value = sp ? (sp.start || entry.date.slice(0, 7)) : "";
     syncSpreadUI();
     $("makeRecurring").hidden = !entry || !!entry.recurring;
@@ -3212,7 +3346,7 @@ function buildRecords(imp, existing, learned, today) {
       const { project: _p, spread: _s, payee: _y, memo: _m, tax: _tx, ...base } = old || {};
       const entry = { ...base, id: old ? old.id : newId(), type: "tr", cents, cat: "Transfer", date, account: from, toAccount: to, note: $("note").value.trim(), created: old ? old.created : new Date().toISOString() };
       $("saveBtn").disabled = true;
-      try { await store.put(entry); closeSheets(); toast(old ? "Transfer updated" : `Transfer to ${to} saved`); }
+      try { await store.put(entry); closeSheets(); toast(old ? "Transfer updated" : `Transfer to ${to} saved`); if (!old) try { localStorage.setItem(LAST_ACC, from); } catch { /* ignore */ } }
       catch (err) { $("entryErr").textContent = writeError(err); }
       finally { $("saveBtn").disabled = false; }
       return;
@@ -3237,6 +3371,7 @@ function buildRecords(imp, existing, learned, today) {
     try {
       await store.put(entry);
       closeSheets();
+      if (!old) try { localStorage.setItem(LAST_ACC, entry.account); } catch { /* ignore */ }
       let extra = 0;
       if (old && old.payee && old.cat !== entry.cat && entry.cat !== UNCAT) extra = await learnRule(old.payee, entry);
       toast(old ? (extra ? `Saved – also sorted ${extra} more from this merchant` : "Transaction updated") : "Transaction saved");
@@ -3395,7 +3530,10 @@ function buildRecords(imp, existing, learned, today) {
     const imp = state.imp;
     if (!imp || !store || imp.running) return;
     const batch = "imp" + Date.now().toString(36), now = new Date().toISOString();
-    const recs = buildRecords(imp, state.entries, state.settings.rules, todayISO()).filter((r) => r.entry && !skipFlag(imp, r.flag));
+    const recs = annotateImport(buildRecords(imp, state.entries, state.settings.rules, todayISO())).filter((r) => r.entry && !skipFlag(imp, r.flag, r));
+    const replaced = recs.filter((r) => r.flag === "fixedrep" && r.fixed && r.fixed.auto).map((r) => r.fixed.auto);
+    const learnedRules = new Map();
+    recs.forEach((r) => { if (r.fixed) learnedRules.set(r.fixed.rule.id, normPayee(r.entry.payee || r.entry.note || "")); });
     const todo = recs.map((r) => {
       const e = { id: newId(), ...r.entry, created: now, batch, importName: imp.fileName };
       if (!e.memo) delete e.memo;
@@ -3419,6 +3557,7 @@ function buildRecords(imp, existing, learned, today) {
       todo.forEach((e) => { if (idFor[e.project]) e.project = idFor[e.project]; });
       settingsPatch.projects = projects;
     }
+    if (learnedRules.size) settingsPatch.recurring = state.settings.recurring.map((x) => (learnedRules.has(x.id) && learnedRules.get(x.id) ? { ...x, payeeKey: learnedRules.get(x.id) } : x));
     if (Object.keys(imp.catMap).length) {
       const saveMap = {};
       for (const [k, v] of Object.entries(imp.catMap)) saveMap[k] = { ...v, project: v.project === "new" ? (idFor["new:" + k] || "") : v.project };
@@ -3432,7 +3571,9 @@ function buildRecords(imp, existing, learned, today) {
     render(); window.scrollTo(0, 0);
     try {
       await store.bulkPut(todo, (n) => { imp.running.done = n; const el = $("impProgress"); if (el) el.textContent = `Saving ${n} of ${todo.length} …`; });
-      imp.done = { count: todo.length, batch, review: todo.filter((e) => e.cat === UNCAT).length };
+      if (replaced.length) await store.bulkPut(replaced.map((e) => ({ ...e, deletedAt: now })));
+      const autoRules = [...learnedRules.keys()].filter((id) => { const r = state.settings.recurring.find((x) => x.id === id); return r && r.mode !== "import"; });
+      imp.done = { count: todo.length, batch, review: todo.filter((e) => e.cat === UNCAT).length, fixed: learnedRules.size, replaced: replaced.length, autoRules };
     } catch (err) {
       imp.done = null; toast(writeError(err) + " Saved rows can be undone under Data & backup.");
     }
@@ -3547,6 +3688,7 @@ function buildRecords(imp, existing, learned, today) {
     const today = todayISO(), add = [];
     let changed = false;
     const next = state.settings.recurring.map((r) => {
+      if (r.mode === "import") return r;
       const dates = occurrences(r, r.lastBooked || "", today);
       if (!dates.length) return r;
       changed = true;
@@ -3562,7 +3704,15 @@ function buildRecords(imp, existing, learned, today) {
     } catch (err) { console.warn(err); }
     finally { booking = false; }
   }
-  let recType = "aus";
+  let recType = "aus", recMode = "auto", recModeTouched = false;
+  const IMPORTED_ACCOUNTS = ["DKB", "PayPal", "Credit card"];
+  function setRecMode(m) {
+    recMode = m;
+    $("recModeAuto").setAttribute("aria-pressed", String(m === "auto")); $("recModeImp").setAttribute("aria-pressed", String(m === "import"));
+    $("recModeHint").textContent = m === "import" ? "Only a plan. When the bank's booking comes with a CSV import, PFM links it to this fixed cost, uses its category and spreads it – nothing is booked twice."
+      : "PFM adds the payment itself on its due date – right for cash or an account you don't import.";
+    syncRecUI();
+  }
   function setRecType(t, cat) {
     recType = t;
     $("recTypeOut").setAttribute("aria-pressed", String(t === "aus"));
@@ -3577,7 +3727,7 @@ function buildRecords(imp, existing, learned, today) {
   function syncRecUI() {
     $("recSpreadWrap").hidden = Number($("recEvery").value) === 1 || recType === "tr";
     const st = $("recStart").value;
-    $("recBackfillWrap").hidden = !(state.recId == null && st && st < todayISO());
+    $("recBackfillWrap").hidden = !(state.recId == null && st && st < todayISO()) || recMode === "import";
   }
   const spreadPick = (selId, customId) => { const v = $(selId).value; return v === "custom" ? parseInt($(customId).value, 10) : Number(v); };
   function syncSpreadUI() { const v = $("spreadMonths").value; $("spreadCustom").hidden = v !== "custom"; $("spreadStartWrap").hidden = !(v === "custom" || Number(v) > 1); }
@@ -3619,11 +3769,15 @@ function buildRecords(imp, existing, learned, today) {
     $("recProject").innerHTML = `<option value="">None</option>` + state.settings.projects.map((p) => `<option value="${esc(p.id)}"${p.id === pj ? " selected" : ""}>${esc(p.name)}</option>`).join("");
     $("recSpread").checked = r ? r.spread !== false : true;
     $("recBackfill").checked = false;
+    recModeTouched = !!r; setRecMode(r ? r.mode || "auto" : IMPORTED_ACCOUNTS.includes(acc) ? "import" : "auto");
     const del = $("recDelete"); del.hidden = !r; del.classList.remove("armed"); del.textContent = "Delete";
     $("recErr").textContent = "";
     syncRecUI();
     showSheet("recSheet");
   }
+  $("recModeAuto").addEventListener("click", () => { recModeTouched = true; setRecMode("auto"); });
+  $("recModeImp").addEventListener("click", () => { recModeTouched = true; setRecMode("import"); });
+  $("recAccount").addEventListener("change", () => { if (!recModeTouched) setRecMode(IMPORTED_ACCOUNTS.includes($("recAccount").value) ? "import" : "auto"); });
   $("recTypeOut").addEventListener("click", () => setRecType("aus"));
   $("recTypeIn").addEventListener("click", () => setRecType("ein"));
   $("recTypeTr").addEventListener("click", () => { setRecType("tr"); syncRecUI(); });
@@ -3638,11 +3792,12 @@ function buildRecords(imp, existing, learned, today) {
     const every = Number($("recEvery").value), list = state.settings.recurring;
     const old = state.recId ? list.find((x) => x.id === state.recId) : null;
     if (recType === "tr" && $("recAccount").value === $("recTo").value) { $("recErr").textContent = "Pick two different accounts."; return; }
-    const rule = { id: old ? old.id : "f" + Date.now().toString(36), type: recType, cents, name: $("recName").value.trim() || (recType === "tr" ? `Transfer to ${$("recTo").value}` : $("recCat").value), cat: recType === "tr" ? "Transfer" : $("recCat").value, account: $("recAccount").value, project: recType === "tr" ? "" : $("recProject").value, every, start, end, spread: recType === "tr" ? false : $("recSpread").checked };
+    const rule = { id: old ? old.id : "f" + Date.now().toString(36), type: recType, cents, name: $("recName").value.trim() || (recType === "tr" ? `Transfer to ${$("recTo").value}` : $("recCat").value), cat: recType === "tr" ? "Transfer" : $("recCat").value, account: $("recAccount").value, project: recType === "tr" ? "" : $("recProject").value, every, start, end, spread: recType === "tr" ? false : $("recSpread").checked, mode: recMode };
+    if (old && old.payeeKey) rule.payeeKey = old.payeeKey;
     if (recType === "tr") rule.toAccount = $("recTo").value;
     const lastPast = occurrences(rule, "", addDays(todayISO(), -1)).pop() || "";
     if (old) rule.lastBooked = old.start === start && old.every === every ? (old.lastBooked || lastPast) : lastPast;
-    else rule.lastBooked = $("recBackfill").checked ? "" : lastPast;
+    else rule.lastBooked = $("recBackfill").checked && recMode === "auto" ? "" : lastPast;
     $("recSave").disabled = true;
     try {
       await patchSettings({ recurring: old ? list.map((x) => (x.id === old.id ? rule : x)) : list.concat(rule) });
@@ -3672,6 +3827,41 @@ function buildRecords(imp, existing, learned, today) {
   const ASSET_GROUPS = ["Cash & accounts", "Investments", "Receivables", "Property & valuables", "Other assets"];
   const LIAB_GROUPS = ["Loans", "Credit cards", "Payables", "Other liabilities"];
   /* Account-like items: latest known balance (opening or snapshot) plus every booking after it */
+  /* Bank accounts: every balance you entered (older versions kept a single opening balance) */
+  function accSnaps(it) { const sn = { ...(it.snaps || {}) }; if (it.openingDate && sn[it.openingDate] == null) sn[it.openingDate] = it.opening || 0; return sn; }
+  function accSnapsAt(it) { const a = { ...(it.snapsAt || {}) }; if (it.openingDate && it.openingSetAt && !a[it.openingDate]) a[it.openingDate] = it.openingSetAt; return a; }
+  /* What PFM would have calculated for day d from the balances before it plus all bookings since */
+  function expectedAt(it, d) {
+    const sn = accSnaps(it); delete sn[d];
+    if (!Object.keys(sn).some((k) => k < d)) return null;
+    return flowValue({ account: it.account, snaps: sn, snapsAt: accSnapsAt(it) }, d);
+  }
+  function reconText(diff) {
+    if (diff == null) return "";
+    if (Math.abs(diff) < 1) return "✓ matches PFM";
+    return diff > 0 ? `${money(diff)} more at the bank than in PFM – income missing or an expense counted twice?` : `${money(-diff)} less at the bank than in PFM – an expense is missing in PFM?`;
+  }
+  function balHistoryHTML(it) {
+    if (!it) return "";
+    const isAcc = it.kind === "account", src = isAcc ? accSnaps(it) : it.kind === "depot" ? it.snaps || {} : it.values || {};
+    const hist = Object.entries(src).sort((a, b) => b[0].localeCompare(a[0])).slice(0, 12);
+    if (!hist.length) return "";
+    return `<span class="label">${isAcc ? "Balances you entered" : it.kind === "depot" ? "Values you entered" : "History"}</span><div class="hist">${hist.map(([k, v]) => {
+      const diff = isAcc ? (() => { const e = expectedAt(it, k); return e == null ? null : v - e; })() : null;
+      return `<div class="hrow"><span><span class="hint">${esc(k.length > 7 ? dateFmt.format(isoDate(k)) : monthFmt.format(ymDate(k)))}</span>${diff != null ? `<br><span class="${Math.abs(diff) < 1 ? "pos" : "warnt"}">${Math.abs(diff) < 1 ? "✓ matched" : `${signed(diff)} vs PFM`}</span>` : ""}</span><b>${money(v)}</b>${it.kind !== "manual" && it.kind ? `<button type="button" class="mbtn sm" data-action="bal-snap-del" data-arg="${esc(k)}" aria-label="Remove this balance">✕</button>` : ""}</div>`;
+    }).join("")}</div>`;
+  }
+  function updateRecon() {
+    const el = $("balRecon"); if (!el) return;
+    const it = state.balId ? state.settings.balance.items.find((x) => x.id === state.balId) : null;
+    const v = parseNum($("balOpening").value), d = $("balOpeningDate").value;
+    if (balKind !== "account" || !it || it.kind !== "account" || v == null || !/^\d{4}-\d{2}-\d{2}$/.test(d)) { el.hidden = true; return; }
+    const exp = expectedAt({ ...it, account: $("balAccount").value }, d);
+    if (exp == null) { el.hidden = true; return; }
+    const diff = Math.round(v * 100) - exp;
+    el.hidden = false; el.className = `recon ${Math.abs(diff) < 1 ? "ok" : "off"}`;
+    el.innerHTML = `PFM calculates <b>${money(exp)}</b> for ${esc(dateFmt.format(isoDate(d)))}, the bank says <b>${money(Math.round(v * 100))}</b>.<br>${esc(reconText(diff))}`;
+  }
   function flowValue(it, end) {
     const snaps = { ...(it.snaps || {}) };
     if (it.openingDate) snaps[it.openingDate] = it.opening || 0;
@@ -3755,7 +3945,7 @@ function buildRecords(imp, existing, learned, today) {
     setBalSide(sd, it ? it.group : null);
     state.balId = it ? it.id : null;
     setBalKind(it ? (it.kind === "account" || it.kind === "depot" ? it.kind : "manual") : (preset && preset.kind) || "manual");
-    $("balTitle").textContent = it ? `Edit ${sd}` : `New ${sd}`;
+    $("balTitle").textContent = it ? (it.kind === "account" ? `${it.name} balance` : `Edit ${sd}`) : `New ${sd}`;
     $("balName").value = it ? it.name : "";
     const cur = it && it.kind === "manual" ? itemValue(it, curMonth()) : it && !it.kind ? itemValue(it, curMonth()) : null;
     $("balValue").value = cur != null ? (cur / 100).toFixed(2) : "";
@@ -3765,11 +3955,12 @@ function buildRecords(imp, existing, learned, today) {
     $("balDepotValue").value = it && it.kind === "depot" ? ((itemValue(it, curMonth()) || 0) / 100).toFixed(2) : "";
     $("balDepotDate").value = todayISO();
     $("balShowHome").checked = it ? it.showHome !== false : true;
-    $("balOpening").value = it && it.kind === "account" ? ((it.opening || 0) / 100).toFixed(2) : "";
-    $("balOpeningDate").value = (it && it.openingDate) || todayISO();
-    const histSrc = it ? (it.kind === "depot" ? it.snaps : it.values) : null;
-    const hist = histSrc ? Object.entries(histSrc).sort((a, b) => b[0].localeCompare(a[0])).slice(0, 8) : [];
-    $("balHistory").innerHTML = hist.length ? `<span class="label">${it.kind === "depot" ? "Values you entered" : "History"}</span><div class="sumlist" style="margin-top:6px">${hist.map(([k, v]) => `<div><span class="hint">${esc(k.length > 7 ? dateFmt.format(isoDate(k)) : monthFmt.format(ymDate(k)))}</span><b>${money(v)}</b></div>`).join("")}</div>` : "";
+    $("balOpening").value = "";
+    $("balOpeningDate").value = todayISO();
+    $("balOpeningLabel").textContent = it && it.kind === "account" ? "Balance at the bank now (to check)" : "Balance at the bank";
+    $("balOpening").placeholder = it && it.kind === "account" && itemValue(it, curMonth()) != null ? `PFM: ${toInput(itemValue(it, curMonth()))}` : "0.00";
+    $("balHistory").innerHTML = balHistoryHTML(it);
+    $("balRecon").hidden = true;
     const del = $("balDelete"); del.hidden = !it; del.classList.remove("armed"); del.textContent = "Delete";
     $("balErr").textContent = "";
     if (preset && preset.account) {
@@ -3784,6 +3975,7 @@ function buildRecords(imp, existing, learned, today) {
     if (preset && preset.account) setTimeout(() => $("balOpening").focus(), 60);
     else if (!it) setTimeout(() => $("balName").focus(), 60);
   }
+  ["balOpening", "balOpeningDate", "balAccount"].forEach((id) => { $(id).addEventListener("input", updateRecon); $(id).addEventListener("change", updateRecon); });
   $("balSideA").addEventListener("click", () => setBalSide("asset"));
   $("balSideL").addEventListener("click", () => setBalSide("liability"));
   $("balKindManual").addEventListener("click", () => setBalKind("manual"));
@@ -3811,11 +4003,13 @@ function buildRecords(imp, existing, learned, today) {
       if (v != null && item.snaps[d] !== Math.round(v * 100)) { item.snaps[d] = Math.round(v * 100); item.snapsAt[d] = new Date().toISOString(); }
       if (prevAcc && prevAcc !== name && state.entries.some((e) => e.account === prevAcc || e.toAccount === prevAcc)) item.account = prevAcc;
     } else {
-      const v = parseNum($("balOpening").value), d = $("balOpeningDate").value;
-      if (v == null) { $("balErr").textContent = "Enter the balance on that day, e.g. 850.00."; return; }
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) { $("balErr").textContent = "Pick the day of that balance."; return; }
-      const changed = !old || old.opening !== Math.round(v * 100) || old.openingDate !== d;
-      Object.assign(item, { account: $("balAccount").value, opening: Math.round(v * 100), openingDate: d, openingSetAt: changed ? new Date().toISOString() : old.openingSetAt });
+      const raw = $("balOpening").value.trim(), d = $("balOpeningDate").value, v = raw ? parseNum(raw) : null;
+      if (raw && v == null) { $("balErr").textContent = "Enter the balance as a number, e.g. 850.00."; return; }
+      if (!old && v == null) { $("balErr").textContent = "Enter the balance on that day, e.g. 850.00."; return; }
+      if (v != null && !/^\d{4}-\d{2}-\d{2}$/.test(d)) { $("balErr").textContent = "Pick the day of that balance."; return; }
+      const snaps = old ? accSnaps(old) : {}, snapsAt = old ? accSnapsAt(old) : {};
+      if (v != null && snaps[d] !== Math.round(v * 100)) { snaps[d] = Math.round(v * 100); snapsAt[d] = new Date().toISOString(); }
+      Object.assign(item, { account: $("balAccount").value, snaps, snapsAt });
     }
     $("balSave").disabled = true;
     try { await patchSettings({ balance: { items: old ? list.map((x) => (x.id === old.id ? item : x)) : list.concat(item) } }); closeSheets(); toast(old ? "Saved" : `“${name}” added`); }
@@ -4495,7 +4689,7 @@ function buildRecords(imp, existing, learned, today) {
   let deep = "";
   try { deep = (location.hash || "").replace(/^#/, "").toLowerCase(); } catch { deep = ""; }
   if (deep === "add" || (!deep && openMode() === "add")) pendingAdd = true;
-  else if (["cashflow", "calc", "balance", "fixed", "budgets", "search", "tax", "plan"].includes(deep)) state.stack.push({ v: deep });
+  else if (["cashflow", "calc", "balance", "fixed", "budgets", "search", "tax", "plan"].includes(deep)) { if (deep === "calc") state.basis = "calc"; state.stack.push({ v: deep === "calc" ? "cashflow" : deep }); }
   if (deep && (["add", "cashflow", "calc", "balance", "fixed", "budgets", "search", "tax", "plan"].includes(deep))) { $("splash").hidden = true; splashDone = true; }
   else if (!splashEnabled()) { $("splash").hidden = true; splashDone = true; }
   $("splash").addEventListener("click", hideSplash);
