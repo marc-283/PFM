@@ -27,7 +27,7 @@ img { max-width: 100%; }
 </style>
 <script>
 window.PFM_STANDALONE = true;
-window.PFM_VERSION = "1.7.1";
+window.PFM_VERSION = "1.8.0";
 if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
 </script>
 </head>
@@ -254,6 +254,54 @@ tr:last-child td { border-bottom: 0; }
 .minitiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .spktile { text-decoration: none; color: inherit; margin-top: -16px; }
 .spktile .tile-t { font-size: 22px; }
+.spkview { gap: 26px; }
+.sech { font-family: var(--f-display); font-weight: 800; font-size: 24px; text-transform: uppercase; letter-spacing: 0.02em; }
+.spkview .sec { display: flex; flex-direction: column; gap: 12px; }
+.spkki { border-color: var(--accent); background: linear-gradient(180deg, rgba(255, 232, 58, 0.07), rgba(255, 232, 58, 0) 70%), var(--surface); }
+.spkkil { color: var(--accent); }
+.card p.spkkitext { white-space: pre-wrap; color: var(--ink); font-size: 16.5px; line-height: 1.5; max-width: none; }
+.spkhero { display: flex; flex-direction: column; gap: 6px; }
+.spkval { font-family: var(--f-display); font-weight: 800; font-size: 52px; line-height: 1; font-variant-numeric: tabular-nums; }
+.spkpill { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; font-family: var(--f-display); font-size: 13.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap; }
+.spkpill i { width: 8px; height: 8px; border-radius: 50%; background: var(--faint); }
+.spkpill[data-r="gruen"] i { background: var(--pos); } .spkpill[data-r="gelb"] i { background: #FFB547; } .spkpill[data-r="rot"] i { background: var(--neg); }
+.spkorder { border-left: 4px solid var(--accent); }
+.spkorder[data-side="sell"] { border-left-color: var(--neg); }
+.spkorder[data-side="adjust"], .spkorder[data-lev="1"][data-side="buy"] { border-left-color: #FFB547; }
+.spktop { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
+.spkwhat { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.spkact { font-family: var(--f-display); font-weight: 800; font-size: 15px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+.spkorder[data-side="sell"] .spkact { color: var(--neg); }
+.spkorder[data-side="adjust"] .spkact, .spkorder[data-lev="1"][data-side="buy"] .spkact { color: #FFB547; }
+.spkkind { display: block; font-size: 13.5px; opacity: 0.85; }
+.spkname { font-weight: 700; font-size: 18px; line-height: 1.2; }
+.spkamt { font-family: var(--f-display); font-weight: 800; font-size: 28px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.spkspecs { display: flex; flex-wrap: wrap; gap: 6px; }
+.spkspecs span { font-size: 13.5px; background: var(--raised); border-radius: 8px; padding: 3px 8px; }
+.spkisin { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.spkisin code { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 14px; background: var(--raised); border-radius: 8px; padding: 4px 8px; user-select: all; }
+.btn.spksmall { min-height: 34px; padding: 5px 10px; font-size: 14px; border-radius: 9px; }
+.spksteps { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; font-size: 15px; }
+.card p.spkdue, .spkrisk { color: #FFB547; font-size: 14px; }
+.card p.spkrisk { color: #FFB547; }
+.card p.spkwhy { font-size: 14.5px; }
+form.spkexec { display: flex; flex-direction: column; gap: 10px; border-top: 1px solid var(--line); padding-top: 12px; }
+.spkrows { display: flex; flex-direction: column; }
+.spkrow { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.spkrow .t1 { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.spkrow .t2 { grid-column: 1 / -1; color: var(--muted); font-size: 13.5px; }
+.spkrow .v { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.spkrow .v small { display: block; font-size: 13px; font-weight: 500; }
+.spkstop { display: block; color: #FFB547; }
+.spkalloc { display: flex; flex-direction: column; gap: 10px; }
+.spkbar { display: grid; grid-template-columns: 104px minmax(0, 1fr) 78px; gap: 10px; align-items: center; font-size: 14px; }
+.spkbar .trk { position: relative; height: 12px; background: var(--raised); border-radius: 999px; overflow: hidden; }
+.spkbar .ist { position: absolute; inset: 0 auto 0 0; background: var(--accent); border-radius: 999px; }
+.spkbar .ziel { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--ink); }
+.spkbar .nums { text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
+.spkaccb { display: flex; flex-direction: column; gap: 12px; padding: 4px 0 14px; }
+.spkh3 { font-family: var(--f-display); font-weight: 800; font-size: 18px; text-transform: uppercase; letter-spacing: 0.03em; }
+.spknote { color: var(--faint); font-size: 13px; }
 .spkic { color: var(--accent); display: inline-flex; }
 .mtile { border: 1px solid var(--line); border-radius: 18px; background: var(--surface); padding: 16px 14px; text-align: left; display: flex; flex-direction: column; gap: 5px; min-width: 0; }
 .mtile .tile-t { font-size: 21px; }
@@ -3304,7 +3352,7 @@ function buildRecords(imp, existing, learned, today) {
         ${state.trash.length ? navRow("nav", "trash", { text: `Recently deleted (${state.trash.length})` }, "Restore what you deleted in the last 30 days") : ""}
       </section>
       <section class="sec"><div class="sechead"><h2 class="sectitle">${L("Play account", "Spielkonto")}</h2></div>
-        <div data-noi18n>${navRow("nav", "spielkonto", { text: L("AI play account", "KI-Spielkonto") }, state.settings.spielkonto.url ? L("Linked – opens in Claude", "Verknüpft – öffnet in Claude") : L("Add the link to your play account page", "Link zur Spielkonto-Seite eintragen"))}</div>
+        <div data-noi18n>${navRow("nav", "spielkonto", { text: L("AI play account", "KI-Spielkonto") }, spkOn() ? L("Shown in PFM – data comes via sync", "In PFM – Daten kommen über den Sync") : state.settings.spielkonto.url ? L("Linked – opens in Claude", "Verknüpft – öffnet in Claude") : L("Add the link to your play account page", "Link zur Spielkonto-Seite eintragen"))}</div>
       </section>
       <section class="sec"><div class="sechead"><h2 class="sectitle">Help</h2></div>
         ${navRow("nav", "help", { text: "How-to guides" }, "Fixed costs, transfers, import, sync …")}
@@ -3421,7 +3469,7 @@ function buildRecords(imp, existing, learned, today) {
       { id: "tax", t: "Prepare your tax return", b: `<ol><li>Mark deductible costs when you add them: <b>More → Tax return</b> → what it is, tick “I have the receipt”, and the work share if you also use it privately.</li><li>Open <b>Tax return</b> on the menu: add your wage tax certificate under Jobs, your ways to work, home office days and study periods.</li><li>PFM adds everything up per year and estimates the refund. The checklist shows which documents you need.</li></ol><p>The estimate helps with planning – the return itself you file with ELSTER or your tax app.</p>` },
       { id: "backup", t: "Backup and sync", b: `<p><b>Backup</b>: ⚙ → <b>Save backup</b> saves one file with everything – put it into iCloud Drive. Load it under Data &amp; backup.</p><p><b>Sync iPhone &amp; iPad</b>: ⚙ → Sync. Set it up once with a private GitHub repository and a fine-grained token, then copy the setup code to the other device. Your data is encrypted with your sync password before it leaves the device.</p>` },
       { id: "gestures", t: "Gestures", b: `<ul><li>Swipe from the left edge to the right: back.</li><li>On the menu pull down: back to the start screen.</li><li>Drag a sheet down at its top edge: close it.</li><li>On the start screen tap or swipe up: to the menu.</li></ul>` },
-      { id: "play", t: "AI play account", b: `<p>The play account page in Claude holds your AI strategy for Trade Republic. Every trading day at 7:30 a check looks at prices, trends and news and writes instructions – with a push notification to the Claude app when you should act. Open the page: the AI tells you what to do now, and “Check now” starts a fresh check.</p><ol><li>⚙ → <b>AI play account</b> → paste the link of the page once.</li><li>Then the tile on the menu opens it directly.</li><li>Buy or sell in Trade Republic, then tap <b>Done</b> on the page so the depot book stays right.</li></ol>` },
+      { id: "play", t: "AI play account", b: `<p>Your AI strategy for the Trade Republic play account runs in Claude. Every trading day at 7:30 a check looks at prices, trends and news, writes instructions and sends a push notification to the Claude app when you should act. With sync switched on, PFM shows the play account directly: the AI's note, every instruction with the steps in Trade Republic, your positions and target vs. actual.</p><ol><li>Tap the <b>AI play account</b> tile on the menu.</li><li>Buy or sell in Trade Republic as the card says, then tap <b>Done</b> and enter what the app shows. For leveraged products also the ISIN, the number of units and the leverage – PFM then shows your stop-loss price.</li><li>The next check takes your ticks into the depot book. Questions to the AI and “Check now” stay on the page in Claude (button at the top).</li></ol><p>PFM only reads the play-account file in your sync repository. Your own finances stay encrypted – the check can't read them.</p>` },
       { id: "lang", t: "Language", b: `<p>⚙ → <b>Language</b> → English or Deutsch. PFM reloads in the new language; your data stays as it is.</p>` }
     ],
     de: [
@@ -3438,7 +3486,7 @@ function buildRecords(imp, existing, learned, today) {
       { id: "tax", t: "Steuererklärung vorbereiten", b: `<ol><li>Absetzbare Kosten gleich beim Erfassen markieren: <b>Mehr → Steuererklärung</b> → Art, „Beleg vorhanden“ ankreuzen und den beruflichen Anteil, wenn du es auch privat nutzt.</li><li><b>Steuererklärung</b> im Menü öffnen: unter Jobs die Lohnsteuerbescheinigung, dazu Arbeitswege, Homeoffice-Tage und Studienzeiten eintragen.</li><li>PFM summiert alles pro Jahr und schätzt die Erstattung. Die Checkliste zeigt, welche Unterlagen du brauchst.</li></ol><p>Die Schätzung hilft beim Planen – abgegeben wird über ELSTER oder deine Steuer-App.</p>` },
       { id: "backup", t: "Backup und Synchronisierung", b: `<p><b>Backup</b>: ⚙ → <b>Backup sichern</b> speichert alles in einer Datei – am besten in iCloud Drive. Laden unter Daten &amp; Backup.</p><p><b>iPhone &amp; iPad synchronisieren</b>: ⚙ → Synchronisieren. Einmal mit einem privaten GitHub-Repository und einem Fine-grained Token einrichten, dann den Einrichtungscode auf das andere Gerät kopieren. Deine Daten werden mit deinem Sync-Passwort verschlüsselt, bevor sie das Gerät verlassen.</p>` },
       { id: "gestures", t: "Gesten", b: `<ul><li>Vom linken Rand nach rechts wischen: zurück.</li><li>Im Menü nach unten ziehen: zurück zum Startbild.</li><li>Ein Fenster oben am Rand nach unten ziehen: schließen.</li><li>Auf dem Startbild tippen oder nach oben wischen: ins Menü.</li></ul>` },
-      { id: "play", t: "KI-Spielkonto", b: `<p>Die Spielkonto-Seite in Claude enthält deine KI-Strategie für Trade Republic. Jeden Börsentag um 7:30 prüft ein Check Kurse, Trends und Nachrichten und schreibt Anweisungen – mit Push-Nachricht an die Claude-App, wenn du handeln sollst. Öffnest du die Seite, sagt dir die KI, was jetzt dran ist; „Jetzt neu prüfen“ startet einen frischen Check.</p><ol><li>⚙ → <b>KI-Spielkonto</b> → einmal den Link der Seite einfügen.</li><li>Danach öffnet die Kachel im Menü sie direkt.</li><li>In Trade Republic kaufen oder verkaufen, dann auf der Seite <b>Ausgeführt</b> tippen, damit das Depotbuch stimmt.</li></ol>` },
+      { id: "play", t: "KI-Spielkonto", b: `<p>Deine KI-Strategie für das Trade-Republic-Spielkonto läuft in Claude. Jeden Börsentag um 7:30 prüft ein Check Kurse, Trends und Nachrichten, schreibt Anweisungen und schickt eine Push-Nachricht an die Claude-App, wenn du handeln sollst. Ist der Sync eingerichtet, zeigt PFM das Spielkonto direkt: den Text der KI, jede Anweisung mit den Schritten in Trade Republic, deine Positionen und Ziel/Ist.</p><ol><li>Im Menü auf die Kachel <b>KI-Spielkonto</b> tippen.</li><li>In Trade Republic kaufen oder verkaufen, wie es auf der Karte steht, dann <b>Ausgeführt</b> tippen und eintragen, was die App zeigt. Bei Hebelprodukten auch ISIN, Stückzahl und Hebel – dann zeigt PFM deinen Stop-Loss-Kurs.</li><li>Der nächste Check übernimmt deine Haken ins Depotbuch. Fragen an die KI und „Jetzt neu prüfen“ gibt es auf der Seite in Claude (Knopf oben).</li></ol><p>PFM liest nur die Spielkonto-Datei in deinem Sync-Repository. Deine eigenen Finanzen bleiben verschlüsselt – der Check kann sie nicht lesen.</p>` },
       { id: "lang", t: "Sprache", b: `<p>⚙ → <b>Sprache</b> → Deutsch oder English. PFM lädt neu in der gewählten Sprache; deine Daten bleiben unverändert.</p>` }
     ]
   };
@@ -3513,34 +3561,336 @@ function buildRecords(imp, existing, learned, today) {
       </div>`;
   }
 
-  /* ---------- KI-Spielkonto: the strategy runs in Claude; PFM keeps the link and opens it ---------- */
+  /* ---------- KI-Spielkonto: the morning check in Claude writes spielkonto.json into your sync repository.
+     PFM shows it, and what you tick off goes to spielkonto-exec.json – the next check takes it into the depot book. ---------- */
   const SPK_ICON = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M3 17l5-5 4 3 8-8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7h5v5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const SPK_FILE = "spielkonto.json", SPK_EXEC = "spielkonto-exec.json", SPK_CACHE = "pfm.spk.v1", SPK_PEND = "pfm.spk.pend.v1";
+  const spk = { data: null, remote: [], at: 0, loading: false, err: "", missing: false, openForm: null };
+  try { const c = JSON.parse(localStorage.getItem(SPK_CACHE) || "null"); if (c && c.pfm === "spielkonto") spk.data = c; } catch { /* ignore */ }
+  let spkPend = []; try { spkPend = JSON.parse(localStorage.getItem(SPK_PEND) || "[]") || []; } catch { spkPend = []; }
+  const spkSavePend = () => { try { localStorage.setItem(SPK_PEND, JSON.stringify(spkPend)); } catch { /* ignore */ } };
+  const spkOn = () => { const c = syncCfg(); return !!(c && c.token && c.owner && c.repo); };
+  async function ghGetText(cfg, file) {
+    const r = await gh(cfg, `/contents/${file}`);
+    if (r.status === 404) return { sha: null, text: null };
+    if (!r.ok) throw { code: "http", status: r.status };
+    const j = await r.json();
+    if (j.content && j.encoding === "base64") return { sha: j.sha, text: new TextDecoder().decode(b64u8(j.content.replace(/\s/g, ""))) };
+    const r2 = await gh(cfg, `/contents/${file}`, { headers: { Accept: "application/vnd.github.raw+json" } });
+    if (!r2.ok) throw { code: "http", status: r2.status };
+    return { sha: j.sha, text: await r2.text() };
+  }
+  async function ghPutText(cfg, file, text, sha, message) {
+    const body = { message, content: u8b64(new TextEncoder().encode(text)) };
+    if (sha) body.sha = sha;
+    const r = await gh(cfg, `/contents/${file}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    if (r.status === 409 || r.status === 422) throw { code: "conflict" };
+    if (r.status === 404) throw { code: "repo" };
+    if (!r.ok) throw { code: "http", status: r.status };
+  }
+  const spkImported = () => new Set((spk.data && spk.data.importedExec) || []);
+  /* Forget ticks the depot book already has, or whose instruction is gone */
+  function spkPrune() {
+    if (!spk.data) return;
+    const imp = spkImported(), live = new Set((spk.data.orders || []).filter((o) => o.status === "open" || o.status === "planned").map((o) => o.id)), n = spkPend.length;
+    spkPend = spkPend.filter((p) => !imp.has(p.id) && live.has(p.orderId) && Date.now() - (Date.parse(p.at) || 0) < 30 * 864e5);
+    if (spkPend.length !== n) spkSavePend();
+  }
+  async function spkFlush(cfg) {
+    if (!spkPend.some((p) => !p.pushed)) return;
+    cfg = cfg || syncCfg(); if (!cfg) return;
+    for (let attempt = 0; attempt < 4; attempt++) {
+      const e = await ghGetText(cfg, SPK_EXEC);
+      let items = []; try { items = e.text ? JSON.parse(e.text).items || [] : []; } catch { items = []; }
+      const imp = spkImported();
+      items = items.filter((i) => i && !imp.has(i.id));
+      for (const p of spkPend) if (!items.some((i) => i.id === p.id)) { const { pushed: _p, ...it } = p; items.push(it); }
+      try { await ghPutText(cfg, SPK_EXEC, JSON.stringify({ pfm: "spielkonto-exec", v: 1, items }, null, 1) + "\n", e.sha, `PFM Spielkonto from ${DEVICE}`); }
+      catch (err) { if (err.code === "conflict" && attempt < 3) continue; throw err; }
+      spkPend.forEach((p) => { p.pushed = true; }); spkSavePend(); spk.remote = items; return;
+    }
+  }
+  async function spkLoad(force) {
+    if (!spkOn() || spk.loading || (!force && Date.now() - spk.at < 90000)) return;
+    const cfg = syncCfg(), before = spk.data && spk.data.exportedAt, errBefore = spk.err;
+    spk.loading = true;
+    if (force) scheduleRender();
+    try {
+      const f = await ghGetText(cfg, SPK_FILE);
+      spk.missing = !f.text;
+      if (f.text) { const j = JSON.parse(f.text); if (j && j.pfm === "spielkonto") { spk.data = j; try { localStorage.setItem(SPK_CACHE, f.text); } catch { /* ignore */ } } }
+      const e = await ghGetText(cfg, SPK_EXEC);
+      try { spk.remote = e.text ? JSON.parse(e.text).items || [] : []; } catch { spk.remote = []; }
+      spkPrune();
+      spk.err = "";
+      await spkFlush(cfg);
+    } catch (e) {
+      spk.err = e && e.code === "net" ? L("Offline – showing the last saved state.", "Offline – du siehst den zuletzt gespeicherten Stand.") : e instanceof SyntaxError ? L("The play-account file in the repository is damaged – the next check rewrites it.", "Die Spielkonto-Datei im Repository ist beschädigt – der nächste Check schreibt sie neu.") : TR(syncErrText(e));
+    } finally {
+      spk.loading = false; spk.at = Date.now();
+      const top = state.stack[state.stack.length - 1];
+      if (top && (top.v === "spielkonto" || top.v === "hub") && (force || (spk.data && spk.data.exportedAt) !== before || spk.err !== errBefore)) scheduleRender();
+    }
+  }
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") { const top = state.stack[state.stack.length - 1]; if (top && (top.v === "spielkonto" || top.v === "hub")) spkLoad(false); } });
+
+  /* --- the depot book as PFM sees it: the export plus your ticks that the check hasn't taken over yet --- */
+  const spkNum = (raw) => {
+    let s = String(raw || "").trim().replace(/[€\s ]/g, "");
+    if (!s) return null;
+    const lc = s.lastIndexOf(","), ld = s.lastIndexOf(".");
+    if (lc >= 0 && ld >= 0) s = lc > ld ? s.replace(/\./g, "").replace(",", ".") : s.replace(/,/g, "");
+    else if (lc >= 0) s = s.replace(/\./g, "").replace(",", ".");
+    else if (ld >= 0 && /^\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, "");
+    return /^-?\d+(\.\d+)?$/.test(s) ? parseFloat(s) : null;
+  };
+  const sEur = new Intl.NumberFormat(LOC, { style: "currency", currency: "EUR" });
+  const sEur0 = new Intl.NumberFormat(LOC, { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
+  const sN = new Intl.NumberFormat(LOC, { maximumFractionDigits: 4 }), sN2 = new Intl.NumberFormat(LOC, { maximumFractionDigits: 2 });
+  const sMoney = (c) => sEur.format((c || 0) / 100);
+  const sSigned = (c) => (c > 0 ? "+" : c < 0 ? "−" : "") + sEur.format(Math.abs(c || 0) / 100);
+  const sUnit = (c) => new Intl.NumberFormat(LOC, { style: "currency", currency: "EUR", minimumFractionDigits: c < 100 ? 3 : 2, maximumFractionDigits: c < 100 ? 3 : 2 }).format(c / 100);
+  const sFmt = (v) => (typeof v === "number" ? sN2.format(v) : String(v ?? ""));
+  const sDay = (d) => { try { const x = new Date(String(d).slice(0, 10) + "T12:00:00"); return x.toLocaleDateString(LOC, x.getFullYear() === new Date().getFullYear() ? { weekday: "short", day: "numeric", month: "short" } : { day: "numeric", month: "short", year: "numeric" }); } catch { return String(d); } };
+  const sWhen = (iso) => { try { return new Date(iso).toLocaleString(LOC, { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }); } catch { return ""; } };
+  const S_LEV = { ko: "Knock-out", faktor: "Faktor-Zertifikat", os: "Optionsschein" }, S_NAV = { ko: "Knock-out", faktor: "Faktor", os: "Optionsschein" };
+  const sIsLev = (o) => !!(o && S_LEV[o.kind]);
+  const sDir = (o) => (o.kind === "os" ? (o.direction === "put" || o.direction === "short" ? "Put" : "Call") : o.direction === "short" || o.direction === "put" ? "Short" : "Long");
+  const sSpan = (r) => (!r ? "" : r.max == null || r.min === r.max ? sFmt(r.min) : r.min == null ? `bis ${sFmt(r.max)}` : `${sFmt(r.min)}–${sFmt(r.max)}`);
+  const sStopPct = (o) => (o.stopPct != null ? o.stopPct : o.kind === "os" ? 40 : 30);
+  const sCap = () => (spk.data && spk.data.config && spk.data.config.capitalCents) || 0;
+  const sPrice = (k) => (spk.data && spk.data.quotes && spk.data.quotes.prices && spk.data.quotes.prices[k]) || null;
+  const sAmount = (o) => (o.amountCents != null ? o.amountCents : o.pct != null && sCap() ? Math.round(sCap() * o.pct / 100) : null);
+  function spkOrders() {
+    const d = spk.data; if (!d) return [];
+    const imp = spkImported(), acts = new Map();
+    for (const it of [...spk.remote, ...spkPend]) if (it && !imp.has(it.id)) acts.set(it.orderId, it);
+    return (d.orders || []).map((o) => {
+      const a = acts.get(o.id);
+      if (!a || (o.status !== "open" && o.status !== "planned")) return o;
+      return a.status === "skipped" ? { ...o, status: "skipped", local: true } : { ...o, status: "done", executed: a.executed, local: true };
+    });
+  }
+  function spkBook(orders) {
+    const pos = {}; let cash = sCap();
+    const done = orders.filter((o) => o.status === "done" && o.executed).sort((a, b) => String(a.executed.date || "").localeCompare(String(b.executed.date || "")));
+    for (const o of done) {
+      const x = o.executed, amt = x.amountCents || 0, fee = x.feeCents || 0;
+      if (o.side === "adjust") { if (pos[o.key] && o.newStopCents) pos[o.key].stopSet = o.newStopCents; continue; }
+      const p = pos[o.key] || (pos[o.key] = { key: o.key, name: o.name, qty: 0, cost: 0, estQty: false });
+      if (o.side === "sell" && o.newStopCents) p.stopSet = o.newStopCents;
+      const lev = sIsLev(o), price = x.priceCents || (lev ? null : o.refPriceCents || sPrice(o.key));
+      const qty = x.qty != null ? x.qty : price ? amt / price : null;
+      if (x.qty == null) p.estQty = true;
+      if (o.side === "buy") {
+        cash -= amt + fee; p.cost += amt; if (qty != null) p.qty += qty;
+        if (lev) Object.assign(p, { lev: true, kind: o.kind, direction: o.direction, levVal: x.lev != null ? x.lev : p.levVal, ko: x.ko != null ? x.ko : p.ko, stopPct: sStopPct(o), maxHoldUntil: o.maxHoldUntil || p.maxHoldUntil });
+      } else {
+        cash += amt - fee;
+        if (o.sellAll || o.knockedOut || o.stopHit) { p.qty = 0; p.cost = 0; }
+        else if (p.qty > 0 && qty != null) { const share = Math.min(1, qty / p.qty); p.cost -= p.cost * share; p.qty -= qty; }
+        else p.cost = Math.max(0, p.cost - amt);
+        if (p.qty < 1e-9) { p.qty = 0; p.cost = 0; }
+      }
+    }
+    const stops = (spk.data && spk.data.state && spk.data.state.stops) || {};
+    const list = Object.values(pos).filter((p) => p.cost > 0.5 || p.qty > 1e-9).map((p) => {
+      const pr = sPrice(p.key), value = pr && p.qty ? Math.round(p.qty * pr) : Math.round(p.cost);
+      const set = p.stopSet != null ? p.stopSet : stops[p.key];
+      const stop = p.lev ? (set != null ? set : p.qty && !p.estQty ? (p.cost / p.qty) * (1 - p.stopPct / 100) : null) : null;
+      return { ...p, value, pl: value - Math.round(p.cost), known: !!(pr && p.qty), stop, stopMoved: set != null };
+    });
+    const invested = list.reduce((a, p) => a + p.value, 0);
+    return { list, cash: Math.round(cash), total: Math.round(cash + invested), levValue: list.filter((p) => p.lev).reduce((a, p) => a + p.value, 0) };
+  }
+  function spkCriteria(o) {
+    const c = [];
+    if (o.lev) c.push(o.kind === "faktor" ? `Faktor ${sSpan(o.lev)}` : `Hebel ${sSpan(o.lev)}`);
+    if (o.koLimit && o.koLimit.level != null) c.push(`KO-Schwelle ${o.koLimit.op === "min" ? "mindestens" : "höchstens"} ${sFmt(o.koLimit.level)}${o.koLimit.unit ? " " + o.koLimit.unit : ""}`);
+    if (o.strike) c.push(`Basispreis ${sSpan(o.strike)}${o.strike.unit ? " " + o.strike.unit : ""}`);
+    if (o.expiryMin) c.push(`Laufzeit bis mindestens ${sDay(o.expiryMin)}`);
+    return c;
+  }
+  function spkSteps(o, amt, book) {
+    const a = amt != null ? sMoney(amt) : "den Betrag";
+    if (sIsLev(o)) {
+      if (o.side === "buy") {
+        const crit = spkCriteria(o), find = `„${o.underlying || o.name}“ öffnen → Derivate → ${S_NAV[o.kind]} → ${sDir(o)}${crit.length ? " → " + crit.join(", ") : ""}`;
+        const s = o.isin ? ["Trade Republic öffnen → Suche → ISIN einfügen (Vorschlag der KI)", `Passt das Produkt nicht mehr zu den Werten oben, such selbst: ${find}`] : ["Trade Republic öffnen → Suche", `${find} – ein Produkt wählen, das genau dazu passt`];
+        s.push(`Kaufen → Stückzahl so wählen, dass die Summe bei etwa ${a} liegt (nicht mehr) → bestätigen (1 € Gebühr)`);
+        s.push(`Direkt danach: Position öffnen → Stop-Loss-Order → Stoppkurs = Kaufkurs − ${sStopPct(o)} % (Kaufkurs × ${sFmt(1 - sStopPct(o) / 100)})`);
+        return s;
+      }
+      if (o.side === "adjust") return [`Trade Republic → Depot → ${o.name} → offene Stop-Loss-Order antippen`, `Stoppkurs auf ${o.newStopCents ? sUnit(o.newStopCents) : "den neuen Wert"} ändern → bestätigen`, "Hier „Erledigt“ tippen"];
+      if (o.knockedOut) return ["In Trade Republic nichts verkaufen – das Produkt wurde nach dem Knock-out automatisch ausgebucht", "Unter Aktivität nachsehen, ob ein Restwert gutgeschrieben wurde", "Hier „Ausgeführt“ tippen und den Restwert eintragen (oft 0 €)"];
+      if (o.stopHit) return ["In Trade Republic nachsehen, ob deine Stop-Loss-Order schon verkauft hat (Aktivität)", "Ja → hier „Ausgeführt“ tippen und den Erlös eintragen", `Nein → Depot → ${o.name} → Verkaufen → alle Stück → bestätigen`];
+      const p = book.list.find((x) => x.key === o.key);
+      const part = !o.sellAll && o.sellPct ? (p && p.qty && !p.estQty ? `${Math.floor(p.qty * o.sellPct / 100)} von ${sFmt(p.qty)} Stück` : `${o.sellPct} % der Stück`) : null;
+      const s = [`Depot → ${o.name} öffnen`];
+      if (!part) s.push("Zuerst die offene Stop-Loss-Order löschen (Orders → Order antippen → Löschen)");
+      s.push(part ? `Verkaufen → ${part} → bestätigen (1 € Gebühr)` : "Verkaufen → alle Stück → bestätigen (1 € Gebühr)");
+      if (part) s.push(`Danach die Stop-Loss-Order auf die restlichen Stück ändern${o.newStopCents ? ` und den Stoppkurs auf ${sUnit(o.newStopCents)} setzen` : ""}`);
+      return s;
+    }
+    if (o.kind === "crypto") return o.side === "buy"
+      ? [`Trade Republic öffnen → Suche → „${o.name}“`, `Kaufen → Betrag ${a} eingeben`, "Order prüfen und bestätigen (1 € Gebühr)"]
+      : [`Depot → ${o.name} öffnen`, o.sellAll ? "Verkaufen → Alles" : `Verkaufen → Betrag ${a}`, "Order prüfen und bestätigen"];
+    return o.side === "buy"
+      ? ["Trade Republic öffnen → Suche → ISIN einfügen", `Kaufen → „Betrag“ wählen → ${a}`, "Order prüfen und bestätigen (1 € Gebühr)"]
+      : [`Depot → ${o.name} öffnen`, o.sellAll ? "Verkaufen → Alles" : `Verkaufen → Betrag ${a}`, "Order prüfen und bestätigen (1 € Gebühr)"];
+  }
+  const sVerb = (o) => (o.side === "sell" ? "Verkaufen" : o.side === "adjust" ? "Stopp ändern" : "Kaufen");
+  function spkCard(o, book) {
+    const amt = sAmount(o), lev = sIsLev(o), side = o.side === "sell" || o.side === "adjust" ? o.side : "buy", levBuy = lev && side === "buy", id = esc(o.id);
+    const amtText = side === "adjust" ? (o.newStopCents ? sUnit(o.newStopCents) : "") : o.knockedOut ? "KO" : o.sellAll ? "Alles" : side === "sell" && o.sellPct ? `${sFmt(o.sellPct)} %` : amt != null ? sMoney(amt) : o.pct != null ? `${sFmt(o.pct)} %` : "";
+    const specs = levBuy ? [o.underlying ? `Basiswert ${o.underlying}` : null, ...spkCriteria(o), o.maxHoldUntil ? `Spätestens raus am ${sDay(o.maxHoldUntil)}` : null].filter(Boolean) : [];
+    let foot;
+    if (side === "adjust") foot = `<div class="btnrow"><button class="btn primary" data-action="spk-done" data-arg="${id}">Erledigt</button><button class="btn" data-action="spk-skip" data-arg="${id}">${spk.armed === o.id ? "Wirklich auslassen?" : "Nicht gemacht"}</button></div>`;
+    else if (spk.openForm === o.id) foot = spkForm(o, amt);
+    else foot = `<div class="btnrow"><button class="btn primary" data-action="spk-exec" data-arg="${id}">Ausgeführt</button><button class="btn" data-action="spk-skip" data-arg="${id}">${spk.armed === o.id ? "Wirklich auslassen?" : "Nicht gemacht"}</button></div>`;
+    return `<article class="card spkorder" data-side="${side}" data-lev="${lev ? 1 : 0}">
+      <div class="spktop"><div class="spkwhat"><span class="spkact">${sVerb(o)}${lev ? `<span class="spkkind">${esc(S_LEV[o.kind])} ${esc(sDir(o))}</span>` : ""}</span><span class="spkname">${esc(o.name)}</span></div><span class="spkamt">${esc(amtText)}</span></div>
+      ${specs.length ? `<div class="spkspecs">${specs.map((s) => `<span>${esc(s)}</span>`).join("")}</div>` : ""}
+      ${o.isin ? `<div class="spkisin"><span class="label">${levBuy ? "ISIN-Vorschlag" : "ISIN"}</span><code>${esc(o.isin)}</code><button class="btn spksmall" data-action="spk-copy" data-arg="${esc(o.isin)}">Kopieren</button></div>` : ""}
+      ${o.due ? `<p class="spkdue">${esc(o.due)}</p>` : ""}
+      <ol class="spksteps">${spkSteps(o, amt, book).map((s) => `<li>${esc(s)}</li>`).join("")}</ol>
+      ${levBuy ? `<p class="spkrisk">Hebelprodukt: Ein Totalverlust ist möglich. Kauf es nur, wenn du gleich danach die Stop-Loss-Order setzt.</p>` : ""}
+      ${o.reason ? `<p class="spkwhy">${esc(o.reason)}</p>` : ""}
+      ${foot}
+    </article>`;
+  }
+  function spkForm(o, amt) {
+    const lev = sIsLev(o), levBuy = lev && o.side !== "sell", id = esc(o.id);
+    const v = amt != null && !(lev && o.side === "sell") ? (amt / 100).toFixed(2).replace(".", DEC) : "";
+    const t = spk.typed || {};
+    const f = (name, label, value, ph, mode) => `<div class="field"><label class="label" for="spk-${name}">${label}</label><input id="spk-${name}" name="${name}" ${mode === "date" ? 'type="date"' : `inputmode="${mode || "decimal"}"`} autocomplete="off" value="${esc(t[name] != null ? t[name] : value || "")}" placeholder="${esc(ph || "")}"${name === "isin" ? ' autocapitalize="characters" spellcheck="false"' : ""}></div>`;
+    return `<form class="spkexec" data-order="${id}" novalidate>
+      <div class="two">
+        ${f("amt", lev && o.side === "sell" ? "Erlös laut App (€)" : levBuy ? "Summe laut App (€)" : "Betrag laut App (€)", v, o.knockedOut ? "z. B. 0" : "")}
+        ${f("qty", levBuy ? "Stück" : "Stück (optional)", "", levBuy ? "z. B. 120" : "z. B. 0,3712")}
+        ${levBuy ? f("isin", "ISIN des Produkts", o.isin || "", "z. B. DE000HG…", "text") + f("lev", o.kind === "faktor" ? "Faktor laut App" : "Hebel laut App", "", "z. B. 5,2") + (o.kind === "ko" ? f("ko", "KO-Schwelle", "", "z. B. 21.480") : "") : ""}
+        ${f("date", "Datum", todayISO(), "", "date")}
+        ${f("fee", "Gebühr (€)", o.knockedOut ? "0" : "1", "")}
+      </div>
+      <p class="hint">${levBuy ? "ISIN, Stück und Hebel stehen in der Kaufbestätigung. Aus Summe und Stück rechnet PFM deinen Stoppkurs." : o.knockedOut ? "Steht in Trade Republic kein Restwert, trag 0 ein." : "Die Stückzahl steht in Trade Republic unter der Position. Ohne sie schätzt PFM den Wert über den Kurs."}</p>
+      <div class="err" id="spkFormErr" role="alert"></div>
+      <div class="btnrow"><button class="btn primary" type="submit">Speichern</button><button class="btn" type="button" data-action="spk-cancel">Abbrechen</button></div>
+    </form>`;
+  }
+  function spkTick(orderId, status, executed) {
+    const it = { id: "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), orderId, status, at: new Date().toISOString(), device: DEVICE };
+    if (executed) it.executed = executed;
+    spkPend.push(it); spkSavePend(); spk.openForm = null; render();
+    spkFlush().then(() => toast(L("Saved – the next check takes it into the depot book", "Gespeichert – der nächste Check übernimmt es ins Depotbuch")))
+      .catch((e) => toast(e && e.code === "net" ? L("Saved on this device – sent when you're online", "Auf dem Gerät gespeichert – wird gesendet, sobald du online bist") : TR(syncErrText(e))));
+  }
+  async function spkSubmit(form) {
+    const o = spkOrders().find((x) => x.id === form.dataset.order), err = form.querySelector(".err"); if (!o) return;
+    const g = (n) => (form.elements[n] ? form.elements[n].value.trim() : "");
+    const lev = sIsLev(o), levBuy = lev && o.side !== "sell";
+    const amt = spkNum(g("amt")), qty = g("qty") ? spkNum(g("qty")) : null, fee = g("fee") ? spkNum(g("fee")) : 0, date = g("date");
+    if (amt == null || amt < 0 || (amt === 0 && o.side !== "sell")) { err.textContent = o.knockedOut ? "Trag den Restwert ein – 0, wenn nichts gutgeschrieben wurde." : "Gib den Betrag aus der App ein, z. B. 450,00."; return; }
+    if (levBuy && !g("qty")) { err.textContent = "Trag die Stückzahl ein – ohne sie kann PFM den Stoppkurs nicht rechnen."; return; }
+    if (g("qty") && (qty == null || qty <= 0)) { err.textContent = "Die Stückzahl als Zahl, z. B. 0,3712 – oder leer lassen."; return; }
+    if (fee == null || fee < 0) { err.textContent = "Die Gebühr als Zahl, z. B. 1."; return; }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) { err.textContent = "Wähle das Datum der Ausführung."; return; }
+    const ex = { date, amountCents: Math.round(amt * 100), feeCents: Math.round(fee * 100), at: new Date().toISOString() };
+    if (qty != null) { ex.qty = qty; ex.priceCents = Math.round(amt * 100000 / qty) / 1000; }
+    if (levBuy) {
+      const isin = g("isin").replace(/\s+/g, "").toUpperCase();
+      if (!/^[A-Z]{2}[A-Z0-9]{9}\d$/.test(isin)) { err.textContent = "Die ISIN hat 12 Zeichen, z. B. DE000HG1AB23 – sie steht in der Kaufbestätigung."; return; }
+      ex.isin = isin;
+      if (g("lev")) { const lv = spkNum(g("lev")); if (lv == null || lv <= 0) { err.textContent = "Den Hebel als Zahl, z. B. 5,2 – oder leer lassen."; return; } ex.lev = lv; }
+      if (g("ko")) { const ko = spkNum(g("ko")); if (ko == null || ko <= 0) { err.textContent = "Die KO-Schwelle als Zahl, z. B. 21.480 – oder leer lassen."; return; } ex.ko = ko; }
+    }
+    spkTick(o.id, "done", ex);
+  }
+  document.addEventListener("submit", (ev) => { const f = ev.target.closest && ev.target.closest("form.spkexec"); if (!f) return; ev.preventDefault(); spkSubmit(f); });
+
+  const S_REGIME = { gruen: "Ampel grün", gelb: "Ampel gelb", rot: "Ampel rot" };
   function spkTile() {
-    const url = state.settings.spielkonto.url;
-    const inner = `<span class="tile-l"><span class="tile-t">${L("AI play account", "KI-Spielkonto")}</span><span class="tile-s">${url ? L("What to buy or sell in Trade Republic today · opens in Claude", "Was du heute in Trade Republic kaufen oder verkaufen sollst · öffnet in Claude") : L("Add the link once – then the AI tells you what to do", "Einmal den Link eintragen – dann sagt dir die KI, was zu tun ist")}</span></span><span class="spkic">${SPK_ICON}</span><span class="chev" aria-hidden="true">›</span>`;
-    return url ? `<a class="tile spktile" data-noi18n href="${esc(url)}" target="_blank" rel="noopener">${inner}</a>` : `<button class="tile spktile" data-noi18n data-action="nav" data-arg="spielkonto">${inner}</button>`;
+    const url = state.settings.spielkonto.url, on = spkOn();
+    if (on) setTimeout(() => spkLoad(false), 0);
+    let sub;
+    if (on && spk.data) {
+      const n = spkOrders().filter((o) => o.status === "open").length;
+      sub = (n ? `${n} ${n === 1 ? L("instruction open", "Anweisung offen") : L("instructions open", "Anweisungen offen")}` : L("Nothing to do right now", "Gerade nichts zu tun")) + ` · ${L("as of", "Stand")} ${sWhen(spk.data.exportedAt)}`;
+    } else if (on) sub = L("What to buy or sell in Trade Republic today", "Was du heute in Trade Republic kaufen oder verkaufen sollst");
+    else sub = url ? L("What to buy or sell in Trade Republic today · opens in Claude", "Was du heute in Trade Republic kaufen oder verkaufen sollst · öffnet in Claude") : L("Add the link once – then the AI tells you what to do", "Einmal den Link eintragen – dann sagt dir die KI, was zu tun ist");
+    const inner = `<span class="tile-l"><span class="tile-t">${L("AI play account", "KI-Spielkonto")}</span><span class="tile-s">${esc(sub)}</span></span><span class="spkic">${SPK_ICON}</span><span class="chev" aria-hidden="true">›</span>`;
+    return !on && url ? `<a class="tile spktile" data-noi18n href="${esc(url)}" target="_blank" rel="noopener">${inner}</a>` : `<button class="tile spktile" data-noi18n data-action="nav" data-arg="spielkonto">${inner}</button>`;
+  }
+  function spkSetupHTML(url, open) {
+    return `<details class="hacc spkacc"${open ? " open" : ""}><summary>${L("Link to Claude and push notifications", "Verknüpfung mit Claude und Push-Nachrichten")}</summary><div class="spkaccb">
+      <div class="field"><label class="label" for="spkUrl">${L("Link to the play account page", "Link zur Spielkonto-Seite")}</label><input id="spkUrl" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://claude.ai/artifact/…" value="${esc(url)}"></div>
+      <div class="err" id="spkErr" role="alert"></div>
+      <div class="btnrow"><button class="btn${url ? "" : " primary"}" data-action="spk-save">${L("Save link", "Link speichern")}</button>${url ? `<button class="btn" data-action="spk-clear">${L("Remove", "Entfernen")}</button>` : ""}</div>
+      <p class="hint">${L("Copy the link in Claude: open the play account page → Share → Copy link. The link syncs to your iPad.", "Den Link kopierst du in Claude: Spielkonto-Seite öffnen → Teilen → Link kopieren. Der Link wird aufs iPad mitsynchronisiert.")}</p>
+      <h3 class="spkh3">${L("Push notifications", "Push-Nachrichten")}</h3>
+      <ol class="spksteps">
+        <li>${L("Install the Claude app on your iPhone and sign in with the same account.", "Installiere die Claude-App auf dem iPhone und melde dich mit demselben Konto an.")}</li>
+        <li>${L("iPhone Settings → Apps → Claude → Notifications → Allow Notifications, with Lock Screen and Banners on.", "iPhone-Einstellungen → Apps → Claude → Mitteilungen → „Mitteilungen erlauben“, dazu Sperrbildschirm und Banner an.")}</li>
+        <li>${L("Done: the morning check sends its instructions to the Claude app.", "Fertig: Der Morgen-Check schickt seine Anweisungen an die Claude-App.")}</li>
+      </ol></div></details>`;
   }
   function viewSpielkonto() {
-    const url = state.settings.spielkonto.url;
-    return `${backBar()}
-      <h1 class="vtitle">${L("AI play account", "KI-Spielkonto")}</h1>
-      <div data-noi18n class="view" style="gap:22px">
-      <p class="hint">${L("Your AI strategy for the Trade Republic play account runs in Claude. Every trading day at 7:30 it checks prices, trends and news and sends a push notification when you should buy or sell. When you open the page, the AI tells you what to do right now.", "Deine KI-Strategie für das Trade-Republic-Spielkonto läuft in Claude. Jeden Börsentag um 7:30 prüft sie Kurse, Trends und Nachrichten und schickt dir eine Push-Nachricht, wenn du kaufen oder verkaufen sollst. Öffnest du die Seite, sagt dir die KI, was gerade zu tun ist.")}</p>
-      ${url ? `<a class="btn primary" style="text-align:center;text-decoration:none" href="${esc(url)}" target="_blank" rel="noopener">${L("Open play account ›", "Spielkonto öffnen ›")}</a>` : ""}
-      <section class="card">
-        <div class="field"><label class="label" for="spkUrl">${L("Link to the play account page", "Link zur Spielkonto-Seite")}</label><input id="spkUrl" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://claude.ai/artifact/…" value="${esc(url)}"></div>
-        <div class="err" id="spkErr" role="alert"></div>
-        <div class="btnrow"><button class="btn${url ? "" : " primary"}" data-action="spk-save">${L("Save link", "Link speichern")}</button>${url ? `<button class="btn" data-action="spk-clear">${L("Remove", "Entfernen")}</button>` : ""}</div>
-        <p class="hint">${L("Copy the link in Claude: open the play account page → Share → Copy link. PFM only stores the link; the depot book and the AI stay in your Claude account. The link syncs to your iPad.", "Den Link kopierst du in Claude: Spielkonto-Seite öffnen → Teilen → Link kopieren. PFM speichert nur den Link; Depotbuch und KI bleiben in deinem Claude-Konto. Der Link wird aufs iPad mitsynchronisiert.")}</p>
-      </section>
-      <section class="card"><h2>${L("Push notifications", "Push-Nachrichten")}</h2>
-        <ol style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px">
-          <li>${L("Install the Claude app on your iPhone and sign in with the same account.", "Installiere die Claude-App auf dem iPhone und melde dich mit demselben Konto an.")}</li>
-          <li>${L("iPhone Settings → Apps → Claude → Notifications → Allow Notifications, with Lock Screen and Banners on.", "iPhone-Einstellungen → Apps → Claude → Mitteilungen → „Mitteilungen erlauben“, dazu Sperrbildschirm und Banner an.")}</li>
-          <li>${L("Done: the morning check sends its instructions to the Claude app. Tapping the notification opens the details.", "Fertig: Der Morgen-Check schickt seine Anweisungen an die Claude-App. Tippst du auf die Nachricht, siehst du die Details.")}</li>
-        </ol></section>
-      </div>`;
+    const url = state.settings.spielkonto.url, on = spkOn(), d = spk.data;
+    if (on) setTimeout(() => spkLoad(false), 0);
+    const head = `${backBar()}<h1 class="vtitle">${L("AI play account", "KI-Spielkonto")}</h1>`;
+    if (!on) return `${head}<div data-noi18n class="view" style="gap:22px">
+      <p class="hint">${L("Your AI strategy for the Trade Republic play account runs in Claude. Every trading day at 7:30 it checks prices, trends and news and sends a push notification when you should buy or sell.", "Deine KI-Strategie für das Trade-Republic-Spielkonto läuft in Claude. Jeden Börsentag um 7:30 prüft sie Kurse, Trends und Nachrichten und schickt dir eine Push-Nachricht, wenn du kaufen oder verkaufen sollst.")}</p>
+      <p class="hint">${L("Set up sync (⚙ → Sync) and PFM shows the play account right here – with the instructions, your positions and the AI's note.", "Richte den Sync ein (⚙ → Sync), dann zeigt PFM das Spielkonto direkt hier – mit den Anweisungen, deinen Positionen und dem Text der KI.")}</p>
+      ${url ? `<a class="btn primary" style="text-align:center;text-decoration:none" href="${esc(url)}" target="_blank" rel="noopener">${L("Open play account in Claude ›", "Spielkonto in Claude öffnen ›")}</a>` : ""}
+      ${spkSetupHTML(url, true)}</div>`;
+    const claude = url || (d && d.pageUrl) || "";
+    const status = spk.loading ? `<p class="hint">${L("Loading …", "Lädt …")}</p>` : spk.err ? `<p class="err">${esc(spk.err)}</p>` : "";
+    if (!d) return `${head}<div data-noi18n class="view" style="gap:22px">${status}
+      <div class="empty"><strong>${L("No data yet", "Noch keine Daten")}</strong><span>${spk.missing ? L("The morning check (trading days 7:30) puts the play account into your sync repository – then it shows up here.", "Der Morgen-Check (werktags 7:30) legt das Spielkonto in deinem Sync-Repository ab – dann erscheint es hier.") : L("PFM is reading the play account from your sync repository.", "PFM liest das Spielkonto aus deinem Sync-Repository.")}</span>
+      ${claude ? `<a class="btn" style="text-decoration:none" href="${esc(claude)}" target="_blank" rel="noopener">${L("Open in Claude ›", "In Claude öffnen ›")}</a>` : ""}</div>
+      ${spkSetupHTML(url, !url)}</div>`;
+    const orders = spkOrders(), book = spkBook(orders), cap = sCap(), cfg = d.config || {};
+    const open = orders.filter((o) => o.status === "open").sort((a, b) => (a.prio || 9) - (b.prio || 9) || String(a.created || "").localeCompare(String(b.created || "")));
+    const planned = orders.filter((o) => o.status === "planned");
+    const pending = orders.filter((o) => o.local).length;
+    const r = cfg.regime && cfg.regime.status;
+    const res = book.total - cap, pct = cap ? res / cap * 100 : 0;
+    const ki = `<section class="card spkki"><div class="split"><span class="label spkkil">${L("The AI says", "Die KI sagt")}</span><span class="hint">${L("as of", "Stand")} ${esc(sWhen(d.exportedAt))}</span></div>
+      <p class="spkkitext">${esc(d.briefing || (open.length ? L("Your instructions are below.", "Deine Anweisungen stehen unten.") : L("Nothing to do right now.", "Gerade nichts zu tun.")))}</p>
+      <div class="btnrow">${claude ? `<a class="btn primary" style="text-decoration:none" href="${esc(claude)}" target="_blank" rel="noopener">${L("Ask or check again in Claude ›", "Fragen oder neu prüfen in Claude ›")}</a>` : ""}<button class="btn" data-action="spk-refresh"${spk.loading ? " disabled" : ""}>${L("Refresh", "Aktualisieren")}</button></div>
+      ${status}
+      ${pending ? `<p class="hint">${pending === 1 ? L("1 tick is waiting for the next check.", "1 Haken wartet auf den nächsten Check.") : L(`${pending} ticks are waiting for the next check.`, `${pending} Haken warten auf den nächsten Check.`)}</p>` : ""}</section>`;
+    const hero = cap ? `<section class="spkhero"><div class="split"><span class="label">${L("Depot value", "Depotwert")}</span><span class="spkpill" data-r="${esc(r || "none")}"><i></i>${esc(S_REGIME[r] || L("No check yet", "Noch kein Check"))}</span></div>
+      <div class="spkval">${esc(sMoney(book.total))}</div>
+      <p class="hint"><span class="${res >= 0 ? "pos" : "neg"}">${res >= 0 ? "▲" : "▼"} ${esc(sSigned(res))} (${esc(sFmt(Math.round(pct * 10) / 10))} %)</span> · ${L("paid in", "eingezahlt")} ${esc(sEur0.format(cap / 100))} · Cash ${esc(sEur0.format(book.cash / 100))}</p></section>` : `<p class="hint">${L("Enter the start capital on the Claude page – then the amounts appear in euros.", "Trag das Startkapital auf der Claude-Seite ein – dann stehen hier die Beträge in Euro.")}</p>`;
+    const todo = open.length ? open.map((o) => spkCard(o, book)).join("") : `<div class="empty"><strong>${L("Nothing to do", "Nichts zu tun")}</strong><span>${L("The next check runs on the next trading day at 7:30 and sends a push when something is due.", "Der nächste Check läuft am nächsten Börsentag um 7:30 und meldet sich per Push, wenn etwas ansteht.")}</span></div>`;
+    const plannedHTML = planned.length ? `<section class="card"><span class="label">${L("Planned – the check releases them", "Geplant – der Check gibt sie frei")}</span><div class="spkrows">${planned.map((o) => `<div class="spkrow"><span class="t1">${sVerb(o)}: ${esc(o.name)}</span><span class="v">${o.pct != null ? esc(sFmt(o.pct)) + " %" : sAmount(o) != null ? esc(sMoney(sAmount(o))) : ""}</span><span class="t2">${esc(o.due || "")}</span></div>`).join("")}</div></section>` : "";
+    const posHTML = book.list.length ? book.list.sort((x, y) => y.value - x.value).map((p) => {
+      const t = (cfg.targets || []).find((x) => x.key === p.key), bucket = p.lev ? "Hebel" : t && t.bucket, pc = p.cost ? p.pl / p.cost * 100 : 0;
+      const levInfo = p.lev ? ` · ${S_LEV[p.kind]} ${sDir(p)}${p.levVal ? " · Hebel " + sFmt(p.levVal) : ""}${p.ko ? " · KO " + sFmt(p.ko) : ""}${p.maxHoldUntil ? " · spätestens raus am " + sDay(p.maxHoldUntil) : ""}` : "";
+      const stop = p.lev ? `<span class="spkstop">${p.stop != null ? `Stop-Loss in der App: ${esc(sUnit(p.stop))}${p.stopMoved ? " (nachgezogen)" : ` (Kaufkurs − ${p.stopPct} %)`}` : `Stop-Loss in der App: Kaufkurs − ${p.stopPct} %`}</span>` : "";
+      return `<div class="spkrow"><span class="t1">${esc(p.name)}${bucket ? `<span class="tag">${esc(bucket)}</span>` : ""}</span><span class="v">${esc(sMoney(p.value))}<small class="${p.pl >= 0 ? "pos" : "neg"}">${esc(sSigned(p.pl))} · ${esc(sFmt(Math.round(pc * 10) / 10))} %</small></span>
+        <span class="t2">${p.qty ? `${p.estQty ? "≈ " : ""}${esc(sN.format(p.qty))} Stück · ` : ""}Einstand ${esc(sMoney(Math.round(p.cost)))}${p.known ? "" : " · noch ohne aktuellen Kurs"}${esc(levInfo)}${stop}</span></div>`;
+    }).join("") + `<div class="spkrow"><span class="t1">Cash</span><span class="v">${esc(sMoney(book.cash))}</span><span class="t2">${L("Earns interest on the clearing account", "Verzinst auf dem Verrechnungskonto")}</span></div>` : `<p class="hint">${L("Nothing bought yet. Positions appear once you tick an instruction off.", "Noch nichts gekauft. Positionen erscheinen, sobald du eine Anweisung als ausgeführt markierst.")}</p>`;
+    const T = cfg.targets || [], tot = book.total || cap || 1, ist = {};
+    book.list.forEach((p) => { ist[p.key] = p.value; });
+    const rows = T.map((t) => ({ n: t.short || t.name, z: t.pct, i: (ist[t.key] || 0) / tot * 100 }));
+    if (cfg.hebelPct) rows.push({ n: "Hebel-Topf", z: cfg.hebelPct, i: book.levValue / tot * 100 });
+    rows.push({ n: "Cash", z: cfg.cashPct != null ? cfg.cashPct : 10, i: book.cash / tot * 100 });
+    const mx = Math.max(40, ...rows.map((x) => Math.max(x.z, x.i)));
+    const alloc = T.length ? rows.map((x) => `<div class="spkbar"><span>${esc(x.n)}</span><span class="trk"><span class="ist" style="width:${Math.max(0, Math.min(100, x.i / mx * 100)).toFixed(1)}%"></span><span class="ziel" style="left:${Math.min(100, x.z / mx * 100).toFixed(1)}%"></span></span><span class="nums">${x.i.toFixed(0)} / ${esc(sFmt(x.z))} %</span></div>`).join("") : "";
+    const log = (d.log || []).slice(0, 8).map((l) => `<div class="spkrow"><span class="t1">${esc(l.title || (l.actions ? `${l.actions} ${l.actions === 1 ? "Anweisung" : "Anweisungen"}` : "Nichts zu tun"))}</span><span class="v">${l.valueCents ? esc(sMoney(l.valueCents)) : ""}</span><span class="t2">${esc(sDay(l.date || l.id))}${S_REGIME[l.regime] ? " · " + esc(S_REGIME[l.regime]) : ""}${l.summary ? " · " + esc(l.summary) : ""}</span></div>`).join("");
+    return `${head}<div data-noi18n class="view spkview">
+      ${ki}${hero}
+      <section class="sec"><div class="split"><h2 class="sech">${L("To do", "Zu tun")}</h2><span class="hint">${open.length ? `${open.length} ${L("open", "offen")}` : ""}</span></div>${todo}${plannedHTML}</section>
+      <section class="sec"><div class="split"><h2 class="sech">${L("Positions", "Positionen")}</h2><span class="hint">${d.quotes && d.quotes.asOf ? `${L("Prices", "Kurse")} ${esc(sWhen(d.quotes.asOf))}` : ""}</span></div><div class="spkrows">${posHTML}</div></section>
+      ${alloc ? `<section class="sec"><h2 class="sech">${L("Target and actual", "Ziel und Ist")}</h2><div class="spkalloc">${alloc}</div><p class="hint">${L("Bar = actual, line = target.", "Balken = Ist, Strich = Ziel.")}</p></section>` : ""}
+      ${log ? `<section class="sec"><div class="split"><h2 class="sech">${L("Daily check", "Täglicher Check")}</h2><span class="hint">${L("trading days 7:30", "werktags 7:30")}</span></div><div class="spkrows">${log}</div></section>` : ""}
+      <p class="hint">${L("Rules, manual entries and questions to the AI: on the play account page in Claude. Ticks you set there show up here after the next check.", "Regelwerk, eigene Orders und Fragen an die KI: auf der Spielkonto-Seite in Claude. Was du dort abhakst, erscheint hier nach dem nächsten Check.")}</p>
+      ${spkSetupHTML(url, false)}
+      <p class="spknote">${L("An experiment with play money, not investment advice. Leveraged products lose value fast and often completely.", "Ein Experiment mit Spielgeld, keine Anlageberatung. Hebelprodukte verlieren schnell und oft komplett an Wert.")}</p>
+    </div>`;
   }
+  document.addEventListener("input", (ev) => { const f = ev.target.closest && ev.target.closest("form.spkexec"); if (f && ev.target.name) { spk.typed = spk.typed || {}; spk.typed[ev.target.name] = ev.target.value; } });
   const VIEWS = { spielkonto: viewSpielkonto, help: viewHelp, theory: viewTheory, hub: viewHub, cashflow: viewHome, cat: viewCat, budgets: viewBudgets, list: viewList, project: viewProject, data: viewData, import: viewImport, fixed: viewFixed, calc: viewHome, balance: viewBalance, trash: viewTrash, categories: viewCategories, search: viewSearch, tax: viewTax, plan: viewPlan, manage: viewManage, sync: viewSync };
 
   function render() {
@@ -3662,6 +4012,12 @@ function buildRecords(imp, existing, learned, today) {
       case "imp-reset": state.imp = null; render(); break;
       case "rec-new": openRec(null); break;
       case "rec-edit": openRec(state.settings.recurring.find((r) => r.id === arg)); break;
+      case "spk-refresh": spkLoad(true); break;
+      case "spk-exec": spk.openForm = arg; spk.typed = {}; spk.armed = null; render(); { const i = document.querySelector("form.spkexec input"); if (i) i.focus(); } break;
+      case "spk-cancel": spk.openForm = null; spk.typed = {}; render(); break;
+      case "spk-skip": if (spk.armed !== arg) { spk.armed = arg; render(); break; } spk.armed = null; spkTick(arg, "skipped", null); break;
+      case "spk-done": spkTick(arg, "done", { date: todayISO(), amountCents: 0, feeCents: 0, at: new Date().toISOString() }); break;
+      case "spk-copy": (navigator.clipboard ? navigator.clipboard.writeText(arg) : Promise.reject()).then(() => toast(L("ISIN copied", "ISIN kopiert"))).catch(() => { window.prompt("ISIN", arg); }); break;
       case "spk-save": case "spk-clear": {
         const raw = a.dataset.action === "spk-clear" ? "" : ($("spkUrl").value || "").trim(), err = $("spkErr");
         if (raw && !/^https:\/\/claude\.ai\/\S+$/.test(raw)) { err.textContent = L("Paste the full link, it starts with https://claude.ai/", "Füge den ganzen Link ein, er beginnt mit https://claude.ai/"); break; }
