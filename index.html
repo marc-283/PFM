@@ -27,7 +27,7 @@ img { max-width: 100%; }
 </style>
 <script>
 window.PFM_STANDALONE = true;
-window.PFM_VERSION = "1.7.0";
+window.PFM_VERSION = "1.7.1";
 if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
 </script>
 </head>
@@ -252,6 +252,9 @@ tr:last-child td { border-bottom: 0; }
 .searchbar button { border: 0; background: var(--raised); color: var(--muted); width: 28px; height: 28px; border-radius: 50%; font-size: 13px; flex: none; }
 .hubsearch { width: 100%; text-align: left; font-size: 16.5px; }
 .minitiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.spktile { text-decoration: none; color: inherit; margin-top: -16px; }
+.spktile .tile-t { font-size: 22px; }
+.spkic { color: var(--accent); display: inline-flex; }
 .mtile { border: 1px solid var(--line); border-radius: 18px; background: var(--surface); padding: 16px 14px; text-align: left; display: flex; flex-direction: column; gap: 5px; min-width: 0; }
 .mtile .tile-t { font-size: 21px; }
 .mtile .tile-v { font-size: 18px; }
@@ -1217,7 +1220,7 @@ function buildRecords(imp, existing, learned, today) {
   const axisMoney = (c) => eur0.format(c / 100);
 
   const state = {
-    entries: [], trash: [], settings: { limits: {}, projects: [], rules: {}, catMap: {}, recurring: [], balance: { items: [] }, customCats: { aus: [], ein: [] }, cats: null, renames: {}, tax: { study: "", years: {}, studies: [] }, plan: { items: [] } },
+    entries: [], trash: [], settings: { limits: {}, projects: [], rules: {}, catMap: {}, recurring: [], balance: { items: [] }, customCats: { aus: [], ein: [] }, cats: null, renames: {}, tax: { study: "", years: {}, studies: [] }, plan: { items: [] }, spielkonto: { url: "" } },
     q: { text: "", type: "all", f: "any" }, taxYear: null, planId: null,
     year: curYear(), mon: new Date().getMonth() + 1,
     stack: [{ v: "hub" }], homeCat: "All", listFilter: "all", sel: null, armedCat: null, newCatType: "aus", editCat: null,
@@ -1596,7 +1599,8 @@ function buildRecords(imp, existing, learned, today) {
     const pl = obj(s.plan);
     const planItems = Array.isArray(pl.items) ? pl.items.filter((i) => i && typeof i.id === "string" && typeof i.name === "string" && Number.isInteger(i.cents) && i.cents > 0).map((i) => ({ ...i, every: [1, 3, 6, 12].includes(i.every) ? i.every : 1 })) : [];
     return { limits: lim, projects, rules: obj(s.rules), catMap: obj(s.catMap), recurring, balance: { items }, customCats: { aus: names(cc.aus), ein: names(cc.ein) }, cats: catsOk ? { aus: names(s.cats.aus), ein: names(s.cats.ein) } : null, renames,
-      tax: { study: ["master", "first", "none"].includes(tx.study) ? tx.study : "", years, studies: Array.isArray(tx.studies) ? tx.studies.filter((x) => x && typeof x.id === "string" && (x.kind === "first" || x.kind === "second")) : [] }, plan: { ...pl, items: planItems } };
+      tax: { study: ["master", "first", "none"].includes(tx.study) ? tx.study : "", years, studies: Array.isArray(tx.studies) ? tx.studies.filter((x) => x && typeof x.id === "string" && (x.kind === "first" || x.kind === "second")) : [] }, plan: { ...pl, items: planItems },
+      spielkonto: { url: typeof obj(s.spielkonto).url === "string" && /^https:\/\/claude\.ai\//.test(obj(s.spielkonto).url) ? obj(s.spielkonto).url : "" } };
   }
   async function patchSettings(patch) {
     if (!store) throw new Error("not ready");
@@ -2040,7 +2044,7 @@ function buildRecords(imp, existing, learned, today) {
       </span>
       <span></span><span class="chev" aria-hidden="true">›</span></button>`;
   }
-  const VIEW_LABEL = { hub: "Menu", cashflow: "Cash flows", cat: "Category", budgets: "Budgets", list: "Transactions", project: "Project", data: "Data & backup", import: "Import", fixed: "Fixed costs", calc: "Cash flows", balance: "Balance sheet", trash: "Recently deleted", categories: "Categories", search: "Search", tax: "Tax return", plan: "Independence plan", manage: "Settings", sync: "Sync", help: "Help", theory: "Theory & tips" };
+  const VIEW_LABEL = { hub: "Menu", cashflow: "Cash flows", cat: "Category", budgets: "Budgets", list: "Transactions", project: "Project", data: "Data & backup", import: "Import", fixed: "Fixed costs", calc: "Cash flows", balance: "Balance sheet", trash: "Recently deleted", categories: "Categories", search: "Search", tax: "Tax return", plan: "Independence plan", manage: "Settings", sync: "Sync", help: "Help", theory: "Theory & tips", spielkonto: "KI-Spielkonto" };
   const backBar = () => { const prev = state.stack[state.stack.length - 2]; return `<button class="backbtn" data-action="back"><span aria-hidden="true">‹</span>${esc(prev ? VIEW_LABEL[prev.v] || "Back" : "Menu")}</button>`; };
   let renderIds = [], scopeIds = [];
   function selToolbar(startLabel) {
@@ -2745,6 +2749,7 @@ function buildRecords(imp, existing, learned, today) {
         <button class="mtile" data-action="nav" data-arg="plan"><span class="tile-t">Independence</span>${pd ? `<span class="tile-v">${Math.round(pd.cov * 100)} %</span><span class="tile-s">paid by yourself</span>` : `<span class="tile-s">What you'd need to earn to pay everything yourself</span>`}</button>
         <button class="mtile" data-action="nav" data-arg="tax"><span class="tile-t">Tax return</span>${txs.hasEmp ? `<span class="tile-v ${txs.refund >= 0 ? "pos" : "neg"}">${signed(txs.refund)}</span><span class="tile-s">estimated ${txs.refund >= 0 ? "refund" : "to pay"} ${y}${txs.R.stale ? ` (${RULES_LATEST} rules)` : ""}</span>` : txs.deductible ? `<span class="tile-v">${money(txs.deductible)}</span><span class="tile-s">deductible in ${y}</span>` : `<span class="tile-s">Collect deductible costs for ${y}</span>`}</button>
       </div>
+      ${spkTile()}
       <section class="accounts" aria-label="Accounts">
         <span class="label">${hasInv ? "Accounts &amp; investments" : "Account balance"}</span>
         <div class="acc-total">${known.length ? heroHTML(total) : "–"}</div>
@@ -3298,6 +3303,9 @@ function buildRecords(imp, existing, learned, today) {
         ${navRow("nav", "categories", { text: "Categories" }, "Add, rename and sort")}
         ${state.trash.length ? navRow("nav", "trash", { text: `Recently deleted (${state.trash.length})` }, "Restore what you deleted in the last 30 days") : ""}
       </section>
+      <section class="sec"><div class="sechead"><h2 class="sectitle">${L("Play account", "Spielkonto")}</h2></div>
+        <div data-noi18n>${navRow("nav", "spielkonto", { text: L("AI play account", "KI-Spielkonto") }, state.settings.spielkonto.url ? L("Linked – opens in Claude", "Verknüpft – öffnet in Claude") : L("Add the link to your play account page", "Link zur Spielkonto-Seite eintragen"))}</div>
+      </section>
       <section class="sec"><div class="sechead"><h2 class="sectitle">Help</h2></div>
         ${navRow("nav", "help", { text: "How-to guides" }, "Fixed costs, transfers, import, sync …")}
         ${navRow("nav", "theory", { text: "Theory & tips" }, "Market value, HGB and tax law, depreciation rules, useful lives")}
@@ -3413,6 +3421,7 @@ function buildRecords(imp, existing, learned, today) {
       { id: "tax", t: "Prepare your tax return", b: `<ol><li>Mark deductible costs when you add them: <b>More → Tax return</b> → what it is, tick “I have the receipt”, and the work share if you also use it privately.</li><li>Open <b>Tax return</b> on the menu: add your wage tax certificate under Jobs, your ways to work, home office days and study periods.</li><li>PFM adds everything up per year and estimates the refund. The checklist shows which documents you need.</li></ol><p>The estimate helps with planning – the return itself you file with ELSTER or your tax app.</p>` },
       { id: "backup", t: "Backup and sync", b: `<p><b>Backup</b>: ⚙ → <b>Save backup</b> saves one file with everything – put it into iCloud Drive. Load it under Data &amp; backup.</p><p><b>Sync iPhone &amp; iPad</b>: ⚙ → Sync. Set it up once with a private GitHub repository and a fine-grained token, then copy the setup code to the other device. Your data is encrypted with your sync password before it leaves the device.</p>` },
       { id: "gestures", t: "Gestures", b: `<ul><li>Swipe from the left edge to the right: back.</li><li>On the menu pull down: back to the start screen.</li><li>Drag a sheet down at its top edge: close it.</li><li>On the start screen tap or swipe up: to the menu.</li></ul>` },
+      { id: "play", t: "AI play account", b: `<p>The play account page in Claude holds your AI strategy for Trade Republic. Every trading day at 7:30 a check looks at prices, trends and news and writes instructions – with a push notification to the Claude app when you should act. Open the page: the AI tells you what to do now, and “Check now” starts a fresh check.</p><ol><li>⚙ → <b>AI play account</b> → paste the link of the page once.</li><li>Then the tile on the menu opens it directly.</li><li>Buy or sell in Trade Republic, then tap <b>Done</b> on the page so the depot book stays right.</li></ol>` },
       { id: "lang", t: "Language", b: `<p>⚙ → <b>Language</b> → English or Deutsch. PFM reloads in the new language; your data stays as it is.</p>` }
     ],
     de: [
@@ -3429,6 +3438,7 @@ function buildRecords(imp, existing, learned, today) {
       { id: "tax", t: "Steuererklärung vorbereiten", b: `<ol><li>Absetzbare Kosten gleich beim Erfassen markieren: <b>Mehr → Steuererklärung</b> → Art, „Beleg vorhanden“ ankreuzen und den beruflichen Anteil, wenn du es auch privat nutzt.</li><li><b>Steuererklärung</b> im Menü öffnen: unter Jobs die Lohnsteuerbescheinigung, dazu Arbeitswege, Homeoffice-Tage und Studienzeiten eintragen.</li><li>PFM summiert alles pro Jahr und schätzt die Erstattung. Die Checkliste zeigt, welche Unterlagen du brauchst.</li></ol><p>Die Schätzung hilft beim Planen – abgegeben wird über ELSTER oder deine Steuer-App.</p>` },
       { id: "backup", t: "Backup und Synchronisierung", b: `<p><b>Backup</b>: ⚙ → <b>Backup sichern</b> speichert alles in einer Datei – am besten in iCloud Drive. Laden unter Daten &amp; Backup.</p><p><b>iPhone &amp; iPad synchronisieren</b>: ⚙ → Synchronisieren. Einmal mit einem privaten GitHub-Repository und einem Fine-grained Token einrichten, dann den Einrichtungscode auf das andere Gerät kopieren. Deine Daten werden mit deinem Sync-Passwort verschlüsselt, bevor sie das Gerät verlassen.</p>` },
       { id: "gestures", t: "Gesten", b: `<ul><li>Vom linken Rand nach rechts wischen: zurück.</li><li>Im Menü nach unten ziehen: zurück zum Startbild.</li><li>Ein Fenster oben am Rand nach unten ziehen: schließen.</li><li>Auf dem Startbild tippen oder nach oben wischen: ins Menü.</li></ul>` },
+      { id: "play", t: "KI-Spielkonto", b: `<p>Die Spielkonto-Seite in Claude enthält deine KI-Strategie für Trade Republic. Jeden Börsentag um 7:30 prüft ein Check Kurse, Trends und Nachrichten und schreibt Anweisungen – mit Push-Nachricht an die Claude-App, wenn du handeln sollst. Öffnest du die Seite, sagt dir die KI, was jetzt dran ist; „Jetzt neu prüfen“ startet einen frischen Check.</p><ol><li>⚙ → <b>KI-Spielkonto</b> → einmal den Link der Seite einfügen.</li><li>Danach öffnet die Kachel im Menü sie direkt.</li><li>In Trade Republic kaufen oder verkaufen, dann auf der Seite <b>Ausgeführt</b> tippen, damit das Depotbuch stimmt.</li></ol>` },
       { id: "lang", t: "Sprache", b: `<p>⚙ → <b>Sprache</b> → Deutsch oder English. PFM lädt neu in der gewählten Sprache; deine Daten bleiben unverändert.</p>` }
     ]
   };
@@ -3503,7 +3513,35 @@ function buildRecords(imp, existing, learned, today) {
       </div>`;
   }
 
-  const VIEWS = { help: viewHelp, theory: viewTheory, hub: viewHub, cashflow: viewHome, cat: viewCat, budgets: viewBudgets, list: viewList, project: viewProject, data: viewData, import: viewImport, fixed: viewFixed, calc: viewHome, balance: viewBalance, trash: viewTrash, categories: viewCategories, search: viewSearch, tax: viewTax, plan: viewPlan, manage: viewManage, sync: viewSync };
+  /* ---------- KI-Spielkonto: the strategy runs in Claude; PFM keeps the link and opens it ---------- */
+  const SPK_ICON = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M3 17l5-5 4 3 8-8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7h5v5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  function spkTile() {
+    const url = state.settings.spielkonto.url;
+    const inner = `<span class="tile-l"><span class="tile-t">${L("AI play account", "KI-Spielkonto")}</span><span class="tile-s">${url ? L("What to buy or sell in Trade Republic today · opens in Claude", "Was du heute in Trade Republic kaufen oder verkaufen sollst · öffnet in Claude") : L("Add the link once – then the AI tells you what to do", "Einmal den Link eintragen – dann sagt dir die KI, was zu tun ist")}</span></span><span class="spkic">${SPK_ICON}</span><span class="chev" aria-hidden="true">›</span>`;
+    return url ? `<a class="tile spktile" data-noi18n href="${esc(url)}" target="_blank" rel="noopener">${inner}</a>` : `<button class="tile spktile" data-noi18n data-action="nav" data-arg="spielkonto">${inner}</button>`;
+  }
+  function viewSpielkonto() {
+    const url = state.settings.spielkonto.url;
+    return `${backBar()}
+      <h1 class="vtitle">${L("AI play account", "KI-Spielkonto")}</h1>
+      <div data-noi18n class="view" style="gap:22px">
+      <p class="hint">${L("Your AI strategy for the Trade Republic play account runs in Claude. Every trading day at 7:30 it checks prices, trends and news and sends a push notification when you should buy or sell. When you open the page, the AI tells you what to do right now.", "Deine KI-Strategie für das Trade-Republic-Spielkonto läuft in Claude. Jeden Börsentag um 7:30 prüft sie Kurse, Trends und Nachrichten und schickt dir eine Push-Nachricht, wenn du kaufen oder verkaufen sollst. Öffnest du die Seite, sagt dir die KI, was gerade zu tun ist.")}</p>
+      ${url ? `<a class="btn primary" style="text-align:center;text-decoration:none" href="${esc(url)}" target="_blank" rel="noopener">${L("Open play account ›", "Spielkonto öffnen ›")}</a>` : ""}
+      <section class="card">
+        <div class="field"><label class="label" for="spkUrl">${L("Link to the play account page", "Link zur Spielkonto-Seite")}</label><input id="spkUrl" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://claude.ai/artifact/…" value="${esc(url)}"></div>
+        <div class="err" id="spkErr" role="alert"></div>
+        <div class="btnrow"><button class="btn${url ? "" : " primary"}" data-action="spk-save">${L("Save link", "Link speichern")}</button>${url ? `<button class="btn" data-action="spk-clear">${L("Remove", "Entfernen")}</button>` : ""}</div>
+        <p class="hint">${L("Copy the link in Claude: open the play account page → Share → Copy link. PFM only stores the link; the depot book and the AI stay in your Claude account. The link syncs to your iPad.", "Den Link kopierst du in Claude: Spielkonto-Seite öffnen → Teilen → Link kopieren. PFM speichert nur den Link; Depotbuch und KI bleiben in deinem Claude-Konto. Der Link wird aufs iPad mitsynchronisiert.")}</p>
+      </section>
+      <section class="card"><h2>${L("Push notifications", "Push-Nachrichten")}</h2>
+        <ol style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px">
+          <li>${L("Install the Claude app on your iPhone and sign in with the same account.", "Installiere die Claude-App auf dem iPhone und melde dich mit demselben Konto an.")}</li>
+          <li>${L("iPhone Settings → Apps → Claude → Notifications → Allow Notifications, with Lock Screen and Banners on.", "iPhone-Einstellungen → Apps → Claude → Mitteilungen → „Mitteilungen erlauben“, dazu Sperrbildschirm und Banner an.")}</li>
+          <li>${L("Done: the morning check sends its instructions to the Claude app. Tapping the notification opens the details.", "Fertig: Der Morgen-Check schickt seine Anweisungen an die Claude-App. Tippst du auf die Nachricht, siehst du die Details.")}</li>
+        </ol></section>
+      </div>`;
+  }
+  const VIEWS = { spielkonto: viewSpielkonto, help: viewHelp, theory: viewTheory, hub: viewHub, cashflow: viewHome, cat: viewCat, budgets: viewBudgets, list: viewList, project: viewProject, data: viewData, import: viewImport, fixed: viewFixed, calc: viewHome, balance: viewBalance, trash: viewTrash, categories: viewCategories, search: viewSearch, tax: viewTax, plan: viewPlan, manage: viewManage, sync: viewSync };
 
   function render() {
     const top = state.stack[state.stack.length - 1], root = $("view");
@@ -3624,6 +3662,11 @@ function buildRecords(imp, existing, learned, today) {
       case "imp-reset": state.imp = null; render(); break;
       case "rec-new": openRec(null); break;
       case "rec-edit": openRec(state.settings.recurring.find((r) => r.id === arg)); break;
+      case "spk-save": case "spk-clear": {
+        const raw = a.dataset.action === "spk-clear" ? "" : ($("spkUrl").value || "").trim(), err = $("spkErr");
+        if (raw && !/^https:\/\/claude\.ai\/\S+$/.test(raw)) { err.textContent = L("Paste the full link, it starts with https://claude.ai/", "Füge den ganzen Link ein, er beginnt mit https://claude.ai/"); break; }
+        patchSettings({ spielkonto: { url: raw } }).then(() => { toast(raw ? L("Link saved", "Link gespeichert") : L("Link removed", "Link entfernt")); render(); }).catch((e) => { err.textContent = writeError(e); });
+        break; }
       case "lang": if (arg !== LANG) { try { localStorage.setItem(LANG_KEY, arg === "de" ? "de" : "en"); sessionStorage.setItem("pfm.reopen", "manage"); } catch { /* ignore */ } location.reload(); } break;
       case "balmode": state.balMode = arg; try { localStorage.setItem(BAL_MODE_KEY, arg); } catch { /* ignore */ } render(); break;
       case "bal-new": if (arg === "asset") { closeSheets(); showSheet("chooseSheet"); } else openBal(null, arg); break;
