@@ -27,7 +27,7 @@ img { max-width: 100%; }
 </style>
 <script>
 window.PFM_STANDALONE = true;
-window.PFM_VERSION = "1.8.0";
+window.PFM_VERSION = "1.9.0";
 if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
 </script>
 </head>
@@ -115,6 +115,100 @@ h1, h2 { margin: 0; text-wrap: balance; }
 .pills button { border: 0; background: transparent; color: var(--muted); font-weight: 700; padding: 7px 14px; border-radius: 999px; font-size: 14px; }
 .pills button[aria-pressed="true"] { background: var(--raised); color: var(--ink); }
 .chartblock { display: flex; flex-direction: column; gap: 12px; }
+.pickwrap:empty { display: none; }
+.pickhint { font-size: 13px; margin-top: -6px; }
+.pickcard { border-color: var(--accent); gap: 14px; }
+.pickbig { display: flex; flex-direction: column; gap: 4px; }
+.pickgrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.pickgrid > div { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.pickgrid b { font-size: 18px; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pickcats { display: flex; flex-direction: column; gap: 8px; }
+.pickcat { display: grid; grid-template-columns: 10px minmax(0, 1fr) auto; gap: 4px 10px; align-items: center; font-size: 14.5px; }
+.pickcat > i { width: 10px; height: 10px; border-radius: 50%; }
+.pickcat .pcn { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pickcat .pcn small { color: var(--muted); margin-left: 6px; font-size: 12.5px; }
+.pickcat .pcv { font-variant-numeric: tabular-nums; font-weight: 600; }
+.pickcat .pcb { grid-column: 2 / -1; height: 4px; background: var(--raised); border-radius: 4px; overflow: hidden; }
+.pickcat .pcb span { display: block; height: 100%; border-radius: 4px; }
+.picklist { display: flex; flex-direction: column; }
+.picklist > .label { padding-bottom: 2px; }
+/* Reports */
+.repview { display: flex; flex-direction: column; gap: 22px; }
+.seg.five { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.seg.five button { padding: 10px 2px; font-size: 13.5px; }
+.reptop { display: flex; flex-direction: column; gap: 6px; }
+.repnav { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.repnav .btn { min-height: 40px; padding: 8px 10px; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.repnav .btn:disabled { opacity: 0.35; }
+.repnote { margin-top: -8px; }
+.repkpis { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.kpi { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 13px 13px 12px; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.kpi b { font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 2px 0 3px; }
+.kpi small, .rcd small, .reptable small { font-size: 12.5px; color: var(--muted); white-space: nowrap; }
+.kpi small .pos, .kpi small .neg { font-weight: 600; }
+.dl0 { color: var(--muted); }
+.repnotes { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.repnotes li { position: relative; padding-left: 18px; font-size: 15.5px; line-height: 1.4; }
+.repnotes li::before { content: ""; position: absolute; left: 2px; top: 0.5em; width: 8px; height: 8px; border-radius: 50%; background: var(--faint); }
+.repnotes li.pos::before { background: var(--pos); } .repnotes li.neg::before { background: var(--neg); }
+.repnotes li.pos, .repnotes li.neg { color: var(--ink); }
+.repsec { gap: 12px; }
+.rchart .rsvg { width: 100%; height: auto; display: block; }
+.rsvg text { fill: var(--muted); font-size: 9px; font-family: var(--f-body); }
+.rsvg text.cur { fill: var(--ink); font-weight: 700; }
+.rsvg .g { stroke: var(--line); stroke-width: 0.7; } .rsvg .g.z { stroke: var(--faint); }
+.rsvg .hl { fill: var(--raised); }
+.rsvg .bi { fill: var(--pos); } .rsvg .bo { fill: var(--neg); }
+.rsvg .nl { fill: none; stroke: var(--accent); stroke-width: 1.6; stroke-linejoin: round; } .rsvg .nd { fill: var(--accent); }
+.rsvg .ar { fill: var(--accent); opacity: 0.14; } .rsvg .ml { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linejoin: round; }
+.rsvg .pl { fill: none; stroke: var(--accent); stroke-width: 1.6; stroke-dasharray: 4 3; } .rsvg .md { fill: var(--accent); }
+.rsvg .today { stroke: var(--faint); stroke-width: 0.8; stroke-dasharray: 2 2; }
+.rsvg .cc { fill: none; stroke: var(--neg); stroke-width: 2; stroke-linejoin: round; } .rsvg .cd { fill: var(--neg); }
+.rsvg .cp { fill: none; stroke: var(--faint); stroke-width: 1.4; stroke-dasharray: 4 3; }
+.repwhere { display: grid; grid-template-columns: 132px minmax(0, 1fr); gap: 14px; align-items: center; }
+.donut { width: 132px; height: 132px; }
+.donut .dl { fill: var(--muted); font-size: 9px; font-family: var(--f-body); }
+.donut .dv { fill: var(--ink); font-size: 14px; font-weight: 600; font-family: var(--f-body); }
+.rlegend { display: flex; flex-direction: column; gap: 6px; font-size: 14px; min-width: 0; }
+.rlegend span { display: flex; align-items: center; gap: 8px; overflow: hidden; white-space: nowrap; }
+.rlegend b { margin-left: auto; font-weight: 600; color: var(--muted); }
+.rlegend i, .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; flex: none; }
+.dot { margin-right: 7px; }
+.rcats { display: flex; flex-direction: column; gap: 10px; }
+.rcat { display: grid; grid-template-columns: 10px minmax(0, 1fr) auto; gap: 4px 10px; align-items: center; font-size: 15px; }
+.rcat > i { width: 10px; height: 10px; border-radius: 50%; }
+.rcat .rcn { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rcat .rcv { font-weight: 600; font-variant-numeric: tabular-nums; text-align: right; }
+.rcat .rcv small { color: var(--muted); font-weight: 400; margin-left: 6px; font-size: 12.5px; }
+.rcat .rcb { grid-column: 2 / -1; height: 5px; background: var(--raised); border-radius: 5px; overflow: hidden; }
+.rcat .rcb span { display: block; height: 100%; border-radius: 5px; }
+.rcat .rcd { grid-column: 2 / -1; margin-top: -2px; }
+.repcells { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 10px; }
+.repcells > * { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.repcells b { font-size: 17px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.reptable { font-size: 13px; }
+.reptable th, .reptable td { white-space: nowrap; vertical-align: top; padding: 8px 6px; }
+.reptable th:first-child, .reptable td:first-child { padding-left: 10px; white-space: normal; min-width: 84px; }
+.reptable th:last-child, .reptable td:last-child { padding-right: 10px; }
+.reptable small { font-size: 11.5px; }
+.reptable td.r, .reptable th.r { text-align: right; }
+.reptable tfoot td { font-weight: 700; }
+.fixbar { height: 12px; border-radius: 6px; background: color-mix(in srgb, var(--neg) 28%, var(--raised)); overflow: hidden; }
+.fixbar span { display: block; height: 100%; background: var(--neg); }
+.rbud { display: flex; flex-direction: column; gap: 6px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.repgrp { border-bottom: 1px solid var(--line); }
+.repgrp summary { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 2px; padding: 13px 0; cursor: pointer; list-style: none; font-size: 15.5px; }
+.repgrp summary::-webkit-details-marker { display: none; }
+.repgrp summary small { color: var(--muted); margin-left: 4px; }
+.repgrp summary b { font-variant-numeric: tabular-nums; font-weight: 600; }
+.repgrp[open] summary { color: var(--accent); }
+.repfeat { text-align: left; border-color: var(--accent); background: linear-gradient(180deg, rgba(255, 232, 58, 0.07), rgba(255, 232, 58, 0) 70%), var(--surface); }
+.repfeat-t { font-family: var(--f-display); font-weight: 800; font-size: 30px; line-height: 1; text-transform: uppercase; }
+.repfeat .repcells { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.repfeat .repcells b { font-size: 16px; }
+.repnew { display: inline-block; background: var(--accent); color: var(--accent-ink); border-radius: 6px; padding: 1px 7px; font-family: var(--f-display); font-weight: 800; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; vertical-align: 1px; }
+.repbadge { background: var(--raised); color: var(--ink); font-size: 12px; }
+.reppdf .btnrow .btn { flex: 1 1 140px; }
 .legend { display: flex; gap: 14px; font-size: 13px; color: var(--muted); flex-wrap: wrap; }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
 .legend i { width: 14px; height: 0; border-top: 2px solid; display: inline-block; }
@@ -1826,7 +1920,7 @@ function buildRecords(imp, existing, learned, today) {
       const lab = (i) => dayMonFmt.format(isoDate(addDays(r.from, i)));
       const tickIdx = [...new Set([0, 0.25, 0.5, 0.75, 1].map((q) => Math.round(q * (n - 1))))];
       return {
-        kind: "daily", domain: n, isCur, cmpLabel, compare, calc: !!calc,
+        kind: "daily", domain: n, isCur, cmpLabel, compare, calc: !!calc, keys: Array.from({ length: n }, (_, i) => addDays(r.from, i)),
         points: arrs[0].slice(0, len).map((v, i) => ({ value: v, label: lab(i) })),
         extra: arrs[1] ? arrs[1].slice(0, len).map((v) => ({ value: v })) : null,
         ticks: tickIdx.map((i) => ({ i, text: lab(i) }))
@@ -1840,7 +1934,7 @@ function buildRecords(imp, existing, learned, today) {
     else if (mode !== "all") { const c = bucketArr(months, r.from, r.to, fns[0], 1); if (c.some((v) => v !== 0)) compare = c.map((v) => ({ value: v })); }
     const crossYear = months[0].slice(0, 4) !== months[months.length - 1].slice(0, 4);
     return {
-      kind: "monthly", domain: months.length, isCur, cmpLabel: calc ? cashName : isYearPeriod() ? String(state.year - 1) : "A year before", compare, calc: !!calc,
+      kind: "monthly", domain: months.length, isCur, keys: months, cmpLabel: calc ? cashName : isYearPeriod() ? String(state.year - 1) : "A year before", compare, calc: !!calc,
       points: arrs[0].slice(0, len).map((v, i) => ({ value: v, label: monthFmt.format(ymDate(months[i])) })),
       extra: arrs[1] ? arrs[1].slice(0, len).map((v) => ({ value: v })) : null,
       ticks: months.map((m, i) => ({ i, text: crossYear ? `${mShort(m)} ${m.slice(2, 4)}` : mShort(m) }))
@@ -1974,28 +2068,47 @@ function buildRecords(imp, existing, learned, today) {
     host.innerHTML = `<svg viewBox="0 0 ${W} ${Hh}" style="height:${Hh}px" role="img" aria-label="${esc(cfg.aria)}">${s}</svg>`;
     if (li < 0) return;
     const svg = host.firstElementChild, cur = svg.querySelector(".cur");
-    const hide = () => { cur.setAttribute("visibility", "hidden"); cfg.onScrub && cfg.onScrub(null); };
-    const at = (ev) => {
-      const r = svg.getBoundingClientRect(), x = (ev.clientX - r.left) * (W / r.width);
-      let i = cfg.bars ? Math.floor((x - L) / (pw / Math.max(1, n))) : n <= 1 ? 0 : Math.round((x - L) / (pw / (n - 1)));
-      i = Math.max(0, Math.min(li, i));
+    /* A tapped point stays marked (cfg.pinned); scrubbing shows other points, letting go returns to it */
+    const pinned = cfg.pinned != null && cfg.pinned <= li ? cfg.pinned : null;
+    let down = null, dead = false;
+    const place = (i) => {
       const cx = f(X(i)), cy = f(Y(pts[i].value));
       cur.firstElementChild.setAttribute("x1", cx); cur.firstElementChild.setAttribute("x2", cx);
       cur.lastElementChild.setAttribute("cx", cx); cur.lastElementChild.setAttribute("cy", cy);
       cur.setAttribute("visibility", "visible");
-      cfg.onScrub && cfg.onScrub(i);
     };
-    svg.addEventListener("pointerdown", at); svg.addEventListener("pointermove", at);
-    svg.addEventListener("pointerleave", hide); svg.addEventListener("pointercancel", hide);
-    svg.addEventListener("pointerup", (e) => { if (e.pointerType !== "mouse") hide(); });
+    const hide = () => {
+      if (dead) return;
+      if (pinned != null) { place(pinned); cfg.onScrub && cfg.onScrub(pinned); return; }
+      cur.setAttribute("visibility", "hidden"); cfg.onScrub && cfg.onScrub(null);
+    };
+    const idxAt = (ev) => {
+      const r = svg.getBoundingClientRect(), x = (ev.clientX - r.left) * (W / r.width);
+      const i = cfg.bars ? Math.floor((x - L) / (pw / Math.max(1, n))) : n <= 1 ? 0 : Math.round((x - L) / (pw / (n - 1)));
+      return Math.max(0, Math.min(li, i));
+    };
+    const at = (ev) => { if (dead) return; const i = idxAt(ev); place(i); cfg.onScrub && cfg.onScrub(i); };
+    svg.addEventListener("pointerdown", (ev) => { down = { x: ev.clientX, y: ev.clientY }; at(ev); });
+    svg.addEventListener("pointermove", at);
+    svg.addEventListener("pointerleave", hide); svg.addEventListener("pointercancel", () => { down = null; hide(); });
+    svg.addEventListener("pointerup", (e) => {
+      const tap = down && Math.abs(e.clientX - down.x) < 12 && Math.abs(e.clientY - down.y) < 12;
+      down = null;
+      if (tap && cfg.onPick) { const i = idxAt(e); dead = true; setTimeout(() => cfg.onPick(i), 0); return; }
+      if (e.pointerType !== "mouse") hide();
+    });
+    if (cfg.onPick) svg.style.cursor = "pointer";
+    if (pinned != null) { place(pinned); cfg.onScrub && cfg.onScrub(pinned); }
   }
   const expandBtn = (id) => `<button class="expbtn" data-action="chart-full" data-arg="${id}" aria-label="Show chart full screen">⤢ Full screen</button>`;
   function heroAndChart(id, s, opts) {
     const mode = opts.mode || "aus", base = heroDefault(s, mode);
-    charts.push({
+    const cfg = {
       id, ...s, color: opts.color, extraColor: "var(--pos)", limit: opts.limit, limitLabel: opts.limitLabel, aria: opts.aria, title: opts.label, between: opts.between, periodic: true,
       onScrub: (i) => { const h = i == null ? base : heroAt(s, i, mode); const v = $(id + "Val"), sub = $(id + "Sub"); if (v) v.innerHTML = heroHTML(h.value, h.signed); if (sub) sub.innerHTML = h.sub; }
-    });
+    };
+    charts.push(cfg);
+    const pickHTML = pickAttach(cfg, s, opts.pick);
     const per = s.kind === "daily" ? ", cumulative" : " per month", cl = s.calc ? " (calc.)" : "";
     const legend = mode === "all"
       ? `<span><i style="border-color:var(--pos)"></i>Income${cl}${per}</span><span><i style="border-color:${opts.color}"></i>Spending${cl}${per}</span>`
@@ -2014,7 +2127,7 @@ function buildRecords(imp, existing, learned, today) {
       <section class="chartblock" aria-label="Chart">
         <div class="chart" id="${id}"></div>
         <div class="cfoot"><div class="legend">${legend}</div>${expandBtn(id)}</div>
-      </section>`;
+      </section>${pickHTML}`;
   }
   /* Net result chart for the Total view: cumulative line for short ranges, bars per month for long ones */
   function netBlock(id, s) {
@@ -2024,8 +2137,10 @@ function buildRecords(imp, existing, learned, today) {
     const plus = pts.filter((p) => p.value >= 0).length;
     const base = bars ? `${plus} of ${pts.length} months positive · avg ${signed(Math.round(sum / Math.max(1, pts.length)))} / month`
       : s.isCur ? "What's left so far this period" : "What was left at the end of the period";
-    charts.push({ id, kind: s.kind, domain: s.domain, points: pts, ticks: s.ticks, compare: null, bars, color: "var(--accent)", limit: 0, aria: "Net result: income minus spending", title: `Net result${s.calc ? " (calculated)" : ""} · ${periodLabel()}`, periodic: true,
-      onScrub: (i) => { const v = $(id + "Val"), sb = $(id + "Sub"); if (!v) return; if (i == null) { v.innerHTML = heroHTML(total, true); sb.textContent = base; } else { v.innerHTML = heroHTML(pts[i].value, true); sb.textContent = `${bars ? "" : "up to "}${pts[i].label}`; } } });
+    const cfg = { id, kind: s.kind, domain: s.domain, points: pts, ticks: s.ticks, compare: null, bars, color: "var(--accent)", limit: 0, aria: "Net result: income minus spending", title: `Net result${s.calc ? " (calculated)" : ""} · ${periodLabel()}`, periodic: true,
+      onScrub: (i) => { const v = $(id + "Val"), sb = $(id + "Sub"); if (!v) return; if (i == null) { v.innerHTML = heroHTML(total, true); sb.textContent = base; } else { v.innerHTML = heroHTML(pts[i].value, true); sb.textContent = `${bars ? "" : "up to "}${pts[i].label}`; } } };
+    charts.push(cfg);
+    const pickHTML = pickAttach(cfg, s, { cat: "All", mode: "all", calc: !!s.calc });
     return `
       <section class="hero">
         <span class="label">Net result${s.calc ? " (calculated)" : ""} · income minus spending</span>
@@ -2033,7 +2148,7 @@ function buildRecords(imp, existing, learned, today) {
         <div class="herosub" id="${id}Sub">${esc(base)}</div>
       </section>
       <section class="chartblock" aria-label="Net result chart"><div class="chart" id="${id}"></div>
-        <div class="cfoot"><div class="legend">${bars ? `<span><i style="border-color:var(--pos)"></i>Month with a plus</span><span><i style="border-color:var(--neg)"></i>Month with a minus</span>` : `<span><i style="border-color:var(--accent)"></i>Net result, cumulative</span>`}</div>${expandBtn(id)}</div></section>`;
+        <div class="cfoot"><div class="legend">${bars ? `<span><i style="border-color:var(--pos)"></i>Month with a plus</span><span><i style="border-color:var(--neg)"></i>Month with a minus</span>` : `<span><i style="border-color:var(--accent)"></i>Net result, cumulative</span>`}</div>${expandBtn(id)}</div></section>${pickHTML}`;
   }
   function catChart(id, cat, mode, between, calc) {
     mode = mode || "aus";
@@ -2045,8 +2160,78 @@ function buildRecords(imp, existing, learned, today) {
     return heroAndChart(id, s, {
       mode, color: cat !== "All" && mode !== "all" ? colorOf(cat) : mode === "ein" ? "var(--pos)" : "var(--neg)",
       limit: lim, limitLabel: cat === "All" ? "Sum of limits" : "Limit",
-      label: `${name} · ${periodLabel()}`, aria: `${name}, ${periodLabel()}`, between
+      label: `${name} · ${periodLabel()}`, aria: `${name}, ${periodLabel()}`, between, pick: { cat, mode, calc: !!calc }
     });
+  }
+
+  /* ---------- Tap a point in a cash-flow chart: the sum on that day or in that month, then every transaction behind it ---------- */
+  const dayLongFmt = new Intl.DateTimeFormat(LOC, { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  function pickAttach(cfg, s, pick) {
+    if (!pick || !s.keys || !s.points.length) return "";
+    const r = range(), sig = `${r.from}|${r.to}|${pick.mode}|${pick.cat}|${pick.calc ? 1 : 0}`;
+    const p = state.pick && state.pick.id === cfg.id && state.pick.sig === sig && state.pick.i < s.points.length ? state.pick.i : null;
+    cfg.pinned = p;
+    cfg.onPick = (i) => {
+      state.pick = p === i ? null : { id: cfg.id, sig, i }; state.pickAll = false;
+      render();
+      const el = $(cfg.id + "Pick");
+      if (state.pick && el) el.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    };
+    return `<div id="${cfg.id}Pick" class="pickwrap">${p == null
+      ? `<p class="hint pickhint" data-noi18n>${L(`Tap a ${s.kind === "daily" ? "day" : "month"} in the chart to see what's behind it.`, `Tippe auf ${s.kind === "daily" ? "einen Tag" : "einen Monat"} im Diagramm, um zu sehen, was dahintersteckt.`)}</p>`
+      : pickPanel(s, p, pick)}</div>`;
+  }
+  function pickPanel(s, i, pick) {
+    const r = range(), daily = s.kind === "daily", key = s.keys[i];
+    const from = daily ? key : (`${key}-01` < r.from ? r.from : `${key}-01`), to = daily ? key : (monthEnd(key) > r.to ? r.to : monthEnd(key));
+    const mode = pick.mode, cat = mode === "all" ? "All" : pick.cat;
+    let items = [], inc = 0, out = 0;
+    if (pick.calc) {
+      const so = mode !== "ein" ? calcShares(from, to, (e) => spendVal(e, cat)) : [], si = mode !== "aus" ? calcShares(from, to, (e) => incomeVal(e, cat)) : [];
+      out = so.reduce((a, x) => a + x.share, 0); inc = si.reduce((a, x) => a + x.share, 0);
+      items = so.map((x) => ({ e: x.e, v: -x.share })).concat(si.map((x) => ({ e: x.e, v: x.share }))).filter((x) => Math.abs(x.v) >= 1);
+    } else {
+      const match = mode === "all" ? () => true
+        : mode === "aus" ? (e) => (e.type === "aus" || isRefund(e)) && (cat === "All" || e.cat === cat)
+        : (e) => e.type === "ein" && !isRefund(e) && (cat === "All" || e.cat === cat);
+      const list = state.entries.filter((e) => e.date >= from && e.date <= to && match(e));
+      const t = totals(list); inc = t.i; out = t.o;
+      items = list.map((e) => ({ e, v: e.type === "tr" ? 0 : e.type === "aus" ? -e.cents : e.cents }));
+    }
+    inc = Math.round(inc); out = Math.round(out);
+    const title = daily ? dayLongFmt.format(isoDate(key)) : monthFmt.format(ymDate(key));
+    const when = daily ? L("on this day", "an diesem Tag") : L("in this month", "in diesem Monat");
+    const cum = daily ? (mode === "all" ? null : s.points[i].value) : null;
+    const calcTag = pick.calc ? L(" (calculated)", " (berechnet)") : "";
+    let head;
+    if (mode === "all") {
+      head = `<div class="pickgrid"><div><span class="label">${L("Income", "Einnahmen")}</span><b class="pos">${money(inc)}</b></div><div><span class="label">${L("Spending", "Ausgaben")}</span><b class="neg">${money(out)}</b></div><div><span class="label">${L("Result", "Ergebnis")}</span><b class="${inc - out >= 0 ? "pos" : "neg"}">${signed(inc - out)}</b></div></div>`;
+    } else {
+      const v = mode === "ein" ? inc : out, what = mode === "ein" ? L("received", "eingenommen") : L("spent", "ausgegeben");
+      const share = !daily && s.points.length > 1 ? s.points.reduce((a, p) => a + p.value, 0) : 0;
+      head = `<div class="pickbig"><span class="heroval sm ${mode === "ein" ? "pos" : ""}">${money(v)}</span><span class="hint">${esc(what)} ${esc(when)}${calcTag}${cat !== "All" ? ` · ${esc(TR(cat))}` : ""}</span></div>
+        ${cum != null ? `<p class="hint">${L("Running total up to this day", "Aufgelaufen bis zu diesem Tag")}: <b class="tn" style="color:var(--ink)">${money(Math.round(cum))}</b></p>` : ""}
+        ${share ? `<p class="hint">${L("Share of the whole period", "Anteil am ganzen Zeitraum")}: <b class="tn" style="color:var(--ink)">${Math.round(v / share * 100)} %</b></p>` : ""}`;
+    }
+    const byCat = new Map();
+    for (const x of items) { if (!x.v) continue; const k = x.e.cat || UNCAT; const g = byCat.get(k) || { cat: k, v: 0, n: 0 }; g.v += x.v; g.n++; byCat.set(k, g); }
+    const groups = [...byCat.values()].sort((a, b) => Math.abs(b.v) - Math.abs(a.v)), gmax = Math.max(1, ...groups.map((g) => Math.abs(g.v)));
+    const catHTML = groups.length > 1 || (!daily && groups.length) ? `<div class="pickcats"><span class="label">${L("By category", "Nach Kategorie")}</span>${groups.map((g) =>
+      `<div class="pickcat"><i style="background:${colorOf(g.cat)}"></i><span class="pcn">${esc(TR(g.cat))}<small>${g.n}×</small></span><span class="pcv ${g.v > 0 ? "pos" : ""}">${g.v > 0 ? "+" : "−"}${money(Math.abs(Math.round(g.v)))}</span><span class="pcb"><span style="width:${(Math.abs(g.v) / gmax * 100).toFixed(1)}%;background:${colorOf(g.cat)}"></span></span></div>`).join("")}</div>` : "";
+    const sorted = items.slice().sort((a, b) => byDateDesc(a.e, b.e));
+    const shown = state.pickAll ? sorted : sorted.slice(0, 30);
+    const rows = shown.map((x) => {
+      if (!pick.calc) return entryRow(x.e);
+      const e = x.e, sp = e.spread && e.spread.months > 1, as = assetOf(e);
+      return entryRow(e, { cents: Math.round(Math.abs(x.v)), note: as && !e.virtualAsset ? `depreciation of ${money(as.cost)}` : sp ? `share of ${money(e.cents)} ÷${e.spread.months}` : "" });
+    }).join("");
+    return `<section class="card pickcard" aria-live="polite">
+      <div class="split" data-noi18n><span class="label">${esc(title)}</span><button class="more" data-action="pick-close">${L("✕ Close", "✕ Schließen")}</button></div>
+      <div data-noi18n>${head}</div>
+      ${catHTML ? `<div data-noi18n>${catHTML}</div>` : ""}
+      <div class="picklist"><span class="label" data-noi18n>${items.length ? `${L("Transactions", "Buchungen")} · ${items.length}` : L(`Nothing ${daily ? "on this day" : "in this month"}`, `Nichts ${daily ? "an diesem Tag" : "in diesem Monat"}`)}</span>${rows}
+        ${sorted.length > shown.length ? `<div class="btnrow" style="margin-top:10px"><button class="btn" data-action="pick-all" data-noi18n>${L(`Show all ${sorted.length}`, `Alle ${sorted.length} zeigen`)}</button></div>` : ""}</div>
+    </section>`;
   }
 
   /* ================= Building blocks ================= */
@@ -2792,6 +2977,7 @@ function buildRecords(imp, existing, learned, today) {
         <button class="tile" data-action="nav" data-arg="balance">
           <span class="tile-l"><span class="tile-t">Balance sheet</span>${hasBal ? `<span class="tile-v">${money(balanceAt(cm).net)} <span class="tile-s">net worth</span></span>` : ""}<span class="tile-s">${hasBal ? "Assets, liabilities, equity" : "Set up assets and liabilities"}</span></span>
           ${spark(nets, "var(--accent)")}<span class="chev" aria-hidden="true">›</span></button>
+        ${repTile()}
       </nav>
       <div class="minitiles">
         <button class="mtile" data-action="nav" data-arg="plan"><span class="tile-t">Independence</span>${pd ? `<span class="tile-v">${Math.round(pd.cov * 100)} %</span><span class="tile-s">paid by yourself</span>` : `<span class="tile-s">What you'd need to earn to pay everything yourself</span>`}</button>
@@ -3469,6 +3655,7 @@ function buildRecords(imp, existing, learned, today) {
       { id: "tax", t: "Prepare your tax return", b: `<ol><li>Mark deductible costs when you add them: <b>More → Tax return</b> → what it is, tick “I have the receipt”, and the work share if you also use it privately.</li><li>Open <b>Tax return</b> on the menu: add your wage tax certificate under Jobs, your ways to work, home office days and study periods.</li><li>PFM adds everything up per year and estimates the refund. The checklist shows which documents you need.</li></ol><p>The estimate helps with planning – the return itself you file with ELSTER or your tax app.</p>` },
       { id: "backup", t: "Backup and sync", b: `<p><b>Backup</b>: ⚙ → <b>Save backup</b> saves one file with everything – put it into iCloud Drive. Load it under Data &amp; backup.</p><p><b>Sync iPhone &amp; iPad</b>: ⚙ → Sync. Set it up once with a private GitHub repository and a fine-grained token, then copy the setup code to the other device. Your data is encrypted with your sync password before it leaves the device.</p>` },
       { id: "gestures", t: "Gestures", b: `<ul><li>Swipe from the left edge to the right: back.</li><li>On the menu pull down: back to the start screen.</li><li>Drag a sheet down at its top edge: close it.</li><li>On the start screen tap or swipe up: to the menu.</li></ul>` },
+      { id: "reports", t: "Reports and PDF", b: `<p>Under <b>Reports</b> on the menu PFM writes a report for every week, month, quarter, half-year and year. A report is finished as soon as its period is over and is marked “New”; the running period shows an interim report.</p><ol><li>Pick week, month, quarter, half-year or year at the top and open a report.</li><li><b>Short</b> shows the key figures, the most important points, the charts and how your money develops. <b>Detailed</b> adds the comparison table, every category, the biggest expenses, limits, accounts and all transactions.</li><li>Every figure is compared with the period before and the same period a year earlier. The projection continues the trend of the last 12 months.</li><li>Tap <b>Short report</b> or <b>Detailed report</b> at the bottom to create a PDF – then save it to Files, send it or print it.</li></ol><p>In <b>Cash flows</b> you can tap a day or month in the chart: PFM shows the sum and every transaction behind it.</p>` },
       { id: "play", t: "AI play account", b: `<p>Your AI strategy for the Trade Republic play account runs in Claude. Every trading day at 7:30 a check looks at prices, trends and news, writes instructions and sends a push notification to the Claude app when you should act. With sync switched on, PFM shows the play account directly: the AI's note, every instruction with the steps in Trade Republic, your positions and target vs. actual.</p><ol><li>Tap the <b>AI play account</b> tile on the menu.</li><li>Buy or sell in Trade Republic as the card says, then tap <b>Done</b> and enter what the app shows. For leveraged products also the ISIN, the number of units and the leverage – PFM then shows your stop-loss price.</li><li>The next check takes your ticks into the depot book. Questions to the AI and “Check now” stay on the page in Claude (button at the top).</li></ol><p>PFM only reads the play-account file in your sync repository. Your own finances stay encrypted – the check can't read them.</p>` },
       { id: "lang", t: "Language", b: `<p>⚙ → <b>Language</b> → English or Deutsch. PFM reloads in the new language; your data stays as it is.</p>` }
     ],
@@ -3486,6 +3673,7 @@ function buildRecords(imp, existing, learned, today) {
       { id: "tax", t: "Steuererklärung vorbereiten", b: `<ol><li>Absetzbare Kosten gleich beim Erfassen markieren: <b>Mehr → Steuererklärung</b> → Art, „Beleg vorhanden“ ankreuzen und den beruflichen Anteil, wenn du es auch privat nutzt.</li><li><b>Steuererklärung</b> im Menü öffnen: unter Jobs die Lohnsteuerbescheinigung, dazu Arbeitswege, Homeoffice-Tage und Studienzeiten eintragen.</li><li>PFM summiert alles pro Jahr und schätzt die Erstattung. Die Checkliste zeigt, welche Unterlagen du brauchst.</li></ol><p>Die Schätzung hilft beim Planen – abgegeben wird über ELSTER oder deine Steuer-App.</p>` },
       { id: "backup", t: "Backup und Synchronisierung", b: `<p><b>Backup</b>: ⚙ → <b>Backup sichern</b> speichert alles in einer Datei – am besten in iCloud Drive. Laden unter Daten &amp; Backup.</p><p><b>iPhone &amp; iPad synchronisieren</b>: ⚙ → Synchronisieren. Einmal mit einem privaten GitHub-Repository und einem Fine-grained Token einrichten, dann den Einrichtungscode auf das andere Gerät kopieren. Deine Daten werden mit deinem Sync-Passwort verschlüsselt, bevor sie das Gerät verlassen.</p>` },
       { id: "gestures", t: "Gesten", b: `<ul><li>Vom linken Rand nach rechts wischen: zurück.</li><li>Im Menü nach unten ziehen: zurück zum Startbild.</li><li>Ein Fenster oben am Rand nach unten ziehen: schließen.</li><li>Auf dem Startbild tippen oder nach oben wischen: ins Menü.</li></ul>` },
+      { id: "reports", t: "Berichte und PDF", b: `<p>Unter <b>Berichte</b> im Menü schreibt PFM für jede Woche, jeden Monat, jedes Quartal, Halbjahr und Jahr einen Bericht. Ein Bericht ist fertig, sobald sein Zeitraum vorbei ist, und wird mit „Neu“ markiert; für den laufenden Zeitraum gibt es einen Zwischenstand.</p><ol><li>Oben Woche, Monat, Quartal, Halbjahr oder Jahr wählen und einen Bericht öffnen.</li><li><b>Kurz</b> zeigt die Kennzahlen, das Wichtigste, die Grafiken und wie sich dein Geld entwickelt. <b>Ausführlich</b> ergänzt die Vergleichstabelle, alle Kategorien, die größten Ausgaben, Limits, Konten und alle Buchungen.</li><li>Jede Zahl wird mit dem Zeitraum davor und dem gleichen Zeitraum im Vorjahr verglichen. Die Hochrechnung schreibt den Trend der letzten 12 Monate fort.</li><li>Unten auf <b>Kurzbericht</b> oder <b>Ausführlicher Bericht</b> tippen, um ein PDF zu erstellen – dann in „Dateien“ sichern, verschicken oder drucken.</li></ol><p>In <b>Einnahmen &amp; Ausgaben</b> kannst du im Diagramm auf einen Tag oder Monat tippen: PFM zeigt die Summe und jede Buchung dahinter.</p>` },
       { id: "play", t: "KI-Spielkonto", b: `<p>Deine KI-Strategie für das Trade-Republic-Spielkonto läuft in Claude. Jeden Börsentag um 7:30 prüft ein Check Kurse, Trends und Nachrichten, schreibt Anweisungen und schickt eine Push-Nachricht an die Claude-App, wenn du handeln sollst. Ist der Sync eingerichtet, zeigt PFM das Spielkonto direkt: den Text der KI, jede Anweisung mit den Schritten in Trade Republic, deine Positionen und Ziel/Ist.</p><ol><li>Im Menü auf die Kachel <b>KI-Spielkonto</b> tippen.</li><li>In Trade Republic kaufen oder verkaufen, wie es auf der Karte steht, dann <b>Ausgeführt</b> tippen und eintragen, was die App zeigt. Bei Hebelprodukten auch ISIN, Stückzahl und Hebel – dann zeigt PFM deinen Stop-Loss-Kurs.</li><li>Der nächste Check übernimmt deine Haken ins Depotbuch. Fragen an die KI und „Jetzt neu prüfen“ gibt es auf der Seite in Claude (Knopf oben).</li></ol><p>PFM liest nur die Spielkonto-Datei in deinem Sync-Repository. Deine eigenen Finanzen bleiben verschlüsselt – der Check kann sie nicht lesen.</p>` },
       { id: "lang", t: "Sprache", b: `<p>⚙ → <b>Sprache</b> → Deutsch oder English. PFM lädt neu in der gewählten Sprache; deine Daten bleiben unverändert.</p>` }
     ]
@@ -3891,7 +4079,817 @@ function buildRecords(imp, existing, learned, today) {
     </div>`;
   }
   document.addEventListener("input", (ev) => { const f = ev.target.closest && ev.target.closest("form.spkexec"); if (f && ev.target.name) { spk.typed = spk.typed || {}; spk.typed[ev.target.name] = ev.target.value; } });
-  const VIEWS = { spielkonto: viewSpielkonto, help: viewHelp, theory: viewTheory, hub: viewHub, cashflow: viewHome, cat: viewCat, budgets: viewBudgets, list: viewList, project: viewProject, data: viewData, import: viewImport, fixed: viewFixed, calc: viewHome, balance: viewBalance, trash: viewTrash, categories: viewCategories, search: viewSearch, tax: viewTax, plan: viewPlan, manage: viewManage, sync: viewSync };
+  /* ================= Reports: periods, figures, comparisons ================= */
+  const REP_KINDS = ["week", "month", "quarter", "half", "year"];
+  const REP_TREND_N = { week: 12, month: 12, quarter: 8, half: 6, year: 5 };
+  const repKindName = (k) => ({ week: L("Week", "Woche"), month: L("Month", "Monat"), quarter: L("Quarter", "Quartal"), half: L("Half-year", "Halbjahr"), year: L("Year", "Jahr") })[k];
+  const repTitle = (k) => ({ week: L("Weekly report", "Wochenbericht"), month: L("Monthly report", "Monatsbericht"), quarter: L("Quarterly report", "Quartalsbericht"), half: L("Half-year report", "Halbjahresbericht"), year: L("Annual report", "Jahresbericht") })[k];
+  const repPrevCol = (k) => ({ week: L("Prev. week", "Vorwoche"), month: L("Prev. month", "Vormonat"), quarter: L("Prev. quarter", "Vorquartal"), half: L("Prev. half", "Vorhalbjahr"), year: L("Prev. year", "Vorjahr") })[k];
+  const repPrevIn = (k) => ({ week: L("the week before", "in der Vorwoche"), month: L("the month before", "im Vormonat"), quarter: L("the quarter before", "im Vorquartal"), half: L("the half-year before", "im Vorhalbjahr"), year: L("the year before", "im Vorjahr") })[k];
+  const repPrevTo = (k) => ({ week: L("the week before", "zur Vorwoche"), month: L("the month before", "zum Vormonat"), quarter: L("the quarter before", "zum Vorquartal"), half: L("the half-year before", "zum Vorhalbjahr"), year: L("the year before", "zum Vorjahr") })[k];
+  const isoOf = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  function isoWeekOf(iso) {
+    const d = isoDate(iso), dow = (d.getDay() + 6) % 7;
+    const thu = new Date(d.getFullYear(), d.getMonth(), d.getDate() - dow + 3), y = thu.getFullYear();
+    const jan4 = new Date(y, 0, 4), firstThu = new Date(y, 0, 4 - ((jan4.getDay() + 6) % 7) + 3);
+    return { y, w: 1 + Math.round((thu - firstThu) / 6048e5) };
+  }
+  const weekMonday = (y, w) => { const jan4 = new Date(y, 0, 4); return isoOf(new Date(y, 0, 4 - ((jan4.getDay() + 6) % 7) + (w - 1) * 7)); };
+  const weeksInYear = (y) => isoWeekOf(`${y}-12-28`).w;
+  function repKeyOf(kind, iso) {
+    const y = iso.slice(0, 4), m = Number(iso.slice(5, 7));
+    if (kind === "week") { const w = isoWeekOf(iso); return `${w.y}-W${pad(w.w)}`; }
+    if (kind === "month") return iso.slice(0, 7);
+    if (kind === "quarter") return `${y}-Q${Math.ceil(m / 3)}`;
+    if (kind === "half") return `${y}-H${m <= 6 ? 1 : 2}`;
+    return y;
+  }
+  function repRange(kind, key) {
+    const y = Number(key.slice(0, 4));
+    if (kind === "week") { const from = weekMonday(y, Number(key.slice(6))); return { from, to: addDays(from, 6) }; }
+    if (kind === "month") return { from: `${key}-01`, to: monthEnd(key) };
+    if (kind === "quarter") { const q = Number(key.slice(6)), m0 = `${y}-${pad(q * 3 - 2)}`; return { from: `${m0}-01`, to: monthEnd(shiftMonth(m0, 2)) }; }
+    if (kind === "half") { const h = Number(key.slice(6)); return h === 1 ? { from: `${y}-01-01`, to: `${y}-06-30` } : { from: `${y}-07-01`, to: `${y}-12-31` }; }
+    return { from: `${y}-01-01`, to: `${y}-12-31` };
+  }
+  function repShift(kind, key, k) {
+    const r = repRange(kind, key);
+    if (kind === "week") return repKeyOf("week", addDays(r.from, 7 * k));
+    if (kind === "year") return String(Number(key) + k);
+    const step = kind === "month" ? 1 : kind === "quarter" ? 3 : 6;
+    return repKeyOf(kind, `${shiftMonth(r.from.slice(0, 7), step * k)}-01`);
+  }
+  function repLastYear(kind, key) {
+    if (kind === "week") { const y = Number(key.slice(0, 4)) - 1; return `${y}-W${pad(Math.min(Number(key.slice(6)), weeksInYear(y)))}`; }
+    return repShift(kind, key, kind === "month" ? -12 : kind === "quarter" ? -4 : kind === "half" ? -2 : -1);
+  }
+  function repLabel(kind, key, form) {
+    const y = key.slice(0, 4), r = repRange(kind, key);
+    if (kind === "week") {
+      const w = Number(key.slice(6));
+      if (form === "tick") return L(`W${w}`, `KW${w}`);
+      const span = `${dayMonFmt.format(isoDate(r.from))} – ${dateFmt.format(isoDate(r.to))}`;
+      return form === "short" ? L(`Week ${w}`, `KW ${w}`) : L(`Week ${w} · ${span}`, `KW ${w} · ${span}`);
+    }
+    if (kind === "month") return form === "tick" ? mShort(key) : form === "short" ? monthName.format(ymDate(key)) : monthFmt.format(ymDate(key));
+    const n = Number(key.slice(6));
+    if (kind === "quarter") return form === "tick" ? `Q${n}` : form === "short" ? L(`Q${n}`, `${n}. Quartal`) : L(`Q${n} ${y}`, `${n}. Quartal ${y}`);
+    if (kind === "half") return form === "tick" ? `H${n}` : form === "short" ? L(`H${n}`, `${n}. Halbjahr`) : L(`H${n} ${y}`, `${n}. Halbjahr ${y}`);
+    return y;
+  }
+  let firstCache = null;
+  function firstDataDate() {
+    if (firstCache && firstCache.ref === state.entries) return firstCache.d;
+    let d = null; for (const e of state.entries) if (!d || e.date < d) d = e.date;
+    firstCache = { ref: state.entries, d };
+    return d;
+  }
+  function repStats(from, to) {
+    const o = { from, to, inc: 0, out: 0, n: 0, outCat: {}, incCat: {}, fixed: 0, acc: {}, proj: {}, exp: [], list: [] };
+    for (const e of state.entries) {
+      if (e.date < from || e.date > to) continue;
+      o.list.push(e);
+      if (e.type === "tr") continue;
+      o.n++;
+      const an = e.account || "?", a = o.acc[an] || (o.acc[an] = { i: 0, o: 0 });
+      if (e.type === "aus") {
+        o.out += e.cents; o.outCat[e.cat] = (o.outCat[e.cat] || 0) + e.cents; a.o += e.cents; o.exp.push(e);
+        if (e.recurring) o.fixed += e.cents;
+        if (e.project) o.proj[e.project] = (o.proj[e.project] || 0) + e.cents;
+      } else if (isRefund(e)) {
+        o.out -= e.cents; o.outCat[e.cat] = (o.outCat[e.cat] || 0) - e.cents; a.i += e.cents;
+        if (e.project) o.proj[e.project] = (o.proj[e.project] || 0) - e.cents;
+      } else { o.inc += e.cents; o.incCat[e.cat] = (o.incCat[e.cat] || 0) + e.cents; a.i += e.cents; }
+    }
+    o.net = o.inc - o.out; o.rate = o.inc > 0 ? o.net / o.inc : null; o.days = dayDiff(from, to) + 1;
+    return o;
+  }
+  /* Spending per day, added up – for "how the period went" */
+  function repCum(from, n, upto) {
+    const arr = new Array(n).fill(0);
+    for (const e of state.entries) { if (e.date < from || e.date > upto) continue; const i = dayDiff(from, e.date); if (i < 0 || i >= n) continue; arr[i] += e.type === "aus" ? e.cents : isRefund(e) ? -e.cents : 0; }
+    for (let i = 1; i < n; i++) arr[i] += arr[i - 1];
+    return arr;
+  }
+  /* Money over time: net worth from the balance sheet if it is set up, otherwise everything saved since the first transaction */
+  function moneyDev(endIso) {
+    const first = firstDataDate(); if (!first) return null;
+    const now = curMonth(), endM = endIso.slice(0, 7) > now ? now : endIso.slice(0, 7);
+    const bs = state.settings.balance.items.length ? balanceStart() : null;
+    const months = [], vals = [];
+    let src;
+    if (bs && bs <= endM) {
+      src = "net";
+      for (let m = bs > shiftMonth(endM, -23) ? bs : shiftMonth(endM, -23); m <= endM; m = shiftMonth(m, 1)) { months.push(m); vals.push(balanceAt(m).net); }
+    } else {
+      src = "saved";
+      const start = first.slice(0, 7) > shiftMonth(endM, -23) ? first.slice(0, 7) : shiftMonth(endM, -23), t = todayISO();
+      let base = 0; const per = new Map();
+      for (const e of state.entries) {
+        if (e.type === "tr" || e.date > t) continue;
+        const v = e.type === "ein" ? e.cents : -e.cents;
+        if (e.date < `${start}-01`) base += v; else if (e.date <= monthEnd(endM)) per.set(e.date.slice(0, 7), (per.get(e.date.slice(0, 7)) || 0) + v);
+      }
+      for (let m = start; m <= endM; m = shiftMonth(m, 1)) { base += per.get(m) || 0; months.push(m); vals.push(base); }
+    }
+    const last = vals[vals.length - 1], k = Math.min(12, vals.length), ys = vals.slice(-k);
+    let slope = 0;
+    if (k >= 2) {
+      const xm = (k - 1) / 2, ym = ys.reduce((a, b) => a + b, 0) / k;
+      let num = 0, den = 0; ys.forEach((y, i) => { num += (i - xm) * (y - ym); den += (i - xm) * (i - xm); });
+      slope = den ? num / den : 0;
+    }
+    const growthPa = k >= 4 && ys[0] > 0 && last > 0 ? Math.pow(last / ys[0], 12 / (k - 1)) - 1 : null;
+    const proj = [3, 6, 12, 24].map((n) => ({ n, v: Math.round(last + slope * n) }));
+    const ahead = Array.from({ length: 12 }, (_, j) => Math.round(last + slope * (j + 1)));
+    const runway = slope < -100 && last > 0 ? Math.floor(last / -slope) : null;
+    const status = k < 2 ? "new" : Math.abs(slope) < 1000 ? "flat" : slope > 0 ? "up" : "down";
+    const idx12 = Math.max(0, vals.length - 13), change12 = last - vals[idx12], since = months[idx12];
+    return { src, months, vals, last, slope: Math.round(slope), k, growthPa, proj, ahead, runway, status, change12, since,
+      name: src === "net" ? L("Net worth", "Vermögen") : L("Saved since you started", "Erspart seit Beginn") };
+  }
+  function repChangeIn(md, kind, R) {
+    if (!md || kind === "week") return null;
+    const endM = R.to.slice(0, 7), startM = shiftMonth(R.from.slice(0, 7), -1);
+    const i1 = md.months.indexOf(endM > curMonth() ? curMonth() : endM), i0 = md.months.indexOf(startM);
+    return i1 >= 0 && i0 >= 0 ? md.vals[i1] - md.vals[i0] : null;
+  }
+  const pctTxt = (x) => `${x > 0 ? "+" : x < 0 ? "−" : "±"}${Math.abs(Math.round(x * 100))} %`;
+  function catRows(a, b, c, total) {
+    const keys = new Set([...Object.keys(a), ...Object.keys(b || {}), ...Object.keys(c || {})]);
+    return [...keys].map((cat) => ({ cat, cur: a[cat] || 0, prev: (b || {})[cat] || 0, ly: (c || {})[cat] || 0, share: total > 0 ? (a[cat] || 0) / total : 0 }))
+      .filter((r) => r.cur || r.prev || r.ly).sort((x, y) => y.cur - x.cur || y.prev - x.prev);
+  }
+  function buildReport(kind, key) {
+    const R = repRange(kind, key), t = todayISO(), running = t >= R.from && t <= R.to;
+    const upto = running ? t : R.to, elapsed = dayDiff(R.from, upto) + 1, total = dayDiff(R.from, R.to) + 1;
+    const pk = repShift(kind, key, -1), PR = repRange(kind, pk), pTo = running ? (addDays(PR.from, elapsed - 1) < PR.to ? addDays(PR.from, elapsed - 1) : PR.to) : PR.to;
+    const yk = kind === "year" ? null : repLastYear(kind, key), YR = yk ? repRange(kind, yk) : null;
+    const yTo = YR ? (running ? (addDays(YR.from, elapsed - 1) < YR.to ? addDays(YR.from, elapsed - 1) : YR.to) : YR.to) : null;
+    const cur = repStats(R.from, upto), prev = repStats(PR.from, pTo), ly = YR ? repStats(YR.from, yTo) : null;
+    const first = firstDataDate();
+    const hasPrev = !!first && first <= pTo, hasLy = !!(ly && first && first <= yTo);
+    const trend = [];
+    for (let j = REP_TREND_N[kind] - 1; j >= 0; j--) {
+      const k2 = repShift(kind, key, -j), r2 = repRange(kind, k2);
+      if (first && r2.to < first && j > 0) continue;
+      const s2 = repStats(r2.from, r2.to < t ? r2.to : t);
+      trend.push({ key: k2, tick: repLabel(kind, k2, "tick"), label: repLabel(kind, k2, "long"), inc: s2.inc, out: s2.out, net: s2.net, cur: k2 === key });
+    }
+    const outRows = catRows(cur.outCat, hasPrev ? prev.outCat : null, hasLy ? ly.outCat : null, cur.out);
+    const incRows = catRows(cur.incCat, hasPrev ? prev.incCat : null, hasLy ? ly.incCat : null, cur.inc);
+    const months = kind === "week" ? 7 / 30.4375 : kind === "month" ? 1 : kind === "quarter" ? 3 : kind === "half" ? 6 : 12;
+    const lim = limits(), budgets = Object.keys(lim).filter((c) => CATS.aus.includes(c) && lim[c] > 0).map((c) => {
+      const L0 = Math.round(lim[c] * months), spent = cur.outCat[c] || 0, sofar = Math.round(L0 * elapsed / total);
+      return { cat: c, limit: L0, spent, over: spent - L0, ahead: running && spent > sofar * 1.1 && spent <= L0 };
+    }).sort((a, b) => b.spent / b.limit - a.spent / a.limit);
+    const md = moneyDev(upto);
+    const rep = { kind, key, R, running, upto, elapsed, total, label: repLabel(kind, key, "long"), title: repTitle(kind),
+      prevKey: pk, prevLabel: repLabel(kind, pk, "long"), lyKey: yk, lyLabel: yk ? repLabel(kind, yk, "long") : "",
+      cur, prev, ly, hasPrev, hasLy, trend, outRows, incRows, budgets, md, mdChange: repChangeIn(md, kind, R),
+      biggest: cur.exp.slice().sort((a, b) => b.cents - a.cents).slice(0, 10),
+      cumCur: repCum(R.from, total, upto).slice(0, elapsed), cumPrev: hasPrev ? repCum(PR.from, dayDiff(PR.from, PR.to) + 1, PR.to) : null,
+      uncat: cur.list.filter((e) => e.cat === UNCAT).length, avgDay: Math.round(cur.out / Math.max(1, elapsed)) };
+    rep.notes = repNotes(rep);
+    return rep;
+  }
+  /* The most important points in plain words – the short report shows the first ones */
+  function repNotes(r) {
+    const N = [], c = r.cur, k = r.kind, cmp = r.running ? L(" (same number of days)", " (bis zum gleichen Tag)") : "";
+    if (!c.n) { N.push({ tone: "", text: L("No transactions in this period yet.", "In diesem Zeitraum gibt es noch keine Buchungen.") }); return N; }
+    if (c.inc > 0 && c.net >= 0) N.push({ tone: "pos", text: L(`You kept ${money(c.net)} – ${Math.round(c.rate * 100)} % of your income (savings rate).`, `Du hast ${money(c.net)} behalten – ${Math.round(c.rate * 100)} % deiner Einnahmen (Sparquote).`) });
+    else if (c.inc > 0) N.push({ tone: "neg", text: L(`You spent ${money(-c.net)} more than you earned.`, `Du hast ${money(-c.net)} mehr ausgegeben als eingenommen.`) });
+    else N.push({ tone: "neg", text: L(`No income recorded – spending ${money(c.out)}.`, `Keine Einnahmen erfasst – Ausgaben ${money(c.out)}.`) });
+    if (r.hasPrev && r.prev.out > 0) {
+      const d = (c.out - r.prev.out) / r.prev.out;
+      N.push({ tone: Math.abs(d) < 0.03 ? "" : d < 0 ? "pos" : "neg", text: Math.abs(d) < 0.03
+        ? L(`Spending ${money(c.out)} – about the same as ${repPrevIn(k)}${cmp}.`, `Ausgaben ${money(c.out)} – etwa so viel wie ${repPrevIn(k)}${cmp}.`)
+        : L(`Spending ${money(c.out)} – ${Math.abs(Math.round(d * 100))} % ${d < 0 ? "less" : "more"} than ${repPrevIn(k)}${cmp} (${signed(c.out - r.prev.out)}).`, `Ausgaben ${money(c.out)} – ${Math.abs(Math.round(d * 100))} % ${d < 0 ? "weniger" : "mehr"} als ${repPrevIn(k)}${cmp} (${signed(c.out - r.prev.out)}).`) });
+    } else N.push({ tone: "", text: L(`Spending ${money(c.out)} · on average ${money(r.avgDay)} a day.`, `Ausgaben ${money(c.out)} · im Schnitt ${money(r.avgDay)} am Tag.`) });
+    const top = r.outRows.find((x) => x.cur > 0);
+    if (top && c.out > 0) N.push({ tone: "", text: L(`Most money went to ${TR(top.cat)}: ${money(top.cur)} (${Math.round(top.share * 100)} % of spending).`, `Das meiste Geld ging für ${TR(top.cat)} raus: ${money(top.cur)} (${Math.round(top.share * 100)} % der Ausgaben).`) });
+    if (r.hasPrev) {
+      const moves = r.outRows.map((x) => ({ ...x, d: x.cur - x.prev })).filter((x) => Math.abs(x.d) >= 2000 && (!x.prev || Math.abs(x.d) / x.prev >= 0.15));
+      const up = moves.filter((x) => x.d > 0).sort((a, b) => b.d - a.d)[0], down = moves.filter((x) => x.d < 0).sort((a, b) => a.d - b.d)[0];
+      if (up) N.push({ tone: "neg", text: up.prev ? L(`${TR(up.cat)} rose the most: ${signed(up.d)} (${pctTxt(up.d / up.prev)}).`, `${TR(up.cat)} stieg am stärksten: ${signed(up.d)} (${pctTxt(up.d / up.prev)}).`) : L(`New this time: ${TR(up.cat)} ${money(up.cur)}.`, `Neu dabei: ${TR(up.cat)} mit ${money(up.cur)}.`) });
+      if (down) N.push({ tone: "pos", text: L(`${TR(down.cat)} fell the most: ${signed(down.d)}${down.prev ? ` (${pctTxt(down.d / down.prev)})` : ""}.`, `${TR(down.cat)} sank am stärksten: ${signed(down.d)}${down.prev ? ` (${pctTxt(down.d / down.prev)})` : ""}.`) });
+    }
+    if (r.hasLy && r.ly.out > 0) { const d = (c.out - r.ly.out) / r.ly.out; N.push({ tone: Math.abs(d) < 0.03 ? "" : d < 0 ? "pos" : "neg", text: L(`Compared with ${r.lyLabel}: spending ${pctTxt(d)}, income ${r.ly.inc ? pctTxt((c.inc - r.ly.inc) / r.ly.inc) : "–"}.`, `Gegenüber ${r.lyLabel}: Ausgaben ${pctTxt(d)}, Einnahmen ${r.ly.inc ? pctTxt((c.inc - r.ly.inc) / r.ly.inc) : "–"}.`) }); }
+    if (r.hasPrev && r.prev.inc > 0 && c.inc > 0) { const d = (c.inc - r.prev.inc) / r.prev.inc; if (Math.abs(d) >= 0.1) N.push({ tone: d > 0 ? "pos" : "neg", text: L(`Income ${money(c.inc)} – ${pctTxt(d)} compared with ${repPrevTo(k)}.`, `Einnahmen ${money(c.inc)} – ${pctTxt(d)} im Vergleich ${repPrevTo(k)}.`) }); }
+    const md = r.md;
+    if (md && md.status !== "new") {
+      const what = md.src === "net" ? L("Your net worth", "Dein Vermögen") : L("Your savings", "Dein Erspartes");
+      if (md.status === "up") N.push({ tone: "pos", text: L(`${what} is growing: on average ${signed(md.slope)} a month. At this pace: about ${money(md.proj[2].v)} in 12 months.`, `${what} wächst: im Schnitt ${signed(md.slope)} pro Monat. Bei diesem Tempo in 12 Monaten etwa ${money(md.proj[2].v)}.`) });
+      else if (md.status === "down") N.push({ tone: "neg", text: md.runway != null && md.runway <= 36 ? L(`${what} is shrinking: ${signed(md.slope)} a month – at this pace it would be used up in about ${md.runway} months.`, `${what} schrumpft: ${signed(md.slope)} pro Monat – bei diesem Tempo wäre es in etwa ${md.runway} Monaten aufgebraucht.`) : L(`${what} is shrinking: on average ${signed(md.slope)} a month.`, `${what} schrumpft: im Schnitt ${signed(md.slope)} pro Monat.`) });
+      else N.push({ tone: "", text: L(`${what} stays about the same (${money(md.last)}).`, `${what} bleibt etwa gleich (${money(md.last)}).`) });
+    }
+    const big = r.biggest[0];
+    if (big) N.push({ tone: "", text: L(`Biggest single expense: ${big.note || TR(big.cat)} – ${money(big.cents)} on ${dayMonFmt.format(isoDate(big.date))}.`, `Größte Einzelausgabe: ${big.note || TR(big.cat)} – ${money(big.cents)} am ${dayMonFmt.format(isoDate(big.date))}.`) });
+    const over = r.budgets.filter((b) => b.over > 0);
+    if (over.length) N.push({ tone: "neg", text: L(`Over the limit: ${over.map((b) => `${TR(b.cat)} (+${money(b.over)})`).join(", ")}.`, `Über dem Limit: ${over.map((b) => `${TR(b.cat)} (+${money(b.over)})`).join(", ")}.`) });
+    else if (r.budgets.length) N.push({ tone: "pos", text: L(`All ${r.budgets.length} limits kept${r.running ? " so far" : ""}.`, `Alle ${r.budgets.length} Limits eingehalten${r.running ? " – bisher" : ""}.`) });
+    if (c.fixed > 0 && c.out > 0) N.push({ tone: "", text: L(`Fixed costs ${money(c.fixed)} – ${Math.round(c.fixed / c.out * 100)} % of spending.`, `Fixkosten ${money(c.fixed)} – ${Math.round(c.fixed / c.out * 100)} % der Ausgaben.`) });
+    if (r.uncat) N.push({ tone: "neg", text: L(`${r.uncat} transaction${r.uncat === 1 ? "" : "s"} without a category – sort ${r.uncat === 1 ? "it" : "them"} for a complete report.`, `${r.uncat} Buchung${r.uncat === 1 ? "" : "en"} ohne Kategorie – ordne sie zu, damit der Bericht vollständig ist.`) });
+    N.forEach((n) => { n.text = n.text.replace(/\.\.$/, "."); });
+    return N;
+  }
+  /* "New" = the latest finished report of a kind that you haven't opened on this device */
+  const REP_SEEN_KEY = "pfm.repSeen";
+  let repSeenCache = null;
+  function repSeen() { if (!repSeenCache) { try { repSeenCache = JSON.parse(localStorage.getItem(REP_SEEN_KEY) || "{}") || {}; } catch { repSeenCache = {}; } } return repSeenCache; }
+  function repLatestDone(kind) { const k = repShift(kind, repKeyOf(kind, todayISO()), -1), f = firstDataDate(); return f && f <= repRange(kind, k).to ? k : null; }
+  const repIsNew = (kind, key) => key === repLatestDone(kind) && (repSeen()[kind] || "") < key;
+  function repMarkSeen(kind, key) {
+    if (!repIsNew(kind, key)) return;
+    repSeen()[kind] = key;
+    try { localStorage.setItem(REP_SEEN_KEY, JSON.stringify(repSeenCache)); } catch { /* ignore */ }
+  }
+  /* ================= Reports: charts (static SVG, scales with the screen) ================= */
+  const rf = (v) => (Math.round(v * 10) / 10).toString();
+  function repScale(vals) {
+    const max = Math.max(0, ...vals), min = Math.min(0, ...vals), step = niceStep(max - min > 0 ? max - min : 20000);
+    let hi = step * Math.ceil(max / step), lo = -step * Math.ceil(-min / step);
+    if (hi <= lo) hi = lo + step;
+    return { lo, hi, step };
+  }
+  function repGrid(sc, Y, L0, x2) {
+    let s = "";
+    for (let v = sc.lo; v <= sc.hi + sc.step / 2; v += sc.step) s += `<line class="g${v === 0 ? " z" : ""}" x1="${L0}" x2="${x2}" y1="${rf(Y(v))}" y2="${rf(Y(v))}"/><text x="${L0 - 5}" y="${rf(Y(v) + 3)}" text-anchor="end">${esc(axisMoney(v))}</text>`;
+    return s;
+  }
+  const barRect = (cls, x, w, y0, y1, extra) => `<rect class="${cls}"${extra || ""} x="${rf(x)}" y="${rf(Math.min(y0, y1))}" width="${rf(w)}" height="${rf(Math.max(0.8, Math.abs(y1 - y0)))}" rx="1.5"/>`;
+  function repBarsSVG(tr) {
+    const W = 340, H = 190, L0 = 50, R0 = 4, T0 = 8, B0 = 20, pw = W - L0 - R0, ph = H - T0 - B0, n = Math.max(1, tr.length);
+    const sc = repScale(tr.flatMap((t) => [t.inc, t.out, t.net])), Y = (v) => T0 + ph - (v - sc.lo) / (sc.hi - sc.lo) * ph;
+    let s = repGrid(sc, Y, L0, W - R0);
+    const slot = pw / n, bw = Math.max(2, Math.min(11, slot * 0.3)), stride = Math.ceil(n / 7);
+    tr.forEach((t, i) => {
+      const cx = L0 + slot * (i + 0.5), op = t.cur ? "" : ' opacity="0.55"';
+      if (t.cur) s += `<rect class="hl" x="${rf(L0 + slot * i + 1)}" y="${T0}" width="${rf(slot - 2)}" height="${ph}" rx="5"/>`;
+      s += barRect("bi", cx - bw - 1, bw, Y(0), Y(t.inc), op) + barRect("bo", cx + 1, bw, Y(0), Y(t.out), op);
+      if ((n - 1 - i) % stride === 0) s += `<text x="${rf(cx)}" y="${H - 5}" text-anchor="middle"${t.cur ? ' class="cur"' : ""}>${esc(t.tick)}</text>`;
+    });
+    if (tr.length > 1) s += `<polyline class="nl" points="${tr.map((t, i) => `${rf(L0 + slot * (i + 0.5))},${rf(Y(t.net))}`).join(" ")}"/>`;
+    s += tr.map((t, i) => `<circle class="nd" cx="${rf(L0 + slot * (i + 0.5))}" cy="${rf(Y(t.net))}" r="${t.cur ? 3.4 : 2.4}"/>`).join("");
+    return `<svg class="rsvg" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(L("Income and spending per period", "Einnahmen und Ausgaben je Zeitraum"))}">${s}</svg>`;
+  }
+  function repLineSVG(md) {
+    const W = 340, H = 170, L0 = 56, R0 = 6, T0 = 10, B0 = 20, pw = W - L0 - R0, ph = H - T0 - B0;
+    const hist = md.vals, ahead = md.ahead, n = hist.length + ahead.length;
+    const sc = repScale(hist.concat(ahead)), Y = (v) => T0 + ph - (v - sc.lo) / (sc.hi - sc.lo) * ph, X = (i) => L0 + i * (pw / Math.max(1, n - 1));
+    let s = repGrid(sc, Y, L0, W - R0);
+    const hp = hist.map((v, i) => `${rf(X(i))},${rf(Y(v))}`).join(" "), li = hist.length - 1;
+    if (hist.length > 1) s += `<polygon class="ar" points="${rf(X(0))},${rf(Y(Math.max(sc.lo, 0)))} ${hp} ${rf(X(li))},${rf(Y(Math.max(sc.lo, 0)))}"/><polyline class="ml" points="${hp}"/>`;
+    s += `<line class="today" x1="${rf(X(li))}" x2="${rf(X(li))}" y1="${T0}" y2="${T0 + ph}"/>`;
+    s += `<polyline class="pl" points="${rf(X(li))},${rf(Y(hist[li]))} ${ahead.map((v, j) => `${rf(X(li + 1 + j))},${rf(Y(v))}`).join(" ")}"/>`;
+    s += `<circle class="md" cx="${rf(X(li))}" cy="${rf(Y(hist[li]))}" r="3.6"/>`;
+    const allM = md.months.concat(ahead.map((_, j) => shiftMonth(md.months[li], j + 1))), stride = Math.ceil(n / 6);
+    allM.forEach((m, i) => { if ((i - li) % stride === 0) s += `<text x="${rf(X(i))}" y="${H - 5}" text-anchor="${i === 0 ? "start" : i === n - 1 ? "end" : "middle"}"${i === li ? ' class="cur"' : ""}>${esc(`${mShort(m)} ${m.slice(2, 4)}`)}</text>`; });
+    return `<svg class="rsvg" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(md.name)}">${s}</svg>`;
+  }
+  function repCumSVG(r) {
+    const W = 340, H = 160, L0 = 50, R0 = 6, T0 = 8, B0 = 20, pw = W - L0 - R0, ph = H - T0 - B0, n = r.total;
+    const prev = r.cumPrev || [], sc = repScale(r.cumCur.concat(prev)), Y = (v) => T0 + ph - (v - sc.lo) / (sc.hi - sc.lo) * ph, X = (i) => L0 + i * (pw / Math.max(1, n - 1));
+    let s = repGrid(sc, Y, L0, W - R0);
+    if (prev.length > 1) s += `<polyline class="cp" points="${prev.slice(0, n).map((v, i) => `${rf(X(i))},${rf(Y(v))}`).join(" ")}"/>`;
+    if (r.cumCur.length > 1) s += `<polyline class="cc" points="${r.cumCur.map((v, i) => `${rf(X(i))},${rf(Y(v))}`).join(" ")}"/>`;
+    const li = r.cumCur.length - 1;
+    if (li >= 0) s += `<circle class="cd" cx="${rf(X(li))}" cy="${rf(Y(r.cumCur[li]))}" r="3.4"/>`;
+    [0, Math.round((n - 1) / 2), n - 1].forEach((i, j) => { s += `<text x="${rf(X(i))}" y="${H - 5}" text-anchor="${j === 0 ? "start" : j === 2 ? "end" : "middle"}">${esc(dayMonFmt.format(isoDate(addDays(r.R.from, i))))}</text>`; });
+    return `<svg class="rsvg" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(L("Spending added up over the period", "Ausgaben im Verlauf des Zeitraums"))}">${s}</svg>`;
+  }
+  /* Top categories, the rest as "Other" */
+  function repSlices(rows, total, max) {
+    const pos = rows.filter((x) => x.cur > 0), top = pos.slice(0, max || 6), rest = pos.slice(max || 6).reduce((a, x) => a + x.cur, 0);
+    const out = top.map((x) => ({ name: TR(x.cat), v: x.cur, color: colorOf(x.cat) }));
+    if (rest > 0) out.push({ name: L("Everything else", "Alles andere"), v: rest, color: "#55555D" });
+    return out.map((x) => ({ ...x, share: total > 0 ? x.v / total : 0 }));
+  }
+  function repDonutSVG(slices, total, label) {
+    const C = 2 * Math.PI * 43; let off = 0, s = "";
+    for (const x of slices) { const len = Math.max(0, x.share * C); s += `<circle cx="60" cy="60" r="43" fill="none" stroke="${x.color}" stroke-width="18" stroke-dasharray="${rf(Math.max(0, len - 1.2))} ${rf(C)}" stroke-dashoffset="${rf(-off)}" transform="rotate(-90 60 60)"/>`; off += len; }
+    if (!slices.length) s += `<circle cx="60" cy="60" r="43" fill="none" stroke="var(--raised)" stroke-width="18"/>`;
+    return `<svg class="donut" viewBox="0 0 120 120" role="img" aria-label="${esc(label)}">${s}<text x="60" y="57" text-anchor="middle" class="dl">${esc(label)}</text><text x="60" y="73" text-anchor="middle" class="dv">${esc(axisMoney(total))}</text></svg>`;
+  }
+
+  /* ================= Reports: views ================= */
+  function repDelta(cur, prev, goodUp, tail) {
+    if (prev == null) return "";
+    const tl = tail ? ` · ${esc(tail)}` : "";
+    if (!prev) return cur ? `<small class="dl0">${L("new", "neu")}${tl}</small>` : "";
+    const d = cur - prev;
+    if (Math.abs(d) < 100) return `<small class="dl0">± 0${tl}</small>`;
+    const good = goodUp ? d > 0 : d < 0;
+    return `<small><span class="${good ? "pos" : "neg"}">${d > 0 ? "▲" : "▼"} ${Math.abs(Math.round(d / Math.abs(prev) * 100))} %</span>${tail ? " " + esc(tail) : ""}</small>`;
+  }
+  const rateTxt = (x) => (x == null ? "–" : `${Math.round(x * 100)} %`);
+  function repKpis(r) {
+    const c = r.cur, p = r.hasPrev ? r.prev : null, y = r.hasLy ? r.ly : null, pc = repPrevCol(r.kind), yc = L("prev. year", "Vorjahr");
+    const dd = (fn, goodUp) => (p ? repDelta(fn(c), fn(p), goodUp, pc) : "") + (y ? repDelta(fn(c), fn(y), goodUp, yc) : "");
+    const ppDelta = (a, b, tail) => (a == null || b == null ? "" : `<small><span class="${a >= b ? "pos" : "neg"}">${a >= b ? "▲" : "▼"} ${Math.abs(Math.round((a - b) * 100))} ${L("pts", "Pkt.")}</span> ${esc(tail)}</small>`);
+    return `<div class="repkpis">
+      <div class="kpi"><span class="label">${L("Income", "Einnahmen")}</span><b class="pos">${money(c.inc)}</b>${dd((s) => s.inc, true)}</div>
+      <div class="kpi"><span class="label">${L("Spending", "Ausgaben")}</span><b>${money(c.out)}</b>${dd((s) => s.out, false)}</div>
+      <div class="kpi"><span class="label">${L("Result", "Ergebnis")}</span><b class="${c.net >= 0 ? "pos" : "neg"}">${signed(c.net)}</b>${p ? `<small class="dl0">${esc(pc)}: ${signed(p.net)}</small>` : ""}${y ? `<small class="dl0">${esc(yc)}: ${signed(y.net)}</small>` : ""}</div>
+      <div class="kpi"><span class="label">${L("Savings rate", "Sparquote")}</span><b class="${c.rate == null ? "" : c.rate >= 0 ? "pos" : "neg"}">${rateTxt(c.rate)}</b>${p ? ppDelta(c.rate, p.rate, pc) : ""}${y ? ppDelta(c.rate, y.rate, yc) : ""}</div>
+    </div>`;
+  }
+  const repNotesHTML = (notes) => `<ul class="repnotes">${notes.map((n) => `<li class="${n.tone}">${esc(n.text)}</li>`).join("")}</ul>`;
+  function repCatBars(rows, total, kind, showDelta) {
+    const max = Math.max(1, ...rows.map((x) => x.cur));
+    return rows.filter((x) => x.cur > 0).map((x) => `<div class="rcat"><i style="background:${colorOf(x.cat)}"></i><span class="rcn">${esc(TR(x.cat))}</span><span class="rcv">${money(x.cur)}<small>${total > 0 ? Math.round(x.cur / total * 100) : 0} %</small></span>
+      <span class="rcb"><span style="width:${(x.cur / max * 100).toFixed(1)}%;background:${colorOf(x.cat)}"></span></span>${showDelta && x.prev != null ? `<span class="rcd">${repDelta(x.cur, x.prev, kind === "ein", repPrevCol(showDelta))}</span>` : ""}</div>`).join("");
+  }
+  function repMoneyHTML(r, long) {
+    const md = r.md;
+    if (!md) return "";
+    const st = md.status === "up" ? `<span class="pos">▲ ${L("growing", "wächst")}</span>` : md.status === "down" ? `<span class="neg">▼ ${L("shrinking", "schrumpft")}</span>` : md.status === "flat" ? L("stays about the same", "bleibt etwa gleich") : L("not enough months yet", "noch zu wenige Monate");
+    const cells = [
+      [L("Per month (trend)", "Pro Monat (Trend)"), md.k >= 2 ? signed(md.slope) : "–"],
+      [L("Growth a year", "Wachstum pro Jahr"), md.growthPa == null ? "–" : pctTxt(md.growthPa)],
+      [L("In 12 months", "In 12 Monaten"), md.k >= 2 ? money(md.proj[2].v) : "–"],
+      r.mdChange != null ? [L("Change in this period", "Veränderung im Zeitraum"), signed(r.mdChange)] : [L(`Since ${monthFmt.format(ymDate(md.since))}`, `Seit ${monthFmt.format(ymDate(md.since))}`), signed(md.change12)]
+    ];
+    return `<section class="card repmoney">
+      <div class="split"><span class="label">${L("How your money develops", "So entwickelt sich dein Geld")}</span><span class="hint">${st}</span></div>
+      <div class="split"><span class="big">${money(md.last)}</span><span class="hint">${esc(md.name)}</span></div>
+      ${md.vals.length > 1 ? `<div class="rchart">${repLineSVG(md)}</div><div class="legend"><span><i style="border-color:var(--accent)"></i>${esc(md.name)}</span><span><i style="border-color:var(--accent);border-top-style:dashed"></i>${L("Projection", "Hochrechnung")}</span></div>` : ""}
+      <div class="repcells">${cells.map(([a, b]) => `<div><span class="label">${esc(a)}</span><b>${esc(b)}</b></div>`).join("")}</div>
+      ${md.runway != null && md.runway <= 36 ? `<p class="neg">${L(`At this pace the money would last about ${md.runway} more months.`, `Bei diesem Tempo reicht das Geld noch etwa ${md.runway} Monate.`)}</p>` : ""}
+      ${long ? `<div class="tablewrap"><table><thead><tr><th>${L("In", "In")}</th><th class="r">${L("Projection", "Hochrechnung")}</th><th class="r">${L("Change", "Veränderung")}</th></tr></thead><tbody>${md.proj.map((x) => `<tr><td>${x.n} ${L("months", "Monaten")}</td><td class="r">${money(x.v)}</td><td class="r">${signed(x.v - md.last)}</td></tr>`).join("")}</tbody></table></div>` : ""}
+      <p>${md.src === "net"
+        ? L(`Net worth from your balance sheet at each month end. The projection continues the trend of the last ${md.k} months (linear) – a rough guide, not a forecast.`, `Vermögen aus deiner Bilanz am jeweiligen Monatsende. Die Hochrechnung schreibt den Trend der letzten ${md.k} Monate fort (linear) – eine Orientierung, keine Prognose.`)
+        : L(`Everything you earned minus everything you spent since your first transaction. Set up your accounts in the balance sheet and PFM uses your real net worth. The projection continues the trend of the last ${md.k} months – a rough guide, not a forecast.`, `Alle Einnahmen minus alle Ausgaben seit deiner ersten Buchung. Richte deine Konten in der Bilanz ein, dann rechnet PFM mit deinem echten Vermögen. Die Hochrechnung schreibt den Trend der letzten ${md.k} Monate fort – eine Orientierung, keine Prognose.`)}</p>
+    </section>`;
+  }
+  const repRow = (e) => `<button class="row nochev" data-action="entry" data-arg="${esc(e.id)}">${badge(e.cat)}<span class="main"><span class="t1">${esc(e.note || TR(e.cat))}</span><span class="t2">${esc(TR(e.cat))}${e.account ? " · " + esc(TR(e.account)) : ""} · ${esc(dayFmt.format(isoDate(e.date)))}</span></span><span class="val ${e.type === "ein" ? "pos" : "neg"}">${e.type === "ein" ? "+" : "−"}${money(e.cents)}</span></button>`;
+  function repCompareTable(r) {
+    const c = r.cur, p = r.hasPrev ? r.prev : null, y = r.hasLy ? r.ly : null;
+    const rows = [
+      [L("Income", "Einnahmen"), (s) => s.inc, money, true],
+      [L("Spending", "Ausgaben"), (s) => s.out, money, false],
+      [L("Result", "Ergebnis"), (s) => s.net, signed, true],
+      [L("Savings rate", "Sparquote"), (s) => s.rate, rateTxt, null],
+      [L("Fixed costs", "Fixkosten"), (s) => s.fixed, money, false],
+      [L("Spending per day", "Ausgaben pro Tag"), (s) => Math.round(s.out / Math.max(1, dayDiff(s.from, s.to) + 1)), money, false],
+      [L("Transactions", "Buchungen"), (s) => s.n, String, null]
+    ];
+    const cell = (s, fn, fmt, goodUp, tail) => {
+      if (!s) return `<td class="r">–</td>`;
+      const v = fn(s), cv = fn(c);
+      const d = goodUp == null || v == null || cv == null ? "" : repDelta(cv, v, goodUp, "");
+      return `<td class="r">${esc(fmt(v))}${d ? `<br>${d}` : ""}</td>`;
+    };
+    return `<div class="tablewrap"><table class="reptable"><thead><tr><th></th><th class="r">${esc(r.running ? L("So far", "Bisher") : L("This period", "Zeitraum"))}</th>${p ? `<th class="r">${esc(repPrevCol(r.kind))}</th>` : ""}${y ? `<th class="r">${L("Prev. year", "Vorjahr")}</th>` : ""}</tr></thead>
+      <tbody>${rows.map(([name, fn, fmt, goodUp]) => `<tr><td>${esc(name)}</td><td class="r"><b>${esc(fmt(fn(c)))}</b></td>${p ? cell(p, fn, fmt, goodUp) : ""}${y ? cell(y, fn, fmt, goodUp) : ""}</tr>`).join("")}</tbody></table></div>
+      <p class="hint">${L("Arrows: how this period compares with the column.", "Pfeile: wie dieser Zeitraum im Vergleich zur Spalte abschneidet.")}${r.running ? " " + L("Comparisons use the same number of days.", "Verglichen wird jeweils bis zum gleichen Tag.") : ""}</p>`;
+  }
+  function repCatTable(r, rows, total, goodUp) {
+    const p = r.hasPrev, y = r.hasLy, dl = (a, b) => (b ? repDelta(a, b, goodUp, "") : a ? `<small class="dl0">${L("new", "neu")}</small>` : "");
+    return `<div class="tablewrap"><table class="reptable"><thead><tr><th>${L("Category", "Kategorie")}</th><th class="r">${L("Amount", "Betrag")}</th>${p ? `<th class="r">${esc(repPrevCol(r.kind))}</th>` : ""}${y ? `<th class="r">${L("Prev. year", "Vorjahr")}</th>` : ""}</tr></thead>
+      <tbody>${rows.map((x) => `<tr><td><i class="dot" style="background:${colorOf(x.cat)}"></i>${esc(TR(x.cat))}</td><td class="r"><b>${money(x.cur)}</b><br><small class="dl0">${total > 0 ? Math.round(x.cur / total * 100) : 0} %</small></td>${p ? `<td class="r">${money(x.prev)}<br>${dl(x.cur, x.prev)}</td>` : ""}${y ? `<td class="r">${money(x.ly)}<br>${dl(x.cur, x.ly)}</td>` : ""}</tr>`).join("")}</tbody>
+      <tfoot><tr><td>${L("Total", "Summe")}</td><td class="r">${money(total)}</td>${p ? `<td class="r">${money(rows.reduce((a, x) => a + x.prev, 0))}</td>` : ""}${y ? `<td class="r">${money(rows.reduce((a, x) => a + x.ly, 0))}</td>` : ""}</tr></tfoot></table></div>`;
+  }
+  function repLongHTML(r) {
+    const c = r.cur, parts = [];
+    parts.push(`<section class="sec repsec"><h2 class="sectitle">${L("Comparison", "Vergleich")}</h2>${repCompareTable(r)}</section>`);
+    if (r.outRows.length) parts.push(`<section class="sec repsec"><h2 class="sectitle">${L("Spending by category", "Ausgaben nach Kategorie")}</h2>${repCatTable(r, r.outRows, c.out, false)}</section>`);
+    if (r.incRows.length) parts.push(`<section class="sec repsec"><h2 class="sectitle">${L("Income by category", "Einnahmen nach Kategorie")}</h2>${repCatTable(r, r.incRows, c.inc, true)}</section>`);
+    if (r.total > 1) parts.push(`<section class="sec repsec"><h2 class="sectitle">${L("Over the period", "Im Verlauf")}</h2><div class="rchart">${repCumSVG(r)}</div>
+      <div class="legend"><span><i style="border-color:var(--neg)"></i>${L("Spending, added up", "Ausgaben aufsummiert")}</span>${r.cumPrev ? `<span><i style="border-color:var(--faint);border-top-style:dashed"></i>${esc(repPrevCol(r.kind))}</span>` : ""}</div>
+      <p class="hint">${L(`On average ${money(r.avgDay)} a day.`, `Im Schnitt ${money(r.avgDay)} am Tag.`)}${r.cumPrev && r.prev.out ? " " + L(`${repPrevCol(r.kind)}: ${money(Math.round(r.prev.out / Math.max(1, dayDiff(r.prev.from, r.prev.to) + 1)))} a day.`, `${repPrevCol(r.kind)}: ${money(Math.round(r.prev.out / Math.max(1, dayDiff(r.prev.from, r.prev.to) + 1)))} am Tag.`) : ""}</p></section>`);
+    if (c.out > 0) {
+      const v = c.out - c.fixed;
+      parts.push(`<section class="card"><span class="label">${L("Fixed and variable costs", "Fixe und variable Kosten")}</span>
+        <div class="fixbar"><span style="width:${(c.fixed / c.out * 100).toFixed(1)}%"></span></div>
+        <div class="split"><span>${L("Fixed", "Fix")} <b>${money(c.fixed)}</b> · ${Math.round(c.fixed / c.out * 100)} %</span><span>${L("Variable", "Variabel")} <b>${money(v)}</b> · ${Math.round(v / c.out * 100)} %</span></div>
+        <p>${L("Fixed costs are your recurring payments (rent, insurance, subscriptions). Variable costs are where you can save quickest.", "Fixkosten sind deine wiederkehrenden Zahlungen (Miete, Versicherungen, Abos). Bei den variablen Kosten kannst du am schnellsten sparen.")}</p></section>`);
+    }
+    if (r.biggest.length) parts.push(`<section class="sec repsec"><h2 class="sectitle">${L("Biggest expenses", "Größte Ausgaben")}</h2>${r.biggest.map(repRow).join("")}</section>`);
+    if (r.budgets.length) parts.push(`<section class="sec repsec"><h2 class="sectitle">${L("Limits", "Limits")}</h2>${r.budgets.map((b) => {
+      const st = b.over > 0 ? "over" : b.ahead || b.spent >= b.limit * 0.9 ? "warn" : "ok";
+      return `<div class="rbud"><div class="split"><span>${esc(TR(b.cat))}</span><span class="tn">${money(b.spent)} <span class="hint">/ ${money(b.limit)}</span></span></div><div class="bar"><span class="${st}" style="width:${Math.min(100, b.spent / b.limit * 100).toFixed(1)}%"></span></div>
+        <span class="status ${st}">${b.over > 0 ? L(`${money(b.over)} over`, `${money(b.over)} drüber`) : L(`${money(b.limit - b.spent)} left`, `${money(b.limit - b.spent)} übrig`)}${b.ahead ? L(" · faster than planned", " · schneller als geplant") : ""}</span></div>`;
+    }).join("")}<p class="hint">${L("Monthly limits scaled to the length of the period.", "Monatslimits auf die Länge des Zeitraums umgerechnet.")}</p></section>`);
+    const accs = Object.entries(c.acc).filter(([, a]) => a.i || a.o).sort((a, b) => b[1].o + b[1].i - a[1].o - a[1].i);
+    if (accs.length > 1) parts.push(`<section class="sec repsec"><h2 class="sectitle">${L("Accounts", "Konten")}</h2><div class="tablewrap"><table class="reptable"><thead><tr><th>${L("Account", "Konto")}</th><th class="r">${L("In", "Rein")}</th><th class="r">${L("Out", "Raus")}</th><th class="r">${L("Net", "Saldo")}</th></tr></thead><tbody>${accs.map(([n, a]) => `<tr><td>${esc(TR(n === "?" ? "Unspecified" : n))}</td><td class="r pos">${money(a.i)}</td><td class="r">${money(a.o)}</td><td class="r">${signed(a.i - a.o)}</td></tr>`).join("")}</tbody></table></div></section>`);
+    const projs = Object.entries(c.proj).filter(([, v]) => v).map(([id, v]) => ({ p: projById(id), v })).filter((x) => x.p);
+    if (projs.length) parts.push(`<section class="sec repsec"><h2 class="sectitle">${L("Projects", "Projekte")}</h2>${projs.map((x) => `<div class="rcat"><i style="background:${x.p.color || "var(--accent)"}"></i><span class="rcn">${esc(x.p.name)}</span><span class="rcv">${money(x.v)}</span></div>`).join("")}</section>`);
+    const groups = new Map();
+    for (const e of c.list) { if (e.type === "tr") continue; const k = (e.type === "ein" && !isRefund(e) ? "+" : "−") + e.cat; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(e); }
+    const gl = [...groups.entries()].map(([k, list]) => ({ k, cat: k.slice(1), inc: k[0] === "+", list: list.sort((a, b) => b.cents - a.cents), sum: list.reduce((a, e) => a + (e.type === "aus" ? e.cents : -e.cents) * (k[0] === "+" ? -1 : 1), 0) }))
+      .sort((a, b) => (a.inc === b.inc ? b.sum - a.sum : a.inc ? 1 : -1));
+    if (gl.length) parts.push(`<section class="sec repsec"><h2 class="sectitle">${L("All transactions", "Alle Buchungen")}</h2>${gl.map((g) => `<details class="repgrp"><summary><i class="dot" style="background:${colorOf(g.cat)}"></i><span>${esc(TR(g.cat))} <small>${g.list.length}×</small></span><b class="${g.inc ? "pos" : ""}">${g.inc ? "+" : "−"}${money(Math.abs(g.sum))}</b></summary>${g.list.slice(0, 200).map(repRow).join("")}${g.list.length > 200 ? `<p class="hint">${L(`+ ${g.list.length - 200} more – see Search`, `+ ${g.list.length - 200} weitere – siehe Suche`)}</p>` : ""}</details>`).join("")}</section>`);
+    return parts.join("");
+  }
+  function repShortHTML(r, long) {
+    const c = r.cur, slices = repSlices(r.outRows, c.out, 6), notes = long ? r.notes : r.notes.slice(0, 6);
+    return `${repKpis(r)}
+      <section class="card"><span class="label">${L("The most important points", "Das Wichtigste")}</span>${repNotesHTML(notes)}</section>
+      ${r.trend.length > 1 ? `<section class="sec repsec"><h2 class="sectitle">${L("Income & spending", "Einnahmen & Ausgaben")}</h2><div class="rchart">${repBarsSVG(r.trend)}</div>
+        <div class="legend"><span><i style="border-color:var(--pos)"></i>${L("Income", "Einnahmen")}</span><span><i style="border-color:var(--neg)"></i>${L("Spending", "Ausgaben")}</span><span><i style="border-color:var(--accent)"></i>${L("Result", "Ergebnis")}</span></div></section>` : ""}
+      ${c.out > 0 ? `<section class="sec repsec"><h2 class="sectitle">${L("Where it went", "Wofür")}</h2><div class="repwhere">${repDonutSVG(slices, c.out, L("Spending", "Ausgaben"))}<div class="rlegend">${slices.map((x) => `<span><i style="background:${x.color}"></i>${esc(x.name)} <b>${Math.round(x.share * 100)} %</b></span>`).join("")}</div></div>
+        <div class="rcats">${repCatBars(r.outRows.slice(0, 6), c.out, "aus", r.hasPrev ? r.kind : null)}</div>${!long && r.outRows.filter((x) => x.cur > 0).length > 6 ? `<p class="hint">${L("All categories in the detailed report.", "Alle Kategorien im ausführlichen Bericht.")}</p>` : ""}</section>` : ""}
+      ${c.inc > 0 && !long ? `<section class="sec repsec"><h2 class="sectitle">${L("Income from", "Einnahmen aus")}</h2><div class="rcats">${repCatBars(r.incRows.slice(0, 6), c.inc, "ein", r.hasPrev ? r.kind : null)}</div></section>` : ""}
+      ${repMoneyHTML(r, long)}`;
+  }
+  const REP_MODE_KEY = "pfm.repMode";
+  function viewReport(v) {
+    const [kind, key] = String(v.p || "").split(":");
+    if (!REP_KINDS.includes(kind) || !key) return `${backBar()}<p class="hint">${L("Report not found.", "Bericht nicht gefunden.")}</p>`;
+    if (!state.repMode) { try { state.repMode = localStorage.getItem(REP_MODE_KEY) || "short"; } catch { state.repMode = "short"; } }
+    const long = state.repMode === "long", r = buildReport(kind, key);
+    repMarkSeen(kind, key);
+    const prevK = repShift(kind, key, -1), nextK = repShift(kind, key, 1), first = firstDataDate();
+    const canPrev = !!first && first <= repRange(kind, prevK).to, canNext = repRange(kind, nextK).from <= todayISO();
+    return `${backBar()}<div data-noi18n class="view repview">
+      <div class="reptop"><span class="label">${esc(r.title)}${r.running ? ` · ${L("so far", "Zwischenstand")}` : ""}</span><h1 class="vtitle">${esc(r.label)}</h1></div>
+      <div class="repnav"><button class="btn" data-action="rep-go" data-arg="${kind}:${prevK}"${canPrev ? "" : " disabled"}>‹ ${esc(repLabel(kind, prevK, "short"))}</button><button class="btn" data-action="rep-go" data-arg="${kind}:${nextK}"${canNext ? "" : " disabled"}>${esc(repLabel(kind, nextK, "short"))} ›</button></div>
+      <div class="seg" role="group" aria-label="${L("Report length", "Umfang")}"><button type="button" data-action="rep-mode" data-arg="short" aria-pressed="${!long}">${L("Short", "Kurz")}</button><button type="button" data-action="rep-mode" data-arg="long" aria-pressed="${long}">${L("Detailed", "Ausführlich")}</button></div>
+      ${r.running ? `<p class="hint repnote">${L(`Interim report up to today. The finished report is ready on ${dateFmt.format(isoDate(addDays(r.R.to, 1)))}. Comparisons use the same number of days.`, `Zwischenstand bis heute. Der fertige Bericht steht ab ${dateFmt.format(isoDate(addDays(r.R.to, 1)))} bereit. Verglichen wird jeweils bis zum gleichen Tag.`)}</p>` : ""}
+      ${!r.cur.n && !r.cur.list.length ? `<div class="empty"><strong>${L("Nothing in this period", "In diesem Zeitraum ist nichts gebucht")}</strong><span>${L("Add transactions or import a CSV file – the report fills itself.", "Erfasse Buchungen oder importiere eine CSV-Datei – der Bericht füllt sich von selbst.")}</span></div>` : repShortHTML(r, long) + (long ? repLongHTML(r) : "")}
+      <section class="card reppdf"><span class="label">${L("Save or share as PDF", "Als PDF speichern oder teilen")}</span>
+        <div class="btnrow"><button class="btn${long ? "" : " primary"}" data-action="rep-pdf" data-arg="short">${L("Short report", "Kurzbericht")}</button><button class="btn${long ? " primary" : ""}" data-action="rep-pdf" data-arg="long">${L("Detailed report", "Ausführlicher Bericht")}</button></div>
+        <p>${L("On the iPhone you can then save it to Files, send it by mail or AirDrop, or print it.", "Auf dem iPhone kannst du es danach in „Dateien“ sichern, per Mail oder AirDrop schicken oder drucken.")}</p></section>
+    </div>`;
+  }
+  function viewReports() {
+    const kind = REP_KINDS.includes(state.repKind) ? state.repKind : "month", first = firstDataDate(), t = todayISO();
+    const head = `${backBar()}<div data-noi18n class="view repview"><h1 class="vtitle">${L("Reports", "Berichte")}</h1>
+      <div class="seg five" role="group" aria-label="${L("Period", "Zeitraum")}">${REP_KINDS.map((k) => `<button type="button" data-action="rep-kind" data-arg="${k}" aria-pressed="${k === kind}">${esc(repKindName(k))}</button>`).join("")}</div>`;
+    if (!first) return `${head}<div class="empty"><strong>${L("No reports yet", "Noch keine Berichte")}</strong><span>${L("As soon as you record transactions, PFM writes a report for every week, month, quarter, half-year and year.", "Sobald du Buchungen erfasst, schreibt PFM für jede Woche, jeden Monat, jedes Quartal, Halbjahr und Jahr einen Bericht.")}</span></div></div>`;
+    const curK = repKeyOf(kind, t), done = repLatestDone(kind), keys = [];
+    for (let k = done, j = 0; k && j < 60; k = repShift(kind, k, -1), j++) { if (repRange(kind, k).to < first) break; keys.push(k); }
+    const shown = state.repMore ? keys : keys.slice(0, 12);
+    const quick = (k) => { const R = repRange(kind, k); return repStats(R.from, R.to < t ? R.to : t); };
+    let feat = "";
+    if (done) {
+      const s = quick(done), isNew = repIsNew(kind, done);
+      feat = `<button class="card repfeat" data-action="rep-open" data-arg="${kind}:${done}">
+        <span class="split"><span class="label">${esc(repTitle(kind))}${isNew ? ` <span class="repnew">${L("New", "Neu")}</span>` : ""}</span><span class="more">${L("Open ›", "Öffnen ›")}</span></span>
+        <span class="repfeat-t">${esc(repLabel(kind, done, "long"))}</span>
+        <span class="repcells"><span><span class="label">${L("Income", "Einnahmen")}</span><b class="pos">${money(s.inc)}</b></span><span><span class="label">${L("Spending", "Ausgaben")}</span><b>${money(s.out)}</b></span><span><span class="label">${L("Result", "Ergebnis")}</span><b class="${s.net >= 0 ? "pos" : "neg"}">${signed(s.net)}</b></span></span></button>`;
+    }
+    const cs = quick(curK);
+    const run = repRange(kind, curK).from <= t ? `<button class="row" data-action="rep-open" data-arg="${kind}:${curK}"><span class="badge repbadge" aria-hidden="true">…</span><span class="main"><span class="t1">${esc(repLabel(kind, curK, "long"))}</span><span class="t2">${L("Running – interim report up to today", "Läuft noch – Zwischenstand bis heute")}</span></span><span class="val ${cs.net >= 0 ? "pos" : "neg"}">${signed(cs.net)}</span><span class="chev" aria-hidden="true">›</span></button>` : "";
+    const rows = shown.slice(1).map((k) => { const s = quick(k); return `<button class="row" data-action="rep-open" data-arg="${kind}:${k}"><span class="badge repbadge" aria-hidden="true">${esc(repLabel(kind, k, "tick"))}</span><span class="main"><span class="t1">${esc(repLabel(kind, k, "long"))}</span><span class="t2">${L("In", "Ein")} ${money(s.inc)} · ${L("out", "aus")} ${money(s.out)}</span></span><span class="val ${s.net >= 0 ? "pos" : "neg"}">${signed(s.net)}</span><span class="chev" aria-hidden="true">›</span></button>`; }).join("");
+    return `${head}
+      ${feat || `<p class="hint">${L("The first report is ready when the first period is over.", "Der erste Bericht ist fertig, sobald der erste Zeitraum vorbei ist.")}</p>`}
+      <section class="sec">${run}${rows}${keys.length > shown.length ? `<div class="btnrow" style="margin-top:12px"><button class="btn" data-action="rep-more">${L(`Show all ${keys.length}`, `Alle ${keys.length} zeigen`)}</button></div>` : ""}</section>
+      <p class="hint">${L("A report is finished as soon as its period is over – new ones are marked “New”. Every report comes short or detailed and can be saved as a PDF.", "Ein Bericht ist fertig, sobald sein Zeitraum vorbei ist – neue sind mit „Neu“ markiert. Jeden Bericht gibt es kurz oder ausführlich, auch als PDF.")}</p>
+    </div>`;
+  }
+  function repTile() {
+    if (!firstDataDate()) return "";
+    const order = ["month", "week", "quarter", "half", "year"], news = order.map((k) => ({ k, key: repLatestDone(k) })).filter((x) => x.key && repIsNew(x.k, x.key));
+    const mk = repLatestDone("month") || curMonth(), R = repRange("month", mk), s = repStats(R.from, R.to);
+    const nets = Array.from({ length: 6 }, (_, j) => { const m = shiftMonth(mk, j - 5), r2 = repRange("month", m); return repStats(r2.from, r2.to).net; });
+    const sub = news.length ? `<span class="repnew">${L("New", "Neu")}</span> ${esc(repTitle(news[0].k))} ${esc(repLabel(news[0].k, news[0].key, news[0].k === "week" ? "short" : "long"))}${news.length > 1 ? esc(L(` + ${news.length - 1} more`, ` + ${news.length - 1} weitere`)) : ""}`
+      : esc(L("Week to year · short or detailed · PDF", "Woche bis Jahr · kurz oder ausführlich · PDF"));
+    return `<button class="tile" data-noi18n data-action="nav" data-arg="reports">
+      <span class="tile-l"><span class="tile-t">${L("Reports", "Berichte")}</span><span class="tile-v"><span class="${s.net >= 0 ? "pos" : "neg"}">${signed(s.net)}</span> <span class="tile-s">${esc(L("result", "Ergebnis"))} ${esc(monthName.format(ymDate(mk)))}</span></span><span class="tile-s">${sub}</span></span>
+      ${spark(nets, "var(--accent)")}<span class="chev" aria-hidden="true">›</span></button>`;
+  }
+  /* ================= PDF – written directly (Helvetica, vector charts), works offline without a library ================= */
+  const HELV_W = [278,278,355,556,556,889,667,191,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,278,278,584,584,584,556,1015,667,667,722,722,667,611,778,722,278,500,667,556,833,722,778,667,778,722,667,611,722,667,944,667,667,611,278,278,278,469,556,333,556,556,500,556,556,278,556,556,222,222,500,222,833,556,556,556,556,333,500,278,556,500,722,500,500,500,334,260,334,584,0,556,0,222,556,333,1000,556,556,333,1000,667,333,1000,0,611,0,0,222,222,333,333,350,556,1000,333,1000,500,333,944,0,500,667,278,333,556,556,556,556,260,556,333,737,370,556,584,333,737,333,400,584,333,333,333,556,537,278,333,333,365,556,834,834,834,611,667,667,667,667,667,667,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,500,556,556,556,556,278,278,278,278,556,556,556,556,556,556,556,584,611,556,556,556,556,500,556,500], HELVB_W = [278,333,474,556,556,889,722,238,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,333,333,584,584,584,611,975,722,722,722,722,667,611,778,722,278,556,722,611,833,722,778,667,778,722,667,611,722,667,944,667,667,611,333,278,333,584,556,333,556,611,556,611,556,333,611,611,278,278,556,278,889,611,611,611,611,389,556,333,611,556,778,556,556,500,389,280,389,584,0,556,0,278,556,500,1000,556,556,333,1000,667,333,1000,0,611,0,0,278,278,500,500,350,556,1000,333,1000,556,333,944,0,500,667,278,333,556,556,556,556,280,556,333,737,370,556,584,333,737,333,400,584,333,333,333,611,556,278,333,333,365,556,834,834,834,611,722,722,722,722,722,722,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,556,556,556,556,556,278,278,278,278,611,611,611,611,611,611,611,584,611,611,611,611,611,556,611,556];
+  const WIN_MAP = { 0x20AC: 0x80, 0x201A: 0x82, 0x0192: 0x83, 0x201E: 0x84, 0x2026: 0x85, 0x2020: 0x86, 0x2021: 0x87, 0x02C6: 0x88, 0x2030: 0x89, 0x0160: 0x8A, 0x2039: 0x8B, 0x0152: 0x8C, 0x017D: 0x8E,
+    0x2018: 0x91, 0x2019: 0x92, 0x201C: 0x93, 0x201D: 0x94, 0x2022: 0x95, 0x2013: 0x96, 0x2014: 0x97, 0x02DC: 0x98, 0x2122: 0x99, 0x0161: 0x9A, 0x203A: 0x9B, 0x0153: 0x9C, 0x017E: 0x9E, 0x0178: 0x9F,
+    0x2212: 0x96, 0x202F: 0xA0, 0x2009: 0x20, 0x2007: 0x20, 0x00AD: 0x2D, 0x25B2: 0x2B, 0x25BC: 0x96, 0x2715: 0x78, 0x2713: 0x76 };
+  const winByte = (ch) => { const c = ch.codePointAt(0); return c < 0x80 ? (c >= 0x20 ? c : 0x20) : WIN_MAP[c] != null ? WIN_MAP[c] : c >= 0xA0 && c <= 0xFF ? c : 0x3F; };
+  const winEnc = (s) => { let o = ""; for (const ch of String(s ?? "")) o += String.fromCharCode(winByte(ch)); return o; };
+  const pdfStr = (s) => winEnc(s).replace(/[\\()]/g, (m) => "\\" + m);
+  const pdfW = (s, size, bold) => { const t = bold ? HELVB_W : HELV_W; let w = 0; for (const ch of String(s ?? "")) { const b = winByte(ch); w += b >= 32 ? t[b - 32] : 0; } return w * size / 1000; };
+  const pdfCol = (hex) => { const h = String(hex).replace("#", ""); return [0, 2, 4].map((i) => (parseInt(h.slice(i, i + 2), 16) / 255).toFixed(3)).join(" "); };
+  const pdfMix = (hex, t) => { const h = String(hex).replace("#", ""); return "#" + [0, 2, 4].map((i) => Math.round(parseInt(h.slice(i, i + 2), 16) * (1 - t) + 255 * t).toString(16).padStart(2, "0")).join(""); };
+  const nf = (v) => (Math.round(v * 100) / 100).toString();
+  function pdfDoc() {
+    const W = 595.28, H = 841.89, pages = [];
+    let pg = null;
+    const Yp = (y) => nf(H - y);
+    const D = {
+      W, H, pages,
+      page() { pg = { ops: [] }; pages.push(pg); },
+      width: pdfW,
+      text(x, y, str, o) {
+        o = o || {}; const size = o.size || 10, w = pdfW(str, size, o.bold);
+        const tx = o.align === "right" ? x - w : o.align === "center" ? x - w / 2 : x;
+        pg.ops.push(`BT /${o.bold ? "F2" : "F1"} ${size} Tf ${pdfCol(o.color || "#111111")} rg ${nf(tx)} ${Yp(y)} Td (${pdfStr(str)}) Tj ET`);
+        return w;
+      },
+      rect(x, y, w, h, o) { pg.ops.push(`${pdfCol(o.fill)} rg ${nf(x)} ${nf(H - y - h)} ${nf(w)} ${nf(h)} re f`); },
+      rrect(x, y, w, h, r, o) {
+        const k = 0.5523 * r, x2 = x + w, y2 = y + h;
+        pg.ops.push(`${pdfCol(o.fill)} rg ${nf(x + r)} ${Yp(y)} m ${nf(x2 - r)} ${Yp(y)} l ${nf(x2 - r + k)} ${Yp(y)} ${nf(x2)} ${Yp(y + r - k)} ${nf(x2)} ${Yp(y + r)} c ${nf(x2)} ${Yp(y2 - r)} l ${nf(x2)} ${Yp(y2 - r + k)} ${nf(x2 - r + k)} ${Yp(y2)} ${nf(x2 - r)} ${Yp(y2)} c ${nf(x + r)} ${Yp(y2)} l ${nf(x + r - k)} ${Yp(y2)} ${nf(x)} ${Yp(y2 - r + k)} ${nf(x)} ${Yp(y2 - r)} c ${nf(x)} ${Yp(y + r)} l ${nf(x)} ${Yp(y + r - k)} ${nf(x + r - k)} ${Yp(y)} ${nf(x + r)} ${Yp(y)} c f`);
+      },
+      line(pts, o) {
+        if (pts.length < 2) return;
+        pg.ops.push(`${pdfCol(o.color)} RG ${o.lw || 1} w 1 J 1 j ${o.dash ? `[${o.dash.join(" ")}] 0 d ` : ""}${pts.map((p, i) => `${nf(p[0])} ${Yp(p[1])} ${i ? "l" : "m"}`).join(" ")} S${o.dash ? " [] 0 d" : ""}`);
+      },
+      poly(pts, o) { if (pts.length < 3) return; pg.ops.push(`${pdfCol(o.fill)} rg ${pts.map((p, i) => `${nf(p[0])} ${Yp(p[1])} ${i ? "l" : "m"}`).join(" ")} h f`); },
+      circle(cx, cy, r, o) {
+        const k = 0.5523 * r;
+        pg.ops.push(`${pdfCol(o.fill)} rg ${nf(cx + r)} ${Yp(cy)} m ${nf(cx + r)} ${Yp(cy - k)} ${nf(cx + k)} ${Yp(cy - r)} ${nf(cx)} ${Yp(cy - r)} c ${nf(cx - k)} ${Yp(cy - r)} ${nf(cx - r)} ${Yp(cy - k)} ${nf(cx - r)} ${Yp(cy)} c ${nf(cx - r)} ${Yp(cy + k)} ${nf(cx - k)} ${Yp(cy + r)} ${nf(cx)} ${Yp(cy + r)} c ${nf(cx + k)} ${Yp(cy + r)} ${nf(cx + r)} ${Yp(cy + k)} ${nf(cx + r)} ${Yp(cy)} c f`);
+      },
+      /* Ring sector from angle a0 to a1 (radians, clockwise from 12 o'clock) */
+      sector(cx, cy, r0, r1, a0, a1, o) {
+        const segs = Math.max(1, Math.ceil((a1 - a0) / (Math.PI / 2))), da = (a1 - a0) / segs, pt = (r, a) => [cx + r * Math.sin(a), cy - r * Math.cos(a)];
+        const arc = (r, from, d, n) => { let s = ""; for (let i = 0; i < n; i++) { const a = from + d * i, b = a + d, k = 4 / 3 * Math.tan((b - a) / 4) * r;
+          const p1 = pt(r, a), p2 = pt(r, b), c1 = [p1[0] + k * Math.cos(a), p1[1] + k * Math.sin(a)], c2 = [p2[0] - k * Math.cos(b), p2[1] - k * Math.sin(b)];
+          s += ` ${nf(c1[0])} ${Yp(c1[1])} ${nf(c2[0])} ${Yp(c2[1])} ${nf(p2[0])} ${Yp(p2[1])} c`; } return s; };
+        const s0 = pt(r1, a0), e0 = pt(r0, a1);
+        pg.ops.push(`${pdfCol(o.fill)} rg ${nf(s0[0])} ${Yp(s0[1])} m${arc(r1, a0, da, segs)} ${nf(e0[0])} ${Yp(e0[1])} l${arc(r0, a1, -da, segs)} h f`);
+      },
+      bytes(title) {
+        const objs = [], add = (s) => { objs.push(s); return objs.length; };
+        add(""); add("");
+        const f1 = add("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>");
+        const f2 = add("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>");
+        let hex = "FEFF"; for (const ch of String(title)) { const c = ch.codePointAt(0); hex += c > 0xFFFF ? "003F" : c.toString(16).padStart(4, "0").toUpperCase(); }
+        const info = add(`<< /Title <${hex}> /Producer (PFM) /Creator (PFM) >>`);
+        const kids = pages.map((p) => { const data = p.ops.join("\n"); const c = add(`<< /Length ${data.length} >>\nstream\n${data}\nendstream`);
+          return add(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${W} ${H}] /Resources << /Font << /F1 ${f1} 0 R /F2 ${f2} 0 R >> >> /Contents ${c} 0 R >>`); });
+        objs[0] = "<< /Type /Catalog /Pages 2 0 R >>";
+        objs[1] = `<< /Type /Pages /Kids [${kids.map((k) => `${k} 0 R`).join(" ")}] /Count ${kids.length} >>`;
+        let out = "%PDF-1.4\n%\xE2\xE3\xCF\xD3\n";
+        const offs = objs.map((body, i) => { const o = out.length; out += `${i + 1} 0 obj\n${body}\nendobj\n`; return o; });
+        const xref = out.length;
+        out += `xref\n0 ${objs.length + 1}\n0000000000 65535 f \n${offs.map((o) => `${String(o).padStart(10, "0")} 00000 n \n`).join("")}trailer\n<< /Size ${objs.length + 1} /Root 1 0 R /Info ${info} 0 R >>\nstartxref\n${xref}\n%%EOF\n`;
+        const u = new Uint8Array(out.length);
+        for (let i = 0; i < out.length; i++) u[i] = out.charCodeAt(i) & 0xFF;
+        return u;
+      }
+    };
+    return D;
+  }
+  function pdfWrap(text, size, bold, maxW) {
+    const out = []; let line = "";
+    for (const word of String(text).split(/\s+/)) {
+      const t = line ? line + " " + word : word;
+      if (pdfW(t, size, bold) <= maxW || !line) line = t; else { out.push(line); line = word; }
+    }
+    if (line) out.push(line);
+    return out;
+  }
+  const pdfFit = (s, maxW, size, bold) => { s = String(s ?? ""); if (pdfW(s, size, bold) <= maxW) return s; while (s.length > 1 && pdfW(s + "…", size, bold) > maxW) s = s.slice(0, -1); return s + "…"; };
+
+  /* The report as PDF: same figures as on screen, laid out for A4 */
+  function repPdfBytes(r, long) {
+    const D = pdfDoc(), M = 42, CW = D.W - 2 * M, BOT = D.H - 52;
+    const C = { ink: "#111111", muted: "#6B6B73", line: "#E3E3E8", pos: "#1E9E5A", neg: "#D93A30", gold: "#C9A800", acc: "#FFE83A", soft: "#F4F4F6" };
+    const c = r.cur, prevC = repPrevCol(r.kind), lyC = L("Prev. year", "Vorjahr");
+    let y = 0;
+    const newPage = () => { D.page(); y = 40; if (D.pages.length > 1) { D.text(M, y, `PFM · ${r.title} · ${r.label}`, { size: 8, color: C.muted }); D.line([[M, y + 6], [M + CW, y + 6]], { color: C.line, lw: 0.5 }); y += 24; } };
+    const ensure = (h) => { if (y + h > BOT) newPage(); };
+    const h2 = (t, need) => { ensure((need || 60) + 30); y += 12; D.rect(M, y, 3, 13, { fill: C.acc }); D.text(M + 9, y + 11, t.toUpperCase(), { size: 11.5, bold: true }); y += 24; };
+    const para = (t, o) => { o = o || {}; for (const ln of pdfWrap(t, o.size || 9, o.bold, o.w || CW)) { ensure(13); D.text(o.x || M, y + 10, ln, { size: o.size || 9, color: o.color || C.muted, bold: o.bold }); y += o.lh || 12.5; } };
+    const dlt = (cur, prev, goodUp, tail) => {
+      if (prev == null) return null;
+      if (!prev) return cur ? { t: `${L("new", "neu")}${tail ? " · " + tail : ""}`, color: C.muted } : null;
+      const d = cur - prev;
+      if (Math.abs(d) < 100) return { t: `± 0 %${tail ? " · " + tail : ""}`, color: C.muted };
+      const good = goodUp ? d > 0 : d < 0;
+      return { t: `${d > 0 ? "+" : "−"}${Math.abs(Math.round(d / Math.abs(prev) * 100))} %${tail ? " · " + tail : ""}`, color: good ? C.pos : C.neg };
+    };
+    const table = (cols, rows, foot) => {
+      const rowH = (row) => (row.some((x) => x && typeof x === "object" && x.sub) ? 25 : 16);
+      const head = () => { ensure(17 + (rows[0] ? rowH(rows[0]) : 16)); let x = M; cols.forEach((col) => { D.text(col.r ? x + col.w - 3 : x + 3, y + 10, col.t, { size: 7.5, bold: true, color: C.muted, align: col.r ? "right" : "left" }); x += col.w; }); y += 15; D.line([[M, y], [M + CW, y]], { color: C.ink, lw: 0.6 }); };
+      const draw = (row, bold) => {
+        const h = rowH(row);
+        if (y + h > BOT) { newPage(); head(); }
+        let x = M;
+        row.forEach((cell, i) => {
+          const col = cols[i], o = cell && typeof cell === "object" ? cell : { t: cell == null ? "" : String(cell) }, dot = o.dot ? 10 : 0, ax = col.r ? x + col.w - 3 : x + 3 + dot;
+          if (o.dot) D.circle(x + 7, y + 7.5, 3, { fill: o.dot });
+          D.text(ax, y + 11, pdfFit(o.t, col.w - 6 - dot, 9, bold || o.b), { size: 9, bold: bold || o.b, color: o.color || C.ink, align: col.r ? "right" : "left" });
+          if (o.sub) D.text(ax, y + 21, pdfFit(o.sub, col.w - 6 - dot, 7.5), { size: 7.5, color: o.subColor || C.muted, align: col.r ? "right" : "left" });
+          x += col.w;
+        });
+        y += h; D.line([[M, y], [M + CW, y]], { color: bold ? C.ink : C.line, lw: bold ? 0.6 : 0.4 });
+      };
+      head(); rows.forEach((row) => draw(row)); if (foot) draw(foot, true);
+      y += 6;
+    };
+    const axisGrid = (x0, y0, w, h, sc, L0) => {
+      const Y = (v) => y0 + h - (v - sc.lo) / (sc.hi - sc.lo) * h;
+      for (let v = sc.lo; v <= sc.hi + sc.step / 2; v += sc.step) { D.line([[x0 + L0, Y(v)], [x0 + w, Y(v)]], { color: v === 0 ? "#B9B9C0" : C.line, lw: v === 0 ? 0.7 : 0.4 }); D.text(x0 + L0 - 4, Y(v) + 3, axisMoney(v), { size: 7, color: C.muted, align: "right" }); }
+      return Y;
+    };
+    const legend = (items) => { ensure(14); let x = M; for (const [col, t, dash] of items) { if (dash) D.line([[x, y + 6], [x + 14, y + 6]], { color: col, lw: 1.6, dash: [2.5, 2] }); else D.rect(x, y + 3, 14, 6, { fill: col }); x += 18 + D.text(x + 18, y + 9, t, { size: 8, color: C.muted }) + 14; } y += 16; };
+
+    /* ---- Page 1: title ---- */
+    newPage();
+    D.rect(0, 0, D.W, 7, { fill: C.acc });
+    D.text(M, 38, "PFM", { size: 12, bold: true }); D.text(M + 30, 38, "Personal Finance Management", { size: 8, color: C.muted });
+    D.text(M + CW, 38, `${L("Created", "Erstellt")} ${dateFmt.format(new Date())}`, { size: 8, color: C.muted, align: "right" });
+    D.text(M, 70, `${r.title}${long ? "" : ` · ${L("short", "kurz")}`}`.toUpperCase(), { size: 9.5, bold: true, color: C.muted });
+    D.text(M, 98, pdfFit(r.label, CW, 24, true), { size: 24, bold: true });
+    D.text(M, 116, `${dateFmt.format(isoDate(r.R.from))} – ${dateFmt.format(isoDate(r.R.to))}${r.running ? ` · ${L("interim report up to", "Zwischenstand bis")} ${dateFmt.format(isoDate(r.upto))}` : ""} · ${L("counted by payment date", "gezählt nach Zahlungsdatum")}`, { size: 8.5, color: C.muted });
+    y = 132;
+    /* ---- Key figures ---- */
+    const p = r.hasPrev ? r.prev : null, ly = r.hasLy ? r.ly : null, kw = (CW - 3 * 8) / 4;
+    const ppd = (a, b, tail) => (a == null || b == null ? null : { t: `${a >= b ? "+" : "−"}${Math.abs(Math.round((a - b) * 100))} ${L("pts", "Pkt.")} · ${tail}`, color: a >= b ? C.pos : C.neg });
+    const kpis = [
+      [L("Income", "Einnahmen"), money(c.inc), C.pos, [p && dlt(c.inc, p.inc, true, prevC), ly && dlt(c.inc, ly.inc, true, lyC)]],
+      [L("Spending", "Ausgaben"), money(c.out), C.ink, [p && dlt(c.out, p.out, false, prevC), ly && dlt(c.out, ly.out, false, lyC)]],
+      [L("Result", "Ergebnis"), signed(c.net), c.net >= 0 ? C.pos : C.neg, [p && { t: `${prevC}: ${signed(p.net)}`, color: C.muted }, ly && { t: `${lyC}: ${signed(ly.net)}`, color: C.muted }]],
+      [L("Savings rate", "Sparquote"), rateTxt(c.rate), c.rate == null ? C.ink : c.rate >= 0 ? C.pos : C.neg, [p && ppd(c.rate, p.rate, prevC), ly && ppd(c.rate, ly.rate, lyC)]]
+    ];
+    kpis.forEach(([lab, val, col, ds], i) => {
+      const x = M + i * (kw + 8);
+      D.rrect(x, y, kw, 66, 7, { fill: C.soft });
+      D.text(x + 9, y + 15, lab.toUpperCase(), { size: 7, bold: true, color: C.muted });
+      D.text(x + 9, y + 34, pdfFit(val, kw - 16, 14, true), { size: 14, bold: true, color: col });
+      ds.filter(Boolean).forEach((d, j) => D.text(x + 9, y + 47 + j * 10, pdfFit(d.t, kw - 16, 7.2), { size: 7.2, color: d.color }));
+    });
+    y += 78;
+    /* ---- The most important points ---- */
+    h2(L("The most important points", "Das Wichtigste"), 40);
+    for (const n of (long ? r.notes : r.notes.slice(0, 6))) {
+      const lines = pdfWrap(n.text, 9.5, false, CW - 14);
+      ensure(lines.length * 13 + 4);
+      D.circle(M + 3.5, y + 6.5, 2.6, { fill: n.tone === "pos" ? C.pos : n.tone === "neg" ? C.neg : "#9A9AA2" });
+      lines.forEach((ln) => { D.text(M + 13, y + 10, ln, { size: 9.5 }); y += 13; });
+      y += 3;
+    }
+    /* ---- Income & spending over time ---- */
+    if (r.trend.length > 1) {
+      h2(L("Income & spending", "Einnahmen & Ausgaben"), 190);
+      const tr = r.trend, h = 150, L0 = 52, sc = repScale(tr.flatMap((t) => [t.inc, t.out, t.net])), Y = axisGrid(M, y, CW, h, sc, L0);
+      const slot = (CW - L0) / tr.length, bw = Math.max(2, Math.min(14, slot * 0.3)), stride = Math.ceil(tr.length / 12);
+      tr.forEach((t, i) => {
+        const cx = M + L0 + slot * (i + 0.5);
+        if (t.cur) D.rect(M + L0 + slot * i + 1, y, slot - 2, h, { fill: "#F6F6F8" });
+        const bar = (x, v, col) => { const y0 = Y(0), y1 = Y(v); D.rect(x, Math.min(y0, y1), bw, Math.max(0.6, Math.abs(y1 - y0)), { fill: t.cur ? col : pdfMix(col, 0.45) }); };
+        bar(cx - bw - 1, t.inc, C.pos); bar(cx + 1, t.out, C.neg);
+        if ((tr.length - 1 - i) % stride === 0) D.text(cx, y + h + 11, t.tick, { size: 7, color: t.cur ? C.ink : C.muted, bold: t.cur, align: "center" });
+      });
+      D.line(tr.map((t, i) => [M + L0 + slot * (i + 0.5), Y(t.net)]), { color: C.gold, lw: 1.4 });
+      tr.forEach((t, i) => D.circle(M + L0 + slot * (i + 0.5), Y(t.net), t.cur ? 2.8 : 2, { fill: C.gold }));
+      y += h + 18;
+      legend([[C.pos, L("Income", "Einnahmen")], [C.neg, L("Spending", "Ausgaben")], [C.gold, L("Result", "Ergebnis")]]);
+    }
+    /* ---- Where it went ---- */
+    if (c.out > 0) {
+      const slices = repSlices(r.outRows, c.out, 7);
+      h2(L("Where it went", "Wofür"), 140);
+      const cx = M + 62, cy = y + 62; let a = 0;
+      for (const s of slices) { const a1 = a + s.share * 2 * Math.PI; if (a1 - a > 0.004) D.sector(cx, cy, 34, 58, a, a1 - 0.012, { fill: s.color }); a = a1; }
+      D.text(cx, cy - 2, L("Spending", "Ausgaben"), { size: 7.5, color: C.muted, align: "center" }); D.text(cx, cy + 11, axisMoney(c.out), { size: 11, bold: true, align: "center" });
+      let ly2 = y + 4; const lx = M + 145;
+      slices.forEach((s) => { D.circle(lx + 4, ly2 + 6, 3.5, { fill: s.color }); D.text(lx + 14, ly2 + 9, pdfFit(s.name, 170, 9), { size: 9 }); D.text(lx + 250, ly2 + 9, money(s.v), { size: 9, align: "right" }); D.text(lx + 290, ly2 + 9, `${Math.round(s.share * 100)} %`, { size: 9, color: C.muted, align: "right" }); ly2 += 16; });
+      y = Math.max(y + 128, ly2 + 6);
+    }
+    if (long) {
+      /* ---- Comparison ---- */
+      h2(L("Comparison", "Vergleich"), 120);
+      const fns = [[L("Income", "Einnahmen"), (s) => s.inc, money, true], [L("Spending", "Ausgaben"), (s) => s.out, money, false], [L("Result", "Ergebnis"), (s) => s.net, signed, true],
+        [L("Savings rate", "Sparquote"), (s) => s.rate, rateTxt, null], [L("Fixed costs", "Fixkosten"), (s) => s.fixed, money, false],
+        [L("Spending per day", "Ausgaben pro Tag"), (s) => Math.round(s.out / Math.max(1, dayDiff(s.from, s.to) + 1)), money, false], [L("Transactions", "Buchungen"), (s) => s.n, String, null]];
+      const cols = [{ t: "", w: 150 }, { t: r.running ? L("So far", "Bisher") : L("This period", "Zeitraum"), w: 120, r: 1 }];
+      if (p) cols.push({ t: `${prevC}`, w: 120, r: 1 }); if (ly) cols.push({ t: lyC, w: 120, r: 1 });
+      const cw2 = CW - cols.reduce((s2, x) => s2 + x.w, 0); cols[0].w += cw2;
+      table(cols, fns.map(([n, fn, fmt, gu]) => {
+        const row = [n, { t: fmt(fn(c)), b: 1 }];
+        for (const s2 of [p, ly]) { if (!s2) continue; const d = gu == null ? null : dlt(fn(c), fn(s2), gu, ""); row.push({ t: fmt(fn(s2)), sub: d ? d.t : "", subColor: d ? d.color : C.muted }); }
+        return row;
+      }));
+      if (p) para(L(`Percentages: this period compared with the column.${r.running ? " Compared up to the same day." : ""}`, `Prozente: dieser Zeitraum im Vergleich zur Spalte.${r.running ? " Verglichen wird bis zum gleichen Tag." : ""}`), { size: 7.5 });
+      /* ---- Categories ---- */
+      const catTable = (title, rows, total, goodUp) => {
+        h2(title, 60);
+        const cols2 = [{ t: L("Category", "Kategorie"), w: 0 }, { t: L("Amount", "Betrag"), w: 105, r: 1 }];
+        if (p) cols2.push({ t: prevC, w: 105, r: 1 }); if (ly) cols2.push({ t: lyC, w: 105, r: 1 });
+        cols2[0].w = CW - cols2.slice(1).reduce((s2, x) => s2 + x.w, 0);
+        const dd = (a, b) => (b ? dlt(a, b, goodUp, "") : a ? { t: L("new", "neu"), color: C.muted } : null);
+        table(cols2, rows.map((x) => {
+          const row = [{ t: TR(x.cat), dot: colorOf(x.cat) }, { t: money(x.cur), b: 1, sub: `${total > 0 ? Math.round(x.cur / total * 100) : 0} %` }];
+          if (p) { const d = dd(x.cur, x.prev); row.push({ t: money(x.prev), sub: d ? d.t : "", subColor: d ? d.color : C.muted }); }
+          if (ly) { const d = dd(x.cur, x.ly); row.push({ t: money(x.ly), sub: d ? d.t : "", subColor: d ? d.color : C.muted }); }
+          return row;
+        }), [L("Total", "Summe"), money(total), ...(p ? [money(rows.reduce((a2, x) => a2 + x.prev, 0))] : []), ...(ly ? [money(rows.reduce((a2, x) => a2 + x.ly, 0))] : [])]);
+      };
+      if (r.outRows.length) catTable(L("Spending by category", "Ausgaben nach Kategorie"), r.outRows, c.out, false);
+      if (r.incRows.length) catTable(L("Income by category", "Einnahmen nach Kategorie"), r.incRows, c.inc, true);
+      /* ---- Over the period ---- */
+      if (r.total > 1 && r.cumCur.length) {
+        h2(L("Over the period", "Im Verlauf"), 160);
+        const h = 130, L0 = 52, n = r.total, prev = r.cumPrev || [], sc = repScale(r.cumCur.concat(prev)), Y = axisGrid(M, y, CW, h, sc, L0), X = (i) => M + L0 + i * ((CW - L0) / Math.max(1, n - 1));
+        if (prev.length > 1) D.line(prev.slice(0, n).map((v, i) => [X(i), Y(v)]), { color: "#9A9AA2", lw: 1.2, dash: [3, 2.5] });
+        if (r.cumCur.length > 1) D.line(r.cumCur.map((v, i) => [X(i), Y(v)]), { color: C.neg, lw: 1.6 });
+        const li = r.cumCur.length - 1; D.circle(X(li), Y(r.cumCur[li]), 2.6, { fill: C.neg });
+        [0, Math.round((n - 1) / 2), n - 1].forEach((i, j) => D.text(X(i), y + h + 11, dayMonFmt.format(isoDate(addDays(r.R.from, i))), { size: 7, color: C.muted, align: j === 0 ? "left" : j === 2 ? "right" : "center" }));
+        y += h + 18;
+        legend([[C.neg, L("Spending, added up", "Ausgaben aufsummiert")], ...(prev.length ? [["#9A9AA2", prevC, true]] : [])]);
+        para(L(`On average ${money(r.avgDay)} a day.`, `Im Schnitt ${money(r.avgDay)} am Tag.`));
+      }
+      /* ---- Fixed and variable ---- */
+      if (c.out > 0) {
+        h2(L("Fixed and variable costs", "Fixe und variable Kosten"), 40);
+        const fw = Math.max(0, Math.min(1, c.fixed / c.out)) * CW;
+        D.rrect(M, y, CW, 10, 5, { fill: pdfMix(C.neg, 0.75) }); if (fw > 1) D.rrect(M, y, Math.max(10, fw), 10, 5, { fill: C.neg });
+        y += 24;
+        D.text(M, y, `${L("Fixed", "Fix")} ${money(c.fixed)} · ${Math.round(c.fixed / c.out * 100)} %`, { size: 9 });
+        D.text(M + CW, y, `${L("Variable", "Variabel")} ${money(c.out - c.fixed)} · ${Math.round((c.out - c.fixed) / c.out * 100)} %`, { size: 9, align: "right" });
+        y += 8;
+      }
+      /* ---- Biggest expenses ---- */
+      if (r.biggest.length) {
+        h2(L("Biggest expenses", "Größte Ausgaben"), 60);
+        table([{ t: L("Date", "Datum"), w: 62 }, { t: L("What", "Was"), w: CW - 62 - 130 - 80 }, { t: L("Category", "Kategorie"), w: 130 }, { t: L("Amount", "Betrag"), w: 80, r: 1 }],
+          r.biggest.map((e) => [dayMonFmt.format(isoDate(e.date)), e.note || TR(e.cat), { t: TR(e.cat), dot: colorOf(e.cat) }, { t: money(e.cents), b: 1 }]));
+      }
+      /* ---- Limits ---- */
+      if (r.budgets.length) {
+        h2(L("Limits", "Limits"), 60);
+        table([{ t: L("Category", "Kategorie"), w: CW - 300 }, { t: L("Spent", "Ausgegeben"), w: 100, r: 1 }, { t: L("Limit", "Limit"), w: 100, r: 1 }, { t: L("Status", "Status"), w: 100, r: 1 }],
+          r.budgets.map((b) => [{ t: TR(b.cat), dot: colorOf(b.cat) }, money(b.spent), money(b.limit), b.over > 0 ? { t: `+${money(b.over)}`, color: C.neg, b: 1 } : { t: `${money(b.limit - b.spent)} ${L("left", "übrig")}`, color: C.pos }]));
+      }
+      /* ---- Accounts ---- */
+      const accs = Object.entries(c.acc).filter(([, a2]) => a2.i || a2.o).sort((a2, b2) => b2[1].o + b2[1].i - a2[1].o - a2[1].i);
+      if (accs.length > 1) {
+        h2(L("Accounts", "Konten"), 60);
+        table([{ t: L("Account", "Konto"), w: CW - 300 }, { t: L("In", "Rein"), w: 100, r: 1 }, { t: L("Out", "Raus"), w: 100, r: 1 }, { t: L("Net", "Saldo"), w: 100, r: 1 }],
+          accs.map(([n2, a2]) => [TR(n2 === "?" ? "Unspecified" : n2), { t: money(a2.i), color: C.pos }, money(a2.o), { t: signed(a2.i - a2.o), b: 1 }]));
+      }
+      const projs = Object.entries(c.proj).filter(([, v]) => v).map(([id, v]) => ({ p: projById(id), v })).filter((x) => x.p);
+      if (projs.length) { h2(L("Projects", "Projekte"), 40); table([{ t: L("Project", "Projekt"), w: CW - 120 }, { t: L("Spending", "Ausgaben"), w: 120, r: 1 }], projs.map((x) => [x.p.name, money(x.v)])); }
+    }
+    /* ---- Money ---- */
+    const md = r.md;
+    if (md) {
+      h2(L("How your money develops", "So entwickelt sich dein Geld"), 190);
+      D.text(M, y + 16, money(md.last), { size: 18, bold: true });
+      D.text(M + D.width(money(md.last), 18, true) + 10, y + 16, md.name, { size: 9, color: C.muted });
+      const st = md.status === "up" ? [L("growing", "wächst"), C.pos] : md.status === "down" ? [L("shrinking", "schrumpft"), C.neg] : md.status === "flat" ? [L("stays about the same", "bleibt etwa gleich"), C.muted] : [L("not enough months yet", "noch zu wenige Monate"), C.muted];
+      D.text(M + CW, y + 16, st[0], { size: 10, bold: true, color: st[1], align: "right" });
+      y += 28;
+      if (md.vals.length > 1) {
+        const h = 130, L0 = 58, hist = md.vals, ahead = md.ahead, n = hist.length + ahead.length, sc = repScale(hist.concat(ahead)), Y = axisGrid(M, y, CW, h, sc, L0), X = (i) => M + L0 + i * ((CW - L0) / Math.max(1, n - 1)), li = hist.length - 1;
+        D.poly([[X(0), Y(Math.max(sc.lo, 0))], ...hist.map((v, i) => [X(i), Y(v)]), [X(li), Y(Math.max(sc.lo, 0))]], { fill: "#FFF7C2" });
+        D.line(hist.map((v, i) => [X(i), Y(v)]), { color: C.gold, lw: 1.8 });
+        D.line([[X(li), y], [X(li), y + h]], { color: C.line, lw: 0.6 });
+        D.line([[X(li), Y(hist[li])], ...ahead.map((v, j) => [X(li + 1 + j), Y(v)])], { color: C.gold, lw: 1.4, dash: [3.5, 2.5] });
+        D.circle(X(li), Y(hist[li]), 3, { fill: C.gold });
+        const allM = md.months.concat(ahead.map((_, j) => shiftMonth(md.months[li], j + 1))), stride = Math.ceil(n / 8);
+        allM.forEach((m, i) => { if ((i - li) % stride === 0) D.text(X(i), y + h + 11, `${mShort(m)} ${m.slice(2, 4)}`, { size: 7, color: i === li ? C.ink : C.muted, bold: i === li, align: i === 0 ? "left" : i === n - 1 ? "right" : "center" }); });
+        y += h + 18;
+        legend([[C.gold, md.name], [C.gold, L("Projection", "Hochrechnung"), true]]);
+      }
+      const cells = [[L("Per month (trend)", "Pro Monat (Trend)"), md.k >= 2 ? signed(md.slope) : "–"], [L("Growth a year", "Wachstum pro Jahr"), md.growthPa == null ? "–" : pctTxt(md.growthPa)],
+        [L("In 12 months", "In 12 Monaten"), md.k >= 2 ? money(md.proj[2].v) : "–"], r.mdChange != null ? [L("Change in this period", "Veränderung im Zeitraum"), signed(r.mdChange)] : [L(`Since ${monthFmt.format(ymDate(md.since))}`, `Seit ${monthFmt.format(ymDate(md.since))}`), signed(md.change12)]];
+      ensure(44); const cw = CW / 4;
+      cells.forEach(([a2, b2], i) => { D.text(M + i * cw, y + 9, a2.toUpperCase(), { size: 6.8, bold: true, color: C.muted }); D.text(M + i * cw, y + 24, b2, { size: 11, bold: true }); });
+      y += 36;
+      if (long && md.k >= 2) table([{ t: L("In", "In"), w: CW - 240 }, { t: L("Projection", "Hochrechnung"), w: 120, r: 1 }, { t: L("Change", "Veränderung"), w: 120, r: 1 }], md.proj.map((x) => [`${x.n} ${L("months", "Monaten")}`, { t: money(x.v), b: 1 }, signed(x.v - md.last)]));
+      if (md.runway != null && md.runway <= 36) para(L(`At this pace the money would last about ${md.runway} more months.`, `Bei diesem Tempo reicht das Geld noch etwa ${md.runway} Monate.`), { color: C.neg, size: 9.5, bold: true });
+      para(md.src === "net"
+        ? L(`Net worth from the balance sheet at each month end. The projection continues the trend of the last ${md.k} months (linear) – a rough guide, not a forecast.`, `Vermögen aus der Bilanz am jeweiligen Monatsende. Die Hochrechnung schreibt den Trend der letzten ${md.k} Monate fort (linear) – eine Orientierung, keine Prognose.`)
+        : L(`All income minus all spending since the first transaction. The projection continues the trend of the last ${md.k} months – a rough guide, not a forecast.`, `Alle Einnahmen minus alle Ausgaben seit der ersten Buchung. Die Hochrechnung schreibt den Trend der letzten ${md.k} Monate fort – eine Orientierung, keine Prognose.`), { size: 8 });
+    }
+    /* ---- All transactions ---- */
+    if (long) {
+      const list = c.list.filter((e) => e.type !== "tr").sort((a2, b2) => a2.date.localeCompare(b2.date)), cap = 800;
+      if (list.length) {
+        h2(`${L("All transactions", "Alle Buchungen")} · ${list.length}`, 60);
+        table([{ t: L("Date", "Datum"), w: 62 }, { t: L("What", "Was"), w: CW - 62 - 120 - 70 - 80 }, { t: L("Category", "Kategorie"), w: 120 }, { t: L("Account", "Konto"), w: 70 }, { t: L("Amount", "Betrag"), w: 80, r: 1 }],
+          list.slice(0, cap).map((e) => { const inc = e.type === "ein"; return [dayMonFmt.format(isoDate(e.date)), e.note || TR(e.cat), { t: TR(e.cat), dot: colorOf(e.cat) }, TR(e.account || ""), { t: `${inc ? "+" : "−"}${money(e.cents)}`, color: inc ? C.pos : C.ink }]; }));
+        if (list.length > cap) para(L(`+ ${list.length - cap} more transactions – see the app.`, `+ ${list.length - cap} weitere Buchungen – siehe App.`));
+      }
+    }
+    if (r.uncat) para(L(`${r.uncat} transaction(s) without a category.`, `${r.uncat} Buchung(en) ohne Kategorie.`), { size: 8 });
+    /* ---- Footer on every page ---- */
+    const n = D.pages.length;
+    D.pages.forEach((pg2, i) => {
+      pg2.ops.push(`${pdfCol(C.line)} RG 0.5 w ${M} 34 m ${nf(M + CW)} 34 l S`);
+      pg2.ops.push(`BT /F1 7.5 Tf ${pdfCol(C.muted)} rg ${M} ${nf(22)} Td (${pdfStr(`PFM · ${r.title} · ${r.label}`)}) Tj ET`);
+      const pt = L(`Page ${i + 1} of ${n}`, `Seite ${i + 1} von ${n}`);
+      pg2.ops.push(`BT /F1 7.5 Tf ${pdfCol(C.muted)} rg ${nf(M + CW - pdfW(pt, 7.5))} ${nf(22)} Td (${pdfStr(pt)}) Tj ET`);
+    });
+    return D.bytes(`${r.title} ${r.label}`);
+  }
+  async function pdfShare(bytes, name) {
+    const blob = new Blob([bytes], { type: "application/pdf" });
+    try {
+      const file = new File([blob], name, { type: "application/pdf" });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: name }); return; }
+    } catch (e) { if (e && e.name === "AbortError") return; }
+    const url = URL.createObjectURL(blob), a = document.createElement("a");
+    a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+    toast(L("PDF created", "PDF erstellt"));
+  }
+  function repPdf(mode) {
+    const top = state.stack[state.stack.length - 1], [kind, key] = String(top.p || "").split(":");
+    if (!REP_KINDS.includes(kind)) return;
+    let bytes;
+    try { bytes = repPdfBytes(buildReport(kind, key), mode === "long"); }
+    catch (e) { console.error(e); toast(L("Couldn't create the PDF", "PDF konnte nicht erstellt werden")); return; }
+    const t = { week: "Wochenbericht", month: "Monatsbericht", quarter: "Quartalsbericht", half: "Halbjahresbericht", year: "Jahresbericht" }[kind];
+    const name = `PFM-${LANG === "de" ? t : `${kind}-report`}-${key}${mode === "long" ? (LANG === "de" ? "-ausfuehrlich" : "-detailed") : (LANG === "de" ? "-kurz" : "-short")}.pdf`;
+    pdfShare(bytes, name);
+  }
+  VIEW_LABEL.reports = L("Reports", "Berichte"); VIEW_LABEL.report = L("Report", "Bericht");
+  const VIEWS = { reports: viewReports, report: viewReport, spielkonto: viewSpielkonto, help: viewHelp, theory: viewTheory, hub: viewHub, cashflow: viewHome, cat: viewCat, budgets: viewBudgets, list: viewList, project: viewProject, data: viewData, import: viewImport, fixed: viewFixed, calc: viewHome, balance: viewBalance, trash: viewTrash, categories: viewCategories, search: viewSearch, tax: viewTax, plan: viewPlan, manage: viewManage, sync: viewSync };
 
   function render() {
     const top = state.stack[state.stack.length - 1], root = $("view");
@@ -3922,11 +4920,11 @@ function buildRecords(imp, existing, learned, today) {
   window.addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => { charts.forEach((c) => drawChart($(c.id), c)); if (state.full) drawFull(); }, 120); });
 
   /* ================= Actions ================= */
-  function go(v, p) { const cur = state.stack[state.stack.length - 1]; cur.scroll = window.scrollY; cur.snap = $("view").innerHTML; cur.snapCls = $("view").className.replace(/\benter\b/, "").trim(); state.stack.push({ v, p }); state.enter = true; state.armedBatch = null; state.sel = null; state.armedTrash = false; state.armedCat = null; render(); window.scrollTo(0, 0); }
+  function go(v, p) { const cur = state.stack[state.stack.length - 1]; cur.scroll = window.scrollY; cur.snap = $("view").innerHTML; cur.snapCls = $("view").className.replace(/\benter\b/, "").trim(); state.stack.push({ v, p }); state.pick = null; state.enter = true; state.armedBatch = null; state.sel = null; state.armedTrash = false; state.armedCat = null; render(); window.scrollTo(0, 0); }
   if (I18N_DEBUG) window.__pfmGo = (v, p) => { closeSheets(); state.stack = [{ v: "hub" }]; if (v !== "hub") go(v, p); else render(); };
   function goBack() {
     if (state.stack.length < 2) return;
-    state.stack.pop();
+    state.stack.pop(); state.pick = null;
     const top = state.stack[state.stack.length - 1];
     if (top.v !== "list" && state.listFilter === "review") state.listFilter = "all";
     state.armedBatch = null; state.sel = null; state.armedTrash = false; state.armedCat = null; render();
@@ -3956,6 +4954,14 @@ function buildRecords(imp, existing, learned, today) {
       case "filter": state.homeCat = arg; state.cfShowAll = false; render(); break;
       case "cfmode": state.cfMode = arg; state.homeCat = "All"; state.cfShowAll = false; render(); break;
       case "cf-showall": state.cfShowAll = true; render(); break;
+      case "pick-close": state.pick = null; render(); break;
+      case "rep-kind": state.repKind = arg; state.repMore = false; render(); break;
+      case "rep-more": state.repMore = true; render(); break;
+      case "rep-open": go("report", arg); break;
+      case "rep-go": { const top = state.stack[state.stack.length - 1]; top.p = arg; render(); window.scrollTo(0, 0); break; }
+      case "rep-mode": state.repMode = arg === "long" ? "long" : "short"; try { localStorage.setItem(REP_MODE_KEY, state.repMode); } catch { /* ignore */ } render(); break;
+      case "rep-pdf": repPdf(arg); break;
+      case "pick-all": state.pickAll = true; render(); break;
       case "calcmode": state.calcMode = arg; state.calcCat = "All"; state.calcShowAll = false; render(); break;
       case "calcfilter": state.calcCat = arg; state.calcShowAll = false; render(); break;
       case "calc-showall": state.calcShowAll = true; render(); break;
@@ -5459,7 +6465,7 @@ function buildRecords(imp, existing, learned, today) {
       : Math.max(240, Math.floor(window.innerHeight - inner.scrollHeight - 8));
     host.style.height = avail + "px";
     const n = c.points.length;
-    drawChart(host, { ...c, height: avail, reveal: sim.k != null && sim.k < n - 1 ? sim.k : null,
+    drawChart(host, { ...c, onPick: null, pinned: null, height: avail, reveal: sim.k != null && sim.k < n - 1 ? sim.k : null,
       onScrub: (i) => scrubTo(c, i == null ? (sim.k != null && sim.k < n - 1 ? Math.floor(sim.k) : null) : i) });
   }
   function renderFull() {
