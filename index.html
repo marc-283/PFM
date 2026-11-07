@@ -27,7 +27,8 @@ img { max-width: 100%; }
 </style>
 <script>
 window.PFM_STANDALONE = true;
-window.PFM_VERSION = "1.9.1";
+window.PFM_VERSION = "1.10.0";
+try { document.documentElement.lang = localStorage.getItem("pfm.lang") === "de" ? "de" : "en"; } catch (e) { /* stays en */ }
 if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
 </script>
 </head>
@@ -266,7 +267,7 @@ h1, h2 { margin: 0; text-wrap: balance; }
 /* Sub-pages */
 .backbtn { display: inline-flex; align-items: center; gap: 4px; border: 0; background: none; color: var(--muted); font-weight: 600; font-size: 15px; padding: 6px 0; align-self: flex-start; }
 .backbtn span { font-size: 24px; line-height: 1; }
-.vtitle { font-family: var(--f-display); font-weight: 800; font-size: 38px; line-height: 0.95; letter-spacing: 0.01em; text-transform: uppercase; overflow-wrap: anywhere; }
+.vtitle { font-family: var(--f-display); font-weight: 800; font-size: 38px; line-height: 0.95; letter-spacing: 0.01em; text-transform: uppercase; }
 .meta { color: var(--muted); font-size: 14.5px; margin: -16px 0 0; }
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 .card p { margin: 0; color: var(--muted); font-size: 14.5px; max-width: 62ch; }
@@ -319,7 +320,7 @@ tr:last-child td { border-bottom: 0; }
 .sheet form { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
 .grip { width: 40px; height: 5px; border-radius: 3px; background: var(--faint); margin: 0 auto 2px; }
 .sheethead { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-.sheethead h2 { font-family: var(--f-display); font-weight: 800; font-size: 26px; text-transform: uppercase; letter-spacing: 0.02em; overflow-wrap: anywhere; }
+.sheethead h2 { font-family: var(--f-display); font-weight: 800; font-size: 26px; text-transform: uppercase; letter-spacing: 0.02em; }
 .mbtn { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); font-size: 16px; display: grid; place-items: center; flex: none; }
 .seg { display: grid; grid-template-columns: 1fr 1fr; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 3px; }
 .seg button { border: 0; background: none; border-radius: 9px; padding: 10px; font-weight: 700; color: var(--muted); }
@@ -345,7 +346,8 @@ tr:last-child td { border-bottom: 0; }
 .searchbar input::-webkit-search-cancel-button { display: none; }
 .searchbar button { border: 0; background: var(--raised); color: var(--muted); width: 28px; height: 28px; border-radius: 50%; font-size: 13px; flex: none; }
 .hubsearch { width: 100%; text-align: left; font-size: 16.5px; }
-.minitiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.minitiles { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
+.textlink { align-self: flex-start; border: 0; background: none; padding: 6px 0; color: var(--muted); font: inherit; font-size: 14px; text-decoration: underline; text-underline-offset: 3px; }
 .spktile { text-decoration: none; color: inherit; margin-top: -16px; }
 .spktile .tile-t { font-size: 22px; }
 .spkview { gap: 26px; }
@@ -543,7 +545,7 @@ details.more[open] summary { margin-bottom: 12px; }
 .tile-s { font-size: 13.5px; color: var(--muted); }
 .tile-s .pos, .tile-s .neg { white-space: nowrap; }
 .spark { width: 84px; height: 30px; display: block; }
-.accounts { margin-top: auto; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; padding-top: 18px; border-top: 1px solid var(--line); }
+.accounts { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; padding: 6px 0 18px; border-bottom: 1px solid var(--line); min-width: 0; }
 .acc-total { font-weight: 600; font-size: 40px; line-height: 1; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
 .acc-total .dec { font-size: 22px; }
 .acc-split { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; width: 100%; }
@@ -616,6 +618,34 @@ tfoot td { font-weight: 700; border-top: 2px solid var(--line); border-bottom: 0
   .two, .mapgrid { grid-template-columns: 1fr; } .stat .v { font-size: 16px; }
 }
 @media (prefers-reduced-motion: reduce) { .view.enter, .sheet, .splash img, .quote, .splash-go, .splash-top { animation: none; } }
+/* Headlines: hyphenate in the page language instead of breaking anywhere, scale with the screen width */
+.vtitle, .tile-t, .card h2, .sectitle, .sech, .spkh3, .card > .label { hyphens: auto; -webkit-hyphens: auto; overflow-wrap: break-word; min-width: 0; }
+.vtitle { font-size: clamp(27px, 9.4vw, 38px); }
+.tile-t { font-size: clamp(19px, 6.6vw, 26px); }
+.mtile .tile-t { font-size: clamp(15px, 5.1vw, 21px); }
+.spktile .tile-t { font-size: clamp(17px, 5.6vw, 22px); }
+.card h2 { font-size: clamp(18px, 5.8vw, 22px); }
+.sectitle, .sech { font-size: clamp(19px, 6.2vw, 24px); }
+/* Save stays reachable with the keyboard open: the sheet head sticks to the top, the sheet ends at the keyboard */
+.sheethead { position: sticky; top: -10px; z-index: 2; background: var(--surface); margin: -10px -2px 0; padding: 10px 2px 8px; }
+.sheethead h2 { min-width: 0; hyphens: auto; -webkit-hyphens: auto; overflow-wrap: break-word; font-size: clamp(19px, 6.4vw, 26px); }
+.headbtns { display: flex; align-items: center; gap: 8px; flex: none; }
+.hsave { border: 0; border-radius: 999px; background: var(--accent); color: var(--accent-ink); font-weight: 800; font-size: 15px; padding: 0 14px; height: 36px; }
+.hsave:disabled { opacity: 0.5; }
+/* Quick entry: favourites */
+.favs { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: -4px 0; padding: 2px 0; min-width: 0; }
+.favs::-webkit-scrollbar { display: none; }
+.favs .favl { flex: none; align-self: center; color: var(--muted); font-family: var(--f-display); font-weight: 700; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; }
+.fav { flex: none; display: flex; flex-direction: column; align-items: flex-start; gap: 1px; max-width: 150px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg); color: var(--ink); padding: 7px 11px; font: inherit; text-align: left; }
+.fav b { font-size: 14px; font-weight: 600; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fav span { font-size: 12.5px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.fav.in span { color: var(--pos); }
+.rlegend span { white-space: normal; line-height: 1.25; }
+.rlegend b { flex: none; padding-left: 6px; }
+.seg.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.seg button { min-width: 0; overflow-wrap: break-word; hyphens: auto; -webkit-hyphens: auto; }
+@media (max-width: 360px) { .seg.three button { font-size: 13.5px; padding: 10px 4px; } }
+.mtile .tile-t { font-size: clamp(13px, 4.4vw, 21px); }
 </style>
 
 <div class="app" id="app"><main class="view" id="view"></main></div>
@@ -627,17 +657,18 @@ tfoot td { font-weight: 700; border-top: 2px solid var(--line); border-bottom: 0
 <div class="sheet" id="entrySheet" role="dialog" aria-modal="true" aria-labelledby="entryTitle" hidden>
   <form id="entryForm" novalidate>
     <div class="grip" aria-hidden="true"></div>
-    <div class="sheethead"><h2 id="entryTitle">New transaction</h2><button type="button" class="mbtn" data-close aria-label="Close">✕</button></div>
+    <div class="sheethead"><h2 id="entryTitle">New transaction</h2><span class="headbtns"><button type="button" class="hsave" data-save="saveBtn" data-de="Sichern">Save</button><button type="button" class="mbtn" data-close aria-label="Close">✕</button></span></div>
     <div class="seg three" role="group" aria-label="Type">
       <button type="button" id="typeOut" aria-pressed="true">Expense</button>
       <button type="button" id="typeIn" aria-pressed="false" data-de="Einnahme">Income</button>
       <button type="button" id="typeTr" aria-pressed="false">Transfer</button>
     </div>
+    <div class="favs" id="favRow" data-noi18n hidden></div>
     <div class="field">
       <label class="label" for="amount">Amount</label>
       <div class="amount"><span>€</span><input id="amount" inputmode="decimal" autocomplete="off" placeholder="0.00"></div>
     </div>
-    <div class="field" id="noteWrap"><label class="label" for="note">Description</label><input id="note" maxlength="120" autocomplete="off" placeholder="e.g. Rewe, Spotify, rent">
+    <div class="field" id="noteWrap"><label class="label" for="note">Description</label><input id="note" maxlength="120" autocomplete="off" list="noteList" placeholder="e.g. Rewe, Spotify, rent"><datalist id="noteList"></datalist>
       <span class="hint" id="catHint" hidden></span></div>
     <div class="field" id="catWrap"><span class="label" id="catLabel">Category</span><div class="chips" id="catChips" role="radiogroup" aria-labelledby="catLabel"></div>
       <div class="newcat" id="entryNewCat" hidden><input id="entryNewCatName" maxlength="30" placeholder="New category name" aria-label="New category name"><button type="button" class="btn" id="entryNewCatAdd">Add</button></div></div>
@@ -685,7 +716,7 @@ tfoot td { font-weight: 700; border-top: 2px solid var(--line); border-bottom: 0
 <div class="sheet" id="limitSheet" role="dialog" aria-modal="true" aria-labelledby="limitTitle" hidden>
   <form id="limitForm" novalidate>
     <div class="grip" aria-hidden="true"></div>
-    <div class="sheethead"><h2 id="limitTitle">Monthly limit</h2><button type="button" class="mbtn" data-close aria-label="Close">✕</button></div>
+    <div class="sheethead"><h2 id="limitTitle">Monthly limit</h2><span class="headbtns"><button type="button" class="hsave" data-save="limitSave" data-de="Sichern">Save</button><button type="button" class="mbtn" data-close aria-label="Close">✕</button></span></div>
     <p class="hint" id="limitHint"></p>
     <div class="field">
       <label class="label" for="limitAmount">Limit per month</label>
@@ -702,7 +733,7 @@ tfoot td { font-weight: 700; border-top: 2px solid var(--line); border-bottom: 0
 <div class="sheet" id="projectSheet" role="dialog" aria-modal="true" aria-labelledby="projTitle" hidden>
   <form id="projectForm" novalidate>
     <div class="grip" aria-hidden="true"></div>
-    <div class="sheethead"><h2 id="projTitle">New project</h2><button type="button" class="mbtn" data-close aria-label="Close">✕</button></div>
+    <div class="sheethead"><h2 id="projTitle">New project</h2><span class="headbtns"><button type="button" class="hsave" data-save="projSave" data-de="Sichern">Save</button><button type="button" class="mbtn" data-close aria-label="Close">✕</button></span></div>
     <p class="hint">Projects group transactions across categories, e.g. a semester abroad or a trip. You'll see the total for the whole project.</p>
     <div class="field"><label class="label" for="projName">Name</label><input id="projName" maxlength="40" placeholder="e.g. Semester abroad"></div>
     <div class="two">
@@ -725,7 +756,7 @@ tfoot td { font-weight: 700; border-top: 2px solid var(--line); border-bottom: 0
 <div class="sheet" id="recSheet" role="dialog" aria-modal="true" aria-labelledby="recTitle" hidden>
   <form id="recForm" novalidate>
     <div class="grip" aria-hidden="true"></div>
-    <div class="sheethead"><h2 id="recTitle">New fixed cost</h2><button type="button" class="mbtn" data-close aria-label="Close">✕</button></div>
+    <div class="sheethead"><h2 id="recTitle">New fixed cost</h2><span class="headbtns"><button type="button" class="hsave" data-save="recSave" data-de="Sichern">Save</button><button type="button" class="mbtn" data-close aria-label="Close">✕</button></span></div>
     <div class="seg three" role="group" aria-label="Type">
       <button type="button" id="recTypeOut" aria-pressed="true">Expense</button>
       <button type="button" id="recTypeIn" aria-pressed="false" data-de="Einnahme">Income</button>
@@ -759,7 +790,7 @@ tfoot td { font-weight: 700; border-top: 2px solid var(--line); border-bottom: 0
 <div class="sheet" id="balSheet" role="dialog" aria-modal="true" aria-labelledby="balTitle" hidden>
   <form id="balForm" novalidate>
     <div class="grip" aria-hidden="true"></div>
-    <div class="sheethead"><h2 id="balTitle">New asset</h2><button type="button" class="mbtn" data-close aria-label="Close">✕</button></div>
+    <div class="sheethead"><h2 id="balTitle">New asset</h2><span class="headbtns"><button type="button" class="hsave" data-save="balSave" data-de="Sichern">Save</button><button type="button" class="mbtn" data-close aria-label="Close">✕</button></span></div>
     <div class="seg" role="group" aria-label="Side">
       <button type="button" id="balSideA" aria-pressed="true">Asset</button>
       <button type="button" id="balSideL" aria-pressed="false">Liability</button>
@@ -803,7 +834,7 @@ tfoot td { font-weight: 700; border-top: 2px solid var(--line); border-bottom: 0
 <div class="sheet" id="objSheet" role="dialog" aria-modal="true" aria-labelledby="objTitle" hidden>
   <form id="objForm" novalidate>
     <div class="grip" aria-hidden="true"></div>
-    <div class="sheethead"><h2 id="objTitle">New item</h2><button type="button" class="mbtn" data-close aria-label="Close">✕</button></div>
+    <div class="sheethead"><h2 id="objTitle">New item</h2><span class="headbtns"><button type="button" class="hsave" data-save="objSave" data-de="Sichern">Save</button><button type="button" class="mbtn" data-close aria-label="Close">✕</button></span></div>
     <div class="two">
       <div class="field"><label class="label" for="objType">What is it?</label><select id="objType"></select></div>
       <div class="field"><label class="label" for="objName">Name</label><input id="objName" maxlength="40" placeholder="e.g. MacBook Air"></div>
@@ -880,7 +911,7 @@ tfoot td { font-weight: 700; border-top: 2px solid var(--line); border-bottom: 0
 <div class="sheet" id="bulkSheet" role="dialog" aria-modal="true" aria-labelledby="bulkTitle" hidden>
   <form id="bulkForm" novalidate>
     <div class="grip" aria-hidden="true"></div>
-    <div class="sheethead"><h2 id="bulkTitle">Edit transactions</h2><button type="button" class="mbtn" data-close aria-label="Close">✕</button></div>
+    <div class="sheethead"><h2 id="bulkTitle">Edit transactions</h2><span class="headbtns"><button type="button" class="hsave" data-save="bulkSave" data-de="Sichern">Save</button><button type="button" class="mbtn" data-close aria-label="Close">✕</button></span></div>
     <p class="hint">Only what you change is applied. Everything left on “Keep” stays as it is.</p>
     <div class="two">
       <div class="field"><label class="label" for="bulkAccount">Account</label><select id="bulkAccount"></select></div>
@@ -898,7 +929,7 @@ tfoot td { font-weight: 700; border-top: 2px solid var(--line); border-bottom: 0
 <div class="sheet" id="formSheet" role="dialog" aria-modal="true" aria-labelledby="fsTitle" hidden>
   <form id="fsForm" novalidate>
     <div class="grip" aria-hidden="true"></div>
-    <div class="sheethead"><h2 id="fsTitle">Edit</h2><button type="button" class="mbtn" data-close aria-label="Close">✕</button></div>
+    <div class="sheethead"><h2 id="fsTitle">Edit</h2><span class="headbtns"><button type="button" class="hsave" data-save="fsSave" data-de="Sichern">Save</button><button type="button" class="mbtn" data-close aria-label="Close">✕</button></span></div>
     <p class="hint" id="fsHint"></p>
     <div id="fsFields" style="display:flex;flex-direction:column;gap:14px"></div>
     <div class="err" id="fsErr" role="alert"></div>
@@ -908,7 +939,7 @@ tfoot td { font-weight: 700; border-top: 2px solid var(--line); border-bottom: 0
 <div class="sheet" id="planSheet" role="dialog" aria-modal="true" aria-labelledby="planTitle" hidden>
   <form id="planForm" novalidate>
     <div class="grip" aria-hidden="true"></div>
-    <div class="sheethead"><h2 id="planTitle">Paid by your parents</h2><button type="button" class="mbtn" data-close aria-label="Close">✕</button></div>
+    <div class="sheethead"><h2 id="planTitle">Paid by your parents</h2><span class="headbtns"><button type="button" class="hsave" data-save="planSave" data-de="Sichern">Save</button><button type="button" class="mbtn" data-close aria-label="Close">✕</button></span></div>
     <div class="field"><label class="label" for="planName">What</label><input id="planName" maxlength="40" placeholder="e.g. Health insurance"></div>
     <div class="field"><label class="label" for="planAmt">Amount</label><div class="amount"><span>€</span><input id="planAmt" inputmode="decimal" autocomplete="off" placeholder="0.00"></div></div>
     <div class="field"><label class="label" for="planEvery">Paid</label><select id="planEvery"><option value="1">Every month</option><option value="3">Every 3 months</option><option value="6">Every 6 months</option><option value="12">Once a year</option></select></div>
@@ -1275,7 +1306,7 @@ function buildRecords(imp, existing, learned, today) {
   if (LANG === "de") {
     const ATTRS = ["placeholder", "aria-label", "title", "label"];
     const off = (el) => !!(el && el.closest && el.closest("[data-noi18n]"));
-    const trAttr = (el, a) => { const v = el.getAttribute(a); if (v) { const t = TR(v); if (t !== v) el.setAttribute(a, t); } };
+    const trAttr = (el, a) => { const v = el.getAttribute(a); if (v) { const t = v === "0.00" ? "0,00" : TR(v); if (t !== v) el.setAttribute(a, t); } };
     const trText = (n) => {
       const v = n.data, t = TR(v); if (t === v) return;
       const p = n.parentNode;
@@ -1378,33 +1409,49 @@ function buildRecords(imp, existing, learned, today) {
   const SMOD_KEY = "pfm.smod.v1", TOMBS_KEY = "pfm.tombs.v1";
   function localStore() {
     const readJSON = (k, fb) => { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? fb; } catch { return fb; } };
-    const writeJSON = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { return false; } };
+    /* Writes all keys or none: on any failure the earlier keys get their old value back and a "quota_exceeded" error is thrown */
+    const writeAll = (pairs) => {
+      const done = [];
+      try {
+        for (const [k, v] of pairs) { const before = localStorage.getItem(k); localStorage.setItem(k, JSON.stringify(v)); done.push([k, before]); }
+      } catch (e) {
+        for (const [k, before] of done.reverse()) { try { if (before == null) localStorage.removeItem(k); else localStorage.setItem(k, before); } catch { /* ignore */ } }
+        const err = new Error("Local storage write failed"); err.code = "quota_exceeded"; err.cause = e; throw err;
+      }
+    };
     let data = readJSON(LOCAL_KEY, null) ?? readJSON(OLD_LOCAL_KEY, []); if (!Array.isArray(data)) data = [];
     let settings = readJSON(LOCAL_SETTINGS, null) ?? readJSON(OLD_LOCAL_SETTINGS, {});
     /* For sync: when each settings part last changed, and which transactions were deleted for good */
     let smod = readJSON(SMOD_KEY, {}), tombs = readJSON(TOMBS_KEY, {});
     let onEntries = () => {}, onSettings = () => {}, onChange = () => {};
-    const save = () => { if (!writeJSON(LOCAL_KEY, data)) toast("Can't save locally (private window?)"); onEntries(data.slice()); onChange(); };
     const stamp = (list) => { const now = Date.now(); return list.map((e) => ({ ...e, mod: now })); };
-    const bury = (ids) => { const now = Date.now(); ids.forEach((id) => { tombs[id] = now; }); writeJSON(TOMBS_KEY, tombs); };
+    /* Compute the next state, write it, and only then make it the state in memory – a failed write leaves everything as it was */
+    const commitEntries = (next, nextTombs) => {
+      const pairs = [[LOCAL_KEY, next]]; if (nextTombs) pairs.push([TOMBS_KEY, nextTombs]);
+      writeAll(pairs);
+      data = next; if (nextTombs) tombs = nextTombs;
+      onEntries(data.slice()); onChange();
+    };
+    const buried = (ids) => { const now = Date.now(), t = { ...tombs }; ids.forEach((id) => { t[id] = now; }); return t; };
     return {
       mode: "local",
       subscribe(cb) { onEntries = cb; cb(data.slice()); },
       subscribeSettings(cb) { onSettings = cb; cb(settings); },
       onChange(fn) { onChange = fn; },
-      async put(e) { const [x] = stamp([e]); data = data.filter((y) => y.id !== x.id).concat(x); save(); },
-      async remove(id) { bury([id]); data = data.filter((x) => x.id !== id); save(); },
-      async bulkPut(list, prog) { const st = stamp(list), ids = new Set(st.map((e) => e.id)); data = data.filter((x) => !ids.has(x.id)).concat(st); save(); prog && prog(list.length); },
-      async bulkRemove(ids) { bury(ids); const s = new Set(ids); data = data.filter((x) => !s.has(x.id)); save(); },
+      async put(e) { const [x] = stamp([e]); commitEntries(data.filter((y) => y.id !== x.id).concat(x)); },
+      async remove(id) { commitEntries(data.filter((x) => x.id !== id), buried([id])); },
+      async bulkPut(list, prog) { const st = stamp(list), ids = new Set(st.map((e) => e.id)); commitEntries(data.filter((x) => !ids.has(x.id)).concat(st)); prog && prog(list.length); },
+      async bulkRemove(ids) { const s = new Set(ids); commitEntries(data.filter((x) => !s.has(x.id)), buried(ids)); },
       async saveSettings(s) {
-        const now = Date.now(), prev = settings || {};
-        for (const k of new Set([...Object.keys(prev), ...Object.keys(s || {})])) if (JSON.stringify(prev[k]) !== JSON.stringify((s || {})[k])) smod[k] = now;
-        settings = s; writeJSON(LOCAL_SETTINGS, s); writeJSON(SMOD_KEY, smod); onSettings(s); onChange();
+        const now = Date.now(), prev = settings || {}, nextSmod = { ...smod };
+        for (const k of new Set([...Object.keys(prev), ...Object.keys(s || {})])) if (JSON.stringify(prev[k]) !== JSON.stringify((s || {})[k])) nextSmod[k] = now;
+        writeAll([[LOCAL_SETTINGS, s], [SMOD_KEY, nextSmod]]);
+        settings = s; smod = nextSmod; onSettings(s); onChange();
       },
       exportState() { return { entries: data.slice(), settings: settings || {}, smod: { ...smod }, tombs: { ...tombs } }; },
       importState(M) {
+        writeAll([[LOCAL_KEY, M.entries], [LOCAL_SETTINGS, M.settings], [SMOD_KEY, M.smod], [TOMBS_KEY, M.tombs]]);
         data = M.entries.slice(); settings = M.settings; smod = M.smod; tombs = M.tombs;
-        writeJSON(LOCAL_KEY, data); writeJSON(LOCAL_SETTINGS, settings); writeJSON(SMOD_KEY, smod); writeJSON(TOMBS_KEY, tombs);
         onEntries(data.slice()); onSettings(settings);
       }
     };
@@ -1573,7 +1620,7 @@ function buildRecords(imp, existing, learned, today) {
     let h = 2166136261; for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
     return (h >>> 0).toString(36) + ":" + str.length;
   }
-  const syncErrText = (e) => ({ net: "No connection – PFM syncs again when you're online.", auth: "GitHub didn't accept the token – it may have expired. Create a new one and enter it here.",
+  const syncErrText = (e) => (e && e.code === "quota_exceeded" ? writeError(e) : null) || ({ net: "No connection – PFM syncs again when you're online.", auth: "GitHub didn't accept the token – it may have expired. Create a new one and enter it here.",
     perm: "The token may not write to this repository – give it “Contents: Read and write”.", repo: "Repository not found – check the name and that the token may access it.",
     pass: "Wrong sync password – it has to be the same on all your devices.", format: "The sync file in the repository isn't from PFM.", old: "Please update iOS to sync (iPadOS/iOS 16.4 or newer).",
     conflict: "Your other device was saving at the same moment – try again.", public: "This repository is public. Make it private on GitHub first (Settings → Change visibility)." }[e && e.code] || `Sync failed${e && e.status ? ` (GitHub ${e.status})` : ""}. Try again later.`);
@@ -1749,7 +1796,8 @@ function buildRecords(imp, existing, learned, today) {
     await store.saveSettings({ ...state.settings, ...patch, version: 3 });
   }
   function writeError(err) {
-    if (err && err.code === "quota_exceeded") return "Storage is full. Delete old transactions or save a backup.";
+    if (err && err.code === "quota_exceeded") { const t = document.getElementById("toast"); if (t) t.hidden = true; } /* no earlier success message may stay on screen */
+    if (err && err.code === "quota_exceeded") return LANG === "de" ? "Nicht gespeichert – der Speicher ist voll. Bitte Backup sichern." : "Not saved – storage is full. Please save a backup.";
     return "Couldn't save. Check your connection and try again.";
   }
 
@@ -2282,7 +2330,7 @@ function buildRecords(imp, existing, learned, today) {
   let renderIds = [], scopeIds = [];
   function selToolbar(startLabel) {
     if (state.sel) return `<div class="seltools"><button class="more" data-action="sel-all">Select all</button><button class="more" data-action="sel-cancel">Cancel</button></div>`;
-    return `<div class="seltools"><button class="more" data-action="sel-start">${startLabel || "Delete"}</button>${state.trash.length ? `<button class="more" data-action="nav" data-arg="trash">Restore (${state.trash.length})</button>` : ""}</div>`;
+    return `<div class="seltools"><button class="more" data-action="sel-start">${startLabel || "Select"}</button>${state.trash.length ? `<button class="more" data-action="nav" data-arg="trash">Restore (${state.trash.length})</button>` : ""}</div>`;
   }
   const byDateDesc = (a, b) => b.date.localeCompare(a.date) || String(b.created || "").localeCompare(String(a.created || ""));
   const projRange = (p) => p.start || p.end ? `${p.start ? dateFmt.format(isoDate(p.start)) : "…"} – ${p.end ? dateFmt.format(isoDate(p.end)) : "ongoing"}` : "No dates set";
@@ -2968,6 +3016,13 @@ function buildRecords(imp, existing, learned, today) {
         <div class="hubright">${STANDALONE ? `<button class="sync" data-mode="${syncMode}" data-action="nav" data-arg="sync" aria-label="Sync status: ${esc(syncText)}">${esc(syncText)}</button>` : `<span class="sync" data-mode="${syncMode}">${esc(syncText)}</span>`}<button class="gear" data-action="nav" data-arg="manage" aria-label="Settings and tools">${ICON_GEAR}</button></div>
       </header>
       <button class="addbig" data-action="add"><span aria-hidden="true">+</span>Add transaction</button>
+      <section class="accounts" aria-label="Accounts">
+        <span class="label">${hasInv ? "Accounts &amp; investments" : "Account balance"}</span>
+        <div class="acc-total">${known.length ? heroHTML(total) : "–"}</div>
+        ${hasInv && known.length ? `<div class="acc-sub">Liquid ${money(liquid)} · <span class="inv-t">Invested ${money(invested)}</span></div>` : ""}
+        <div class="acc-split">${accs.map((x) => `<button class="acc" data-action="${x.action}" data-arg="${esc(x.arg)}"><span class="label${x.inv ? " inv" : ""}">${esc(x.a)}</span>${x.v != null ? `<b>${money(x.v)}</b>` : `<span class="set">Set balance</span>`}</button>`).join("")}${hasInv ? "" : `<button class="acc" data-action="choose" data-arg="depot"><span class="label inv">Investments</span><span class="set">+ Add</span></button>`}</div>
+        <div class="ytd"><span class="label">Plus since 1 Jan</span><b class="${plus >= 0 ? "pos" : "neg"}">${signed(plus)}</b></div>
+      </section>
       <button class="searchbar hubsearch" data-action="search">${ICON_SEARCH}<span>Search transactions</span></button>
       ${STANDALONE && state.entries.length && (lastBackupDays() == null || lastBackupDays() > 14) ? `<button class="notice" data-action="export-json">Last backup: ${esc(lastBackupText())} · Save a backup now ›</button>` : ""}
       <nav class="tiles" aria-label="Menu">
@@ -2980,17 +3035,10 @@ function buildRecords(imp, existing, learned, today) {
         ${repTile()}
       </nav>
       <div class="minitiles">
-        <button class="mtile" data-action="nav" data-arg="plan"><span class="tile-t">Independence</span>${pd ? `<span class="tile-v">${Math.round(pd.cov * 100)} %</span><span class="tile-s">paid by yourself</span>` : `<span class="tile-s">What you'd need to earn to pay everything yourself</span>`}</button>
-        <button class="mtile" data-action="nav" data-arg="tax"><span class="tile-t">Tax return</span>${txs.hasEmp ? `<span class="tile-v ${txs.refund >= 0 ? "pos" : "neg"}">${signed(txs.refund)}</span><span class="tile-s">estimated ${txs.refund >= 0 ? "refund" : "to pay"} ${y}${txs.R.stale ? ` (${RULES_LATEST} rules)` : ""}</span>` : txs.deductible ? `<span class="tile-v">${money(txs.deductible)}</span><span class="tile-s">deductible in ${y}</span>` : `<span class="tile-s">Collect deductible costs for ${y}</span>`}</button>
+        <button class="mtile" data-action="nav" data-arg="plan"><span class="tile-t" data-de="Unab­hängig­keit">Independence</span>${pd ? `<span class="tile-v">${Math.round(pd.cov * 100)} %</span><span class="tile-s">paid by yourself</span>` : `<span class="tile-s">What you'd need to earn to pay everything yourself</span>`}</button>
+        <button class="mtile" data-action="nav" data-arg="tax"><span class="tile-t" data-de="Steuer­erklärung">Tax return</span>${txs.hasEmp ? `<span class="tile-v ${txs.refund >= 0 ? "pos" : "neg"}">${signed(txs.refund)}</span><span class="tile-s">estimated ${txs.refund >= 0 ? "refund" : "to pay"} ${y}${txs.R.stale ? ` (${RULES_LATEST} rules)` : ""}</span>` : txs.deductible ? `<span class="tile-v">${money(txs.deductible)}</span><span class="tile-s">deductible in ${y}</span>` : `<span class="tile-s">Collect deductible costs for ${y}</span>`}</button>
       </div>
-      ${spkTile()}
-      <section class="accounts" aria-label="Accounts">
-        <span class="label">${hasInv ? "Accounts &amp; investments" : "Account balance"}</span>
-        <div class="acc-total">${known.length ? heroHTML(total) : "–"}</div>
-        ${hasInv && known.length ? `<div class="acc-sub">Liquid ${money(liquid)} · <span class="inv-t">Invested ${money(invested)}</span></div>` : ""}
-        <div class="acc-split">${accs.map((x) => `<button class="acc" data-action="${x.action}" data-arg="${esc(x.arg)}"><span class="label${x.inv ? " inv" : ""}">${esc(x.a)}</span>${x.v != null ? `<b>${money(x.v)}</b>` : `<span class="set">Set balance</span>`}</button>`).join("")}${hasInv ? "" : `<button class="acc" data-action="choose" data-arg="depot"><span class="label inv">Investments</span><span class="set">+ Add</span></button>`}</div>
-        <div class="ytd"><span class="label">Plus since 1 Jan</span><b class="${plus >= 0 ? "pos" : "neg"}">${signed(plus)}</b></div>
-      </section>`;
+      ${spkTile()}`;
   }
 
 
@@ -3401,7 +3449,7 @@ function buildRecords(imp, existing, learned, today) {
       const studies = Array.isArray(d.studies) ? d.studies.filter((x) => x && (x.kind === "first" || x.kind === "second")).map((x) => ({ id: typeof x.id === "string" ? x.id : tid(), kind: x.kind, name: String(x.name || "").slice(0, 60), from: x.from || "", to: x.to || "" })) : T.studies;
       await patchSettings({ tax: { ...T, years, studies } });
       state.taxYear = Object.keys(d.years).sort().pop(); render(); toast("Tax data imported");
-    } catch { toast("Couldn't read that file"); }
+    } catch (err) { toast(err && err.code === "quota_exceeded" ? writeError(err) : "Couldn't read that file"); }
   }
 
   /* ---------- Independence plan ---------- */
@@ -3522,10 +3570,10 @@ function buildRecords(imp, existing, learned, today) {
       ${backBar()}
       <h1 class="vtitle">Settings &amp; tools</h1>
       <section class="sec"><div class="sechead"><h2 class="sectitle">Your data</h2></div>
-        ${navRow("nav", "import", { text: "Import CSV" }, "DKB, PayPal or Expenses app – PFM offers a backup afterwards")}
         ${navRow("export-json", "", { text: "Save backup" }, STANDALONE ? `Last backup: ${lastBackupText()}` : "All transactions and settings in one file")}
         ${navRow("nav", "data", { text: "Data & backup" }, "Load a backup, export CSV, undo imports, start screen")}
         ${STANDALONE ? navRow("nav", "sync", { text: "Sync iPhone & iPad" }, (() => { const c = syncCfg(); return !c ? "Off – set up with a GitHub token" : c.error ? c.error : c.last ? `On · last synced ${new Date(c.last).toLocaleTimeString(LOC, { hour: "2-digit", minute: "2-digit" })}` : "On"; })()) : ""}
+        ${state.entries.length ? navRow("nav", "import", { text: "Import CSV" }, "DKB, PayPal or Expenses app – PFM offers a backup afterwards") : `<button type="button" class="textlink" data-action="nav" data-arg="import">Import CSV</button>`}
       </section>
       <section class="sec"><div class="sechead"><h2 class="sectitle">Planning</h2></div>
         ${planRows()}
@@ -4005,6 +4053,7 @@ function buildRecords(imp, existing, learned, today) {
       sub = (n ? `${n} ${n === 1 ? L("instruction open", "Anweisung offen") : L("instructions open", "Anweisungen offen")}` : L("Nothing to do right now", "Gerade nichts zu tun")) + ` · ${L("as of", "Stand")} ${sWhen(spk.data.exportedAt)}`;
     } else if (on) sub = L("What to buy or sell in Trade Republic today", "Was du heute in Trade Republic kaufen oder verkaufen sollst");
     else sub = url ? L("What to buy or sell in Trade Republic today · opens in Claude", "Was du heute in Trade Republic kaufen oder verkaufen sollst · öffnet in Claude") : L("Add the link once – then the AI tells you what to do", "Einmal den Link eintragen – dann sagt dir die KI, was zu tun ist");
+    if (!url && !spk.data) return ""; /* not set up yet – reachable under ⚙ only */
     const inner = `<span class="tile-l"><span class="tile-t">${L("AI play account", "KI-Spielkonto")}</span><span class="tile-s">${esc(sub)}</span></span><span class="spkic">${SPK_ICON}</span><span class="chev" aria-hidden="true">›</span>`;
     return !on && url ? `<a class="tile spktile" data-noi18n href="${esc(url)}" target="_blank" rel="noopener">${inner}</a>` : `<button class="tile spktile" data-noi18n data-action="nav" data-arg="spielkonto">${inner}</button>`;
   }
@@ -5294,6 +5343,17 @@ function buildRecords(imp, existing, learned, today) {
     ["entrySheet", "limitSheet", "projectSheet", "recSheet", "balSheet", "bulkSheet", "objSheet", "chooseSheet", "planSheet", "formSheet"].forEach((id) => { $(id).hidden = true; });
     $("backdrop").hidden = true; state.editingId = null; state.limitCat = null; state.projectId = null;
   }
+  /* Head "Save" buttons press the sheet's own save button (which is disabled while saving) */
+  document.addEventListener("click", (ev) => { const b = ev.target.closest && ev.target.closest(".hsave"); if (!b) return; ev.preventDefault(); const t = $(b.dataset.save); if (t && !t.disabled) t.click(); });
+  /* With the keyboard open, end the sheet at the keyboard so its head (and Save) stays on screen */
+  function fitSheet() {
+    const vv = window.visualViewport; if (!vv) return;
+    const gap = Math.max(0, Math.round(window.innerHeight - vv.height - vv.offsetTop));
+    SHEETS.forEach((id) => { const el = $(id); if (!el) return; if (el.hidden || gap < 40) { el.style.bottom = ""; el.style.maxHeight = ""; } else { el.style.bottom = gap + "px"; el.style.maxHeight = Math.round(vv.height * 0.96) + "px"; } });
+  }
+  if (window.visualViewport) { visualViewport.addEventListener("resize", fitSheet); visualViewport.addEventListener("scroll", fitSheet); }
+  /* An error in a sheet scrolls into view – the Save in the head may be far from the message */
+  document.querySelectorAll(".sheet .err").forEach((el) => new MutationObserver(() => { if (el.textContent.trim()) el.scrollIntoView({ block: "nearest", behavior: "smooth" }); }).observe(el, { childList: true, characterData: true, subtree: true }));
   function parseAmount(raw) { const v = parseNum(raw); if (v == null || v <= 0) return null; const c = Math.round(v * 100); return c > 0 ? c : null; }
   const toInput = (c) => (c / 100).toFixed(2).replace(".", DEC);
 
@@ -5307,6 +5367,8 @@ function buildRecords(imp, existing, learned, today) {
     $("catWrap").hidden = tr; $("projWrap").hidden = tr; $("spreadWrap").hidden = tr; $("toWrap").hidden = !tr; $("taxMore").hidden = tr; fillTaxKinds(t);
     if (tr) $("entryMore").open = true;
     $("catHint").hidden = true;
+    if (tr) $("favRow").hidden = true; else if (!state.editingId) fillFavs(true);
+    fillNoteList();
     $("accountLabel").textContent = tr ? "From" : "Account";
     $("note").placeholder = tr ? "e.g. Savings plan" : t === "ein" ? "e.g. Salary, Übungsleiter" : "e.g. Rewe, Spotify, rent";
     if (tr) { $("catChips").innerHTML = ""; return; }
@@ -5331,13 +5393,64 @@ function buildRecords(imp, existing, learned, today) {
     }
     el.textContent = parts.join(" · ");
   }
-  /* Suggest the category from the description, with the same merchant rules the import uses (Rewe → Groceries) */
+  /* What you typed before: per description the latest category, how often it was used, and the frequent entries of the last 90 days */
+  let histCache = null;
+  function entryHistory() {
+    if (histCache && histCache.src === state.entries) return histCache;
+    const byNote = { aus: new Map(), ein: new Map() }, since = addDays(todayISO(), -90), favMap = new Map();
+    for (const e of state.entries) {
+      if (e.type !== "aus" && e.type !== "ein") continue;
+      const note = (e.note || "").trim(), key = normText(note); if (!key) continue;
+      const m = byNote[e.type], h = m.get(key) || { note, n: 0, cat: "", at: "" };
+      h.n++;
+      const at = e.date + (e.created || "");
+      if (at > h.at) { h.at = at; h.note = note; if (e.cat && e.cat !== UNCAT) h.cat = e.cat; }
+      m.set(key, h);
+      if (e.recurring || e.batch || e.date < since) continue; /* favourites: only what you typed in yourself */
+      const fk = `${e.type}|${key}|${e.cat}|${e.account}`, f = favMap.get(fk) || { type: e.type, note, cat: e.cat, account: e.account, n: 0, at: "", cents: 0 };
+      f.n++; if (at > f.at) { f.at = at; f.cents = e.cents; f.note = note; }
+      favMap.set(fk, f);
+    }
+    const favs = [...favMap.values()].filter((f) => f.n >= 2).sort((a, b) => b.n - a.n || b.at.localeCompare(a.at)).slice(0, 6);
+    histCache = { src: state.entries, byNote, favs };
+    return histCache;
+  }
+  function fillNoteList() {
+    const dl = $("noteList"); if (!dl) return;
+    if (state.type === "tr") { dl.innerHTML = ""; return; }
+    const list = [...entryHistory().byNote[state.type].values()].sort((a, b) => b.n - a.n || b.at.localeCompare(a.at)).slice(0, 150);
+    dl.innerHTML = list.map((h) => `<option value="${esc(h.note)}"></option>`).join("");
+  }
+  function fillFavs(show) {
+    const row = $("favRow"), favs = show ? entryHistory().favs : [];
+    row.hidden = !favs.length;
+    row.innerHTML = favs.length ? `<span class="favl">${L("Frequent", "Häufig")}</span>` + favs.map((f, i) => `<button type="button" class="fav${f.type === "ein" ? " in" : ""}" data-fav="${i}"><b>${esc(f.note)}</b><span>${f.type === "ein" ? "+" : ""}${esc(money(f.cents))} · ${esc(TR(f.cat))}</span></button>`).join("") : "";
+  }
+  $("favRow").addEventListener("click", (ev) => {
+    const b = ev.target.closest(".fav"); if (!b) return;
+    const f = entryHistory().favs[Number(b.dataset.fav)]; if (!f) return;
+    setType(f.type, f.cat); fillNoteList();
+    $("note").value = f.note;
+    if ([...$("account").options].some((o) => o.value === f.account)) $("account").value = f.account; else $("account").innerHTML = accountOptions(f.account);
+    $("amount").value = toInput(f.cents);
+    catTouched = true; $("catHint").hidden = true; dupArmed = ""; $("entryErr").textContent = "";
+    syncMoreSum();
+    const a = $("amount"); a.focus(); try { a.setSelectionRange(0, a.value.length); } catch { /* ignore */ }
+  });
+  /* A typed expense with the same amount as a fixed cost PFM booked by itself (±3 days) – ask once before saving it a second time */
+  let dupArmed = "";
+  function autoTwin(cents, date) {
+    const lo = addDays(date, -3), hi = addDays(date, 3);
+    return state.entries.find((e) => e.type === "aus" && e.cents === cents && e.recurring && /^r.+x\d{8}$/.test(e.id) && e.date >= lo && e.date <= hi) || null;
+  }
+  /* Suggest the category from the description: first what you used for it before, then the merchant rules the import uses (Rewe → Groceries) */
   function suggestCat() {
     const hint = $("catHint");
     if (catTouched || state.type === "tr") { hint.hidden = true; return; }
     const v = $("note").value.trim();
     if (v.length < 3) { hint.hidden = true; return; }
-    const g = autoCat(v, "", state.type, state.settings.rules);
+    const past = entryHistory().byNote[state.type].get(normText(v));
+    const g = past && past.cat && CATS[state.type].includes(past.cat) ? past.cat : autoCat(v, "", state.type, state.settings.rules);
     const ok = state.type === "aus" ? g !== UNCAT && CATS.aus.includes(g) : g !== rn("Other income") && CATS.ein.includes(g);
     const inp = ok ? [...document.querySelectorAll('#catChips input[name="cat"]')].find((x) => x.value === g) : null;
     if (!inp) { hint.hidden = true; return; }
@@ -5379,7 +5492,8 @@ function buildRecords(imp, existing, learned, today) {
     syncSpreadUI();
     $("makeRecurring").hidden = !entry || !!entry.recurring;
     $("makeAsset").hidden = !entry || entry.type !== "aus" || state.settings.balance.items.some((it) => it.txId === entry.id);
-    $("entryErr").textContent = "";
+    $("entryErr").textContent = ""; dupArmed = "";
+    fillFavs(!entry);
     showSheet("entrySheet");
     if (!entry) setTimeout(() => $("amount").focus(), 60);
   }
@@ -5422,6 +5536,15 @@ function buildRecords(imp, existing, learned, today) {
     if (state.type === "aus" && TAX_KINDS[tk]) { const sh = parseInt($("taxShare").value, 10); entry.tax = { kind: tk, share: sh >= 1 && sh <= 100 ? sh : 100, receipt: $("taxReceipt").checked }; if (TAX_KINDS[tk].subs) entry.tax.sub = $("taxSub").value || "other"; }
     else if (state.type === "ein" && TAX_IN_KINDS[tk]) entry.tax = { kind: tk };
     if (spm > 1) { let st = $("spreadStart").value.trim(); if (!/^\d{4}-\d{2}$/.test(st)) st = date.slice(0, 7); entry.spread = { months: spm, start: st }; }
+    if (!old && entry.type === "aus") {
+      const twin = autoTwin(cents, date), key = twin ? `${twin.id}|${cents}|${date}` : "";
+      if (twin && dupArmed !== key) {
+        dupArmed = key;
+        const nm = twin.note || TR(twin.cat), d = new Intl.DateTimeFormat(LOC, { day: "numeric", month: "long" }).format(isoDate(twin.date));
+        $("entryErr").textContent = L(`Looks like ${nm} from ${d} – PFM already booked that automatically. Save anyway?`, `Sieht aus wie ${nm} vom ${d} – das hat PFM schon automatisch gebucht. Trotzdem speichern?`);
+        return;
+      }
+    }
     $("saveBtn").disabled = true;
     try {
       await store.put(entry);
@@ -5446,7 +5569,7 @@ function buildRecords(imp, existing, learned, today) {
     const b = $("deleteBtn");
     if (!state.armed) { state.armed = true; b.classList.add("armed"); b.textContent = "Really delete?"; return; }
     try { const id = state.editingId; await softDelete([id]); closeSheets(); }
-    catch { $("entryErr").textContent = "Couldn't delete. Try again."; disarm(); }
+    catch (err) { $("entryErr").textContent = err && err.code === "quota_exceeded" ? writeError(err) : "Couldn't delete. Try again."; disarm(); }
   });
 
   /* Limit sheet */
@@ -5630,7 +5753,9 @@ function buildRecords(imp, existing, learned, today) {
       const autoRules = [...learnedRules.keys()].filter((id) => { const r = state.settings.recurring.find((x) => x.id === id); return r && r.mode !== "import"; });
       imp.done = { count: todo.length, batch, review: todo.filter((e) => e.cat === UNCAT).length, fixed: learnedRules.size, replaced: replaced.length, autoRules };
     } catch (err) {
-      imp.done = null; toast(writeError(err) + " Saved rows can be undone under Data & backup.");
+      imp.done = null;
+      if (err && err.code === "quota_exceeded") imp.error = writeError(err); /* nothing was written – the preview stays, the message shows under the file picker */
+      else toast(writeError(err) + " Saved rows can be undone under Data & backup.");
     }
     imp.running = null;
     render();
@@ -5644,7 +5769,7 @@ function buildRecords(imp, existing, learned, today) {
       toast(`${ids.length} imported transactions removed`);
       if (state.imp && state.imp.done && state.imp.done.batch === id) state.imp = null;
       render();
-    } catch { toast("Couldn't undo the import. Try again."); render(); }
+    } catch (err) { toast(err && err.code === "quota_exceeded" ? writeError(err) : "Couldn't undo the import. Try again."); render(); }
   }
 
   /* Export / backup */
@@ -5695,7 +5820,7 @@ function buildRecords(imp, existing, learned, today) {
         customCats: { aus: uniq(st.customCats.aus.concat(s.customCats.aus)), ein: uniq(st.customCats.ein.concat(s.customCats.ein)) }
       });
       toast(`${list.length} transactions loaded`);
-    } catch { toast("That file isn't a valid backup"); }
+    } catch (err) { toast(err && err.code === "quota_exceeded" ? writeError(err) : "That file isn't a valid backup"); }
   }
 
   let toastTimer;
@@ -5756,7 +5881,7 @@ function buildRecords(imp, existing, learned, today) {
       if (add.length) await store.bulkPut(add);
       await patchSettings({ recurring: next });
       if (add.length) toast(`${add.length} fixed ${add.length === 1 ? "payment" : "payments"} booked`);
-    } catch (err) { console.warn(err); }
+    } catch (err) { console.warn(err); if (err && err.code === "quota_exceeded") toast(writeError(err)); }
     finally { booking = false; }
   }
   let recType = "aus", recMode = "auto", recModeTouched = false;
@@ -6092,10 +6217,8 @@ function buildRecords(imp, existing, learned, today) {
     const set = new Set(ids), now = new Date().toISOString();
     const list = state.entries.filter((e) => set.has(e.id)).map((e) => ({ ...e, deletedAt: now }));
     if (!list.length) return;
-    try {
-      await store.bulkPut(list);
-      toast(`${list.length} ${list.length === 1 ? "transaction" : "transactions"} deleted`, { label: "Restore", fn: () => restore(list.map((e) => e.id)) });
-    } catch (err) { toast(writeError(err)); }
+    await store.bulkPut(list); /* errors go to the caller, which shows them where the user is */
+    toast(`${list.length} ${list.length === 1 ? "transaction" : "transactions"} deleted`, { label: "Restore", fn: () => restore(list.map((e) => e.id)) });
   }
   async function restore(ids) {
     const set = new Set(ids);
@@ -6156,7 +6279,7 @@ function buildRecords(imp, existing, learned, today) {
     if (!state.sel.armed) { state.sel.armed = true; render(); return; }
     const ids = [...state.sel.ids];
     state.sel = null; render();
-    await softDelete(ids);
+    try { await softDelete(ids); } catch (err) { toast(writeError(err)); }
   });
 
   /* ================= Categories: add, rename, reorder, delete ================= */
