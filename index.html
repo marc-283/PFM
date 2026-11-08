@@ -27,7 +27,7 @@ img { max-width: 100%; }
 </style>
 <script>
 window.PFM_STANDALONE = true;
-window.PFM_VERSION = "1.11.0";
+window.PFM_VERSION = "1.12.0";
 try { document.documentElement.lang = localStorage.getItem("pfm.lang") === "de" ? "de" : "en"; } catch (e) { /* stays en */ }
 if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
 </script>
@@ -670,6 +670,35 @@ body:not(.notabs) .toast { bottom: calc(var(--tabh) + 76px + env(safe-area-inset
 .minitiles.one { grid-template-columns: minmax(0, 1fr); }
 .areas { display: flex; flex-direction: column; gap: 14px; padding-top: 4px; }
 @media (max-width: 360px) { .tabbar button { font-size: 10px; letter-spacing: 0; } .tabbar svg { width: 23px; height: 23px; } }
+/* 1.12: overview month card, empty balance */
+.acc-empty { margin: 2px 0 0; max-width: 300px; color: var(--muted); font-size: 15.5px; line-height: 1.4; }
+.monthcard { border: 1px solid var(--line); border-radius: 18px; background: var(--surface); overflow: hidden; }
+.mc-main { width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 14px; align-items: center; padding: 18px 16px; border: 0; background: none; color: inherit; font: inherit; text-align: left; }
+.mc-main .tile-l { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.mc-big { font-weight: 600; font-size: clamp(30px, 10vw, 38px); line-height: 1.05; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.mc-big .dec { font-size: 0.55em; }
+.mc-rep { width: 100%; display: flex; align-items: center; gap: 10px; border: 0; border-top: 1px solid var(--line); background: none; color: var(--ink); font: inherit; font-size: 14px; text-align: left; padding: 12px 16px; }
+.mc-rept { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* 1.12: calmer Cash flows tab */
+.vhead { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 12px; }
+.vhead .vtitle { flex: 1 1 150px; }
+.vhead-r { display: flex; align-items: center; gap: 8px; flex: none; margin-left: auto; }
+.miniseg { display: flex; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 3px; }
+.miniseg button { border: 0; background: none; color: var(--muted); font: inherit; font-size: 13px; font-weight: 600; padding: 6px 11px; border-radius: 999px; white-space: nowrap; }
+.miniseg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.infobtn { width: 30px; height: 30px; flex: none; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); color: var(--muted); font: inherit; font-family: Georgia, serif; font-style: italic; font-weight: 700; font-size: 15px; line-height: 1; }
+.infobtn[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.vhead + .basis-hint { margin-top: -14px; }
+.periodnav { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(0, 0.9fr) minmax(0, 1.15fr); flex-wrap: nowrap; }
+.periodnav > label { min-width: 0; display: block; }
+.periodnav .psel { width: 100%; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rangebtn { text-align: left; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%238E8E96' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); padding-right: 36px; }
+@media (max-width: 360px) { .periodnav { gap: 6px; } .periodnav .psel { font-size: 14px; padding-left: 10px; padding-right: 22px; background-position: right 7px center; } .miniseg button { padding: 6px 9px; font-size: 12.5px; } }
+.fab { width: 58px; height: 58px; padding: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55); }
+.fab span { font-size: 32px; font-weight: 600; line-height: 1; margin-top: -2px; }
+.fav { max-width: 140px; }
+.fab { transition: opacity 0.18s ease, transform 0.18s ease; }
+.fab.dodge { opacity: 0; transform: scale(0.6); pointer-events: none; }
 </style>
 
 <div class="app" id="app"><main class="view" id="view"></main></div>
@@ -682,7 +711,7 @@ body:not(.notabs) .toast { bottom: calc(var(--tabh) + 76px + env(safe-area-inset
   <button type="button" data-tab="more"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5.5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="18.5" cy="12" r="1.5"/></svg><span data-de="Mehr">More</span></button>
 </nav>
 
-<button class="fab" id="addBtn"><span aria-hidden="true">+</span>Add</button>
+<button class="fab" id="addBtn" aria-label="Add transaction"><span aria-hidden="true">+</span></button>
 <div class="backdrop" id="backdrop" hidden></div>
 
 <div class="sheet" id="entrySheet" role="dialog" aria-modal="true" aria-labelledby="entryTitle" hidden>
@@ -1891,7 +1920,7 @@ function buildRecords(imp, existing, learned, today) {
           ${custom ? `<option value="" selected disabled hidden>Year</option>` : ""}
           ${ys.map((y) => `<option value="${y}"${!custom && state.year === y ? " selected" : ""}>${y}</option>`).join("")}
         </select></label>
-        <button class="psel rangebtn" data-action="range-toggle" aria-pressed="${custom}">Custom range</button>
+        <button class="psel rangebtn" data-action="range-toggle" aria-pressed="${custom}">${L("Custom", "Eigener")}</button>
       </div>
       ${custom ? `<div class="rangerow">
           <label class="field"><span class="label">From</span><input type="date" class="psel datein" id="rangeFrom${sfx}" value="${r.from}" max="${r.to}"></label>
@@ -2336,7 +2365,7 @@ function buildRecords(imp, existing, learned, today) {
       return `<button class="row nochev" data-action="entry" data-arg="${esc(e.id)}"${state.sel ? ` aria-pressed="${on ? "true" : "false"}"` : ""}>
         ${state.sel ? `<span class="checkc${on ? " on" : ""}" aria-hidden="true">${on ? "✓" : ""}</span>` : `<span class="badge" style="color:#9AA3AD;background:#9AA3AD24" aria-hidden="true">⇄</span>`}
         <span class="main"><span class="t1">${esc(e.note || "Transfer")}${e.recurring ? '<span class="tag">Fixed</span>' : ""}</span>
-        <span class="t2">${esc(e.account)} → ${esc(e.toAccount)} · ${esc(dayFmt.format(isoDate(e.date)))}</span></span>
+        <span class="t2">${esc(e.account)} → ${esc(e.toAccount)}${opt && opt.noDate ? "" : " · " + esc(dayFmt.format(isoDate(e.date)))}</span></span>
         <span class="val">${money(e.cents)}</span></button>`;
     }
     const p = e.project && projById(e.project), back = isRefund(e);
@@ -2346,7 +2375,7 @@ function buildRecords(imp, existing, learned, today) {
     return `<button class="row nochev" data-action="entry" data-arg="${esc(e.id)}"${state.sel ? ` aria-pressed="${on ? "true" : "false"}"` : ""}>
       ${state.sel ? `<span class="checkc${on ? " on" : ""}" aria-hidden="true">${on ? "✓" : ""}</span>` : badge(e.cat, e.type)}
       <span class="main"><span class="t1">${esc(e.note || e.cat)}${tags}</span>
-      <span class="t2">${esc(e.note && e.note !== e.cat ? e.cat + (back ? " (money back)" : "") + " · " : back ? "Money back · " : "")}${esc(e.account)}${p ? " · " + esc(p.name) : ""} · ${esc(dayFmt.format(isoDate(e.date)))}${opt && opt.note ? " · " + esc(opt.note) : ""}</span></span>
+      <span class="t2">${esc(e.note && e.note !== e.cat ? e.cat + (back ? " (money back)" : "") + " · " : back ? "Money back · " : "")}${esc(e.account)}${p ? " · " + esc(p.name) : ""}${opt && opt.noDate ? "" : " · " + esc(dayFmt.format(isoDate(e.date)))}${opt && opt.note ? " · " + esc(opt.note) : ""}</span></span>
       <span class="val ${e.type === "ein" ? "pos" : "neg"}">${e.type === "ein" ? "+" : "−"}${money(opt && opt.cents != null ? opt.cents : e.cents)}</span>
     </button>`;
   }
@@ -2402,7 +2431,7 @@ function buildRecords(imp, existing, learned, today) {
     for (const e of items) { if (!days.has(e.date)) days.set(e.date, []); days.get(e.date).push(e); }
     return [...days.entries()].map(([date, its]) => {
       const t = totals(its);
-      return `<div class="dayhead"><span>${esc(dayFmt.format(isoDate(date)))}</span><span class="tn">${signed(t.i - t.o)}</span></div>${its.map(entryRow).join("")}`;
+      return `<div class="dayhead"><span>${esc(dayFmt.format(isoDate(date)))}</span>${its.length > 1 ? `<span class="tn">${signed(t.i - t.o)}</span>` : ""}</div>${its.map((e) => entryRow(e, { noDate: true })).join("")}`;
     }).join("");
   }
   function viewHome() {
@@ -2431,13 +2460,22 @@ function buildRecords(imp, existing, learned, today) {
     const unc = uncategorized().length;
     return `
       ${backBar()}
-      <h1 class="vtitle">Cash flows</h1>
-      ${basisSeg()}
+      ${cfHead()}
       ${periodNav()}
       ${catChart("chHome", state.cfMode === "all" ? "All" : state.homeCat, state.cfMode, seg + chips)}
       ${state.cfMode === "all" ? netBlock("chNet", series("All", "all")) : ""}
       ${unc ? `<section class="sec">${navRow("review", "", { text: `${unc} ${unc === 1 ? "transaction needs" : "transactions need"} a category`, badge: badge(UNCAT) }, "Tap to sort them – the app learns from your choices")}</section>` : ""}
       ${listHTML}`;
+  }
+  function cfHead() {
+    const b = state.basis === "calc" ? "calc" : "paid";
+    return `<div class="vhead" data-noi18n>
+        <h1 class="vtitle">${L("Cash flows", "Einnahmen &amp; Ausgaben")}</h1>
+        <div class="vhead-r"><div class="miniseg" role="group" aria-label="${esc(L("Count by", "Zählen nach"))}"><button type="button" data-action="basis" data-arg="paid" aria-pressed="${b === "paid"}">${L("Paid", "Gezahlt")}</button><button type="button" data-action="basis" data-arg="calc" aria-pressed="${b === "calc"}">${L("Calculated", "Kalkuliert")}</button></div>
+        <button type="button" class="infobtn" data-action="basis-info" aria-pressed="${!!state.basisInfo}" aria-label="${esc(L("What do Paid and Calculated mean?", "Was heißt Gezahlt und Kalkuliert?"))}">i</button></div>
+      </div>
+      ${state.basisInfo ? `<p class="hint basis-hint" data-noi18n>${esc(L("Paid: when the money left or arrived (Auszahlung). Calculated: what each month really cost – yearly payments spread over their months (Aufwand).", "Gezahlt: wann das Geld abging oder ankam (Auszahlung). Kalkuliert: was jeder Monat wirklich gekostet hat – Jahreszahlungen auf ihre Monate verteilt (Aufwand)."))}</p>` : ""}
+      <button class="searchbar hubsearch" data-action="search">${ICON_SEARCH}<span>${L("Search transactions", "Buchungen durchsuchen")}</span></button>`;
   }
   function basisSeg() {
     const b = state.basis === "calc" ? "calc" : "paid";
@@ -2497,7 +2535,7 @@ function buildRecords(imp, existing, learned, today) {
     for (const e of shown) { if (!days.has(e.date)) days.set(e.date, []); days.get(e.date).push(e); }
     const body = [...days.entries()].map(([date, items]) => {
       const t = totals(items);
-      return `<div class="dayhead"><span>${esc(dayFmt.format(isoDate(date)))}</span><span class="tn">${signed(t.i - t.o)}</span></div>${items.map(entryRow).join("")}`;
+      return `<div class="dayhead"><span>${esc(dayFmt.format(isoDate(date)))}</span>${items.length > 1 ? `<span class="tn">${signed(t.i - t.o)}</span>` : ""}</div>${items.map((e) => entryRow(e, { noDate: true })).join("")}`;
     }).join("");
     const unc = uncategorized().length;
     const pills = [["all", "All"], ["aus", "Expenses"], ["ein", "Income"]].concat(unc || review ? [["review", `To review (${unc})`]] : []);
@@ -2875,8 +2913,7 @@ function buildRecords(imp, existing, learned, today) {
     const spread = state.entries.filter((e) => e.spread && e.spread.months > 1).filter((e) => { const st = e.spread.start || e.date.slice(0, 7), en = shiftMonth(st, e.spread.months - 1); return st <= r.to.slice(0, 7) && en >= r.from.slice(0, 7); }).sort((a, b) => b.cents - a.cents);
     return `
       ${backBar()}
-      <h1 class="vtitle">Cash flows</h1>
-      ${basisSeg()}
+      ${cfHead()}
       ${periodNav()}
       ${catChart("chCalc", cat, mode, between, true)}
       ${mode === "all" ? netBlock("chCalcNet", series("All", "all", true)) : ""}
@@ -3045,16 +3082,12 @@ function buildRecords(imp, existing, learned, today) {
     const mt = totals(state.entries.filter((e) => e.date.startsWith(cm)));
     const ytd = totals(state.entries.filter((e) => e.date.startsWith(y + "-") && e.date <= todayISO()));
     const last6 = Array.from({ length: 6 }, (_, k) => spentInMonth(shiftMonth(cm, k - 5), "All"));
-    const calcVals = accrual(y, "out").slice(0, mon);
-    const avg = calcAvg(y);
-    const hasBal = state.settings.balance.items.length > 0;
-    const nets = hasBal ? Array.from({ length: 6 }, (_, k) => balanceAt(shiftMonth(cm, k - 5)).net) : [];
     const accs = HUB_ACCOUNTS.map((a) => ({ a, v: accountBalance(a), inv: false, action: "acc", arg: a }));
     state.settings.balance.items.filter((it) => it.kind === "depot" && it.showHome !== false).forEach((it) => accs.push({ a: it.name, v: itemValue(it, cm), inv: true, action: "bal-item", arg: it.id }));
     const known = accs.filter((x) => x.v != null), total = known.reduce((s, x) => s + x.v, 0);
     const liquid = known.filter((x) => !x.inv).reduce((s, x) => s + x.v, 0), invested = known.filter((x) => x.inv).reduce((s, x) => s + x.v, 0);
     const hasInv = accs.some((x) => x.inv);
-    const bal = mt.i - mt.o, plus = ytd.i - ytd.o;
+    const plus = ytd.i - ytd.o;
     const pd = state.settings.plan.items.length ? planData() : null, txs = taxCalc(String(y));
     return `
       <header class="hubhead">
@@ -3064,26 +3097,31 @@ function buildRecords(imp, existing, learned, today) {
       <button class="addbig" data-action="add"><span aria-hidden="true">+</span>Add transaction</button>
       <section class="accounts" aria-label="Accounts">
         <span class="label">${hasInv ? "Accounts &amp; investments" : "Account balance"}</span>
-        <div class="acc-total">${known.length ? heroHTML(total) : "–"}</div>
+        ${known.length ? `<div class="acc-total">${heroHTML(total)}</div>` : `<p class="acc-empty">${esc(L("Enter your account balances to see your net worth", "Trag deine Kontostände ein, um dein Vermögen zu sehen"))}</p>`}
         ${hasInv && known.length ? `<div class="acc-sub">Liquid ${money(liquid)} · <span class="inv-t">Invested ${money(invested)}</span></div>` : ""}
         <div class="acc-split">${accs.map((x) => `<button class="acc" data-action="${x.action}" data-arg="${esc(x.arg)}"><span class="label${x.inv ? " inv" : ""}">${esc(x.a)}</span>${x.v != null ? `<b>${money(x.v)}</b>` : `<span class="set">Set balance</span>`}</button>`).join("")}${hasInv ? "" : `<button class="acc" data-action="choose" data-arg="depot"><span class="label inv">Investments</span><span class="set">+ Add</span></button>`}</div>
-        <div class="ytd"><span class="label">Plus since 1 Jan</span><b class="${plus >= 0 ? "pos" : "neg"}">${signed(plus)}</b></div>
+        ${known.length ? `<div class="ytd"><span class="label">Plus since 1 Jan</span><b class="${plus >= 0 ? "pos" : "neg"}">${signed(plus)}</b></div>` : ""}
       </section>
-      <button class="searchbar hubsearch" data-action="search">${ICON_SEARCH}<span>Search transactions</span></button>
       ${STANDALONE && state.entries.length && (lastBackupDays() == null || lastBackupDays() > 14) ? `<button class="notice" data-action="export-json">Last backup: ${esc(lastBackupText())} · Save a backup now ›</button>` : ""}
-      <nav class="tiles" aria-label="Menu">
-        <button class="tile" data-action="nav" data-arg="cashflow">
-          <span class="tile-l"><span class="tile-t">Cash flows</span><span class="tile-v">${money(mt.o)} <span class="tile-s">paid in ${esc(monthName.format(new Date()))}</span></span><span class="tile-s">Calculated <b class="calcv">${money(Math.round(avg))}</b> a month · balance <span class="${bal >= 0 ? "pos" : "neg"}">${signed(bal)}</span></span></span>
-          <span class="sparks">${spark(last6, "var(--ink)")}${spark(calcVals, "var(--accent)")}</span><span class="chev" aria-hidden="true">›</span></button>
-        <button class="tile" data-action="nav" data-arg="balance">
-          <span class="tile-l"><span class="tile-t">Balance sheet</span>${hasBal ? `<span class="tile-v">${money(balanceAt(cm).net)} <span class="tile-s">net worth</span></span>` : ""}<span class="tile-s">${hasBal ? "Assets, liabilities, equity" : "Set up assets and liabilities"}</span></span>
-          ${spark(nets, "var(--accent)")}<span class="chev" aria-hidden="true">›</span></button>
-        ${repTile()}
-      </nav>
+      ${monthCard(mt, last6)}
       ${(() => { const hd = state.settings.hide || {}, t = [hd.plan ? "" : `<button class="mtile" data-action="nav" data-arg="plan"><span class="tile-t" data-de="Unab­hängig­keit">Independence</span>${pd ? `<span class="tile-v">${Math.round(pd.cov * 100)} %</span><span class="tile-s">paid by yourself</span>` : `<span class="tile-s">What you'd need to earn to pay everything yourself</span>`}</button>`, hd.tax ? "" : `<button class="mtile" data-action="nav" data-arg="tax"><span class="tile-t" data-de="Steuer­erklärung">Tax return</span>${txs.hasEmp ? `<span class="tile-v ${txs.refund >= 0 ? "pos" : "neg"}">${signed(txs.refund)}</span><span class="tile-s">estimated ${txs.refund >= 0 ? "refund" : "to pay"} ${y}${txs.R.stale ? ` (${RULES_LATEST} rules)` : ""}</span>` : txs.deductible ? `<span class="tile-v">${money(txs.deductible)}</span><span class="tile-s">deductible in ${y}</span>` : `<span class="tile-s">Collect deductible costs for ${y}</span>`}</button>`].filter(Boolean);
         return t.length ? `<div class="minitiles${t.length === 1 ? " one" : ""}">${t.join("")}</div>` : ""; })()}
       ${spkTile()}
       ${recentHTML()}`;
+  }
+  /* This month at a glance – tapping it opens the Cash flows tab; a new report gets its own small line */
+  function monthCard(mt, last6) {
+    const mn = monthName.format(new Date()), bal = mt.i - mt.o;
+    const news = firstDataDate() ? ["month", "week", "quarter", "half", "year"].map((k) => ({ k, key: repLatestDone(k) })).filter((x) => x.key && repIsNew(x.k, x.key)) : [];
+    const n0 = news[0];
+    return `<div class="monthcard" data-noi18n>
+      <button class="mc-main" data-action="nav" data-arg="cashflow">
+        <span class="tile-l"><span class="label">${esc(L(`Expenses ${mn}`, `Ausgaben ${mn}`))}</span>
+          <span class="mc-big">${heroHTML(mt.o)}</span>
+          <span class="tile-s">${esc(L("Income", "Einnahmen"))} <span class="pos">${money(mt.i)}</span> · ${esc(L("Balance", "Saldo"))} <span class="${bal >= 0 ? "pos" : "neg"}">${signed(bal)}</span></span></span>
+        ${spark(last6, "var(--ink)")}<span class="chev" aria-hidden="true">›</span></button>
+      ${n0 ? `<button class="mc-rep" data-action="rep-jump" data-arg="${n0.k}:${esc(n0.key)}"><span class="repnew">${L("New", "Neu")}</span><span class="mc-rept">${esc(repTitle(n0.k))} ${esc(repLabel(n0.k, n0.key, n0.k === "week" ? "short" : "long"))}${news.length > 1 ? esc(L(` + ${news.length - 1} more`, ` + ${news.length - 1} weitere`)) : ""}</span><span class="chev" aria-hidden="true">›</span></button>` : ""}
+    </div>`;
   }
   /* The last few transactions you typed in – tap one to fix it */
   function recentHTML() {
@@ -5151,6 +5189,7 @@ function buildRecords(imp, existing, learned, today) {
     charts.forEach((c) => drawChart($(c.id), c));
     if (state.full) renderFull();
     $("addBtn").hidden = !["cashflow", "list", "cat", "project", "budgets"].includes(top.v) || !!state.sel;
+    requestAnimationFrame(fabDodge);
     const tb = $("tabbar"), noTabs = !!state.sel; /* the selection bar takes the tab bar's place */
     tb.hidden = noTabs; document.body.classList.toggle("notabs", noTabs);
     tb.querySelectorAll("[data-tab]").forEach((b) => { const on = b.dataset.tab === state.tab; b.classList.toggle("on", on); b.setAttribute("aria-current", on ? "page" : "false"); });
@@ -5207,6 +5246,7 @@ function buildRecords(imp, existing, learned, today) {
       case "sync-copy": { const c = syncCfg(); if (!c) break; const code = setupCode(c);
         (navigator.clipboard ? navigator.clipboard.writeText(code) : Promise.reject()).then(() => toast("Setup code copied – paste it on your other device")).catch(() => { window.prompt(TR("Copy this setup code:"), code); }); break; }
       case "sync-off": { if (!state.syncArmed) { state.syncArmed = true; a.textContent = "Really stop? Data stays here"; a.classList.add("armed"); break; } state.syncArmed = false; saveSyncCfg(null); showSyncLabel(); toast("Sync stopped on this device"); render(); break; }
+      case "basis-info": state.basisInfo = !state.basisInfo; render(); break;
       case "basis": {
         const to = arg === "calc" ? "calc" : "paid";
         if (to === "calc") { state.calcMode = state.cfMode; state.calcCat = state.homeCat; } else { state.cfMode = state.calcMode; state.homeCat = state.calcCat; }
@@ -5224,6 +5264,7 @@ function buildRecords(imp, existing, learned, today) {
       case "rep-kind": state.repKind = arg; state.repMore = false; render(); break;
       case "rep-more": state.repMore = true; render(); break;
       case "rep-open": go("report", arg); break;
+      case "rep-jump": openTab("reports"); go("report", arg); break;
       case "rep-go": { const top = state.stack[state.stack.length - 1]; top.p = arg; render(); window.scrollTo(0, 0); break; }
       case "rep-mode": state.repMode = arg === "long" ? "long" : "short"; try { localStorage.setItem(REP_MODE_KEY, state.repMode); } catch { /* ignore */ } render(); break;
       case "rep-pdf": repPdf(arg); break;
@@ -5401,7 +5442,7 @@ function buildRecords(imp, existing, learned, today) {
   $("backdrop").addEventListener("click", () => requestClose());
   $("addBtn").addEventListener("click", () => openEntry(null));
   $("note").addEventListener("input", suggestCat);
-  $("catChips").addEventListener("change", (ev) => { if (ev.isTrusted) { catTouched = true; $("catHint").hidden = true; } });
+  $("catChips").addEventListener("change", (ev) => { if (ev.isTrusted) { catTouched = true; $("catHint").hidden = true; } if (/categor|Kategorie/.test($("entryErr").textContent)) $("entryErr").textContent = ""; });
   $("entryForm").addEventListener("input", syncMoreSum);
   $("entryForm").addEventListener("change", syncMoreSum);
 
@@ -5446,6 +5487,16 @@ function buildRecords(imp, existing, learned, today) {
     $("backdrop").hidden = true; state.editingId = null; state.limitCat = null; state.projectId = null;
     $("guard").hidden = true; guardFor = null;
   }
+  /* The round + steps aside while a chart is underneath it, so it never covers the chart */
+  function fabDodge() {
+    const f = $("addBtn"); if (!f || f.hidden) return;
+    const r = f.getBoundingClientRect(), pad = 6;
+    const hit = [...document.querySelectorAll("#view .chart svg")].some((c) => { const b = c.getBoundingClientRect(); return b.bottom > r.top - pad && b.top < r.bottom + pad && b.right > r.left - pad && b.left < r.right + pad; });
+    f.classList.toggle("dodge", hit);
+  }
+  let fabTick = 0;
+  window.addEventListener("scroll", () => { if (!fabTick) fabTick = requestAnimationFrame(() => { fabTick = 0; fabDodge(); }); }, { passive: true });
+  window.addEventListener("resize", () => requestAnimationFrame(fabDodge));
   /* Head "Save" buttons press the sheet's own save button (which is disabled while saving) */
   document.addEventListener("click", (ev) => { const b = ev.target.closest && ev.target.closest(".hsave"); if (!b) return; ev.preventDefault(); const t = $(b.dataset.save); if (t && !t.disabled) t.click(); });
   /* With the keyboard open, end the sheet at the keyboard so its head (and Save) stays on screen */
@@ -5477,7 +5528,7 @@ function buildRecords(imp, existing, learned, today) {
     if (tr) { $("catChips").innerHTML = ""; return; }
     const main = CATS[t].slice(), extra = t === "ein" ? CATS.aus.slice() : [];
     if (keepCat && !main.includes(keepCat) && !extra.includes(keepCat) && (t === "ein" || !CATS.ein.includes(keepCat))) main.push(keepCat);
-    const sel = keepCat && main.concat(extra).includes(keepCat) ? keepCat : main[0];
+    const sel = keepCat && main.concat(extra).includes(keepCat) ? keepCat : null; /* no silent default: you pick it, or a favourite / the description suggests it */
     const chip = (c, i) => `<label class="chip"><input type="radio" name="cat" id="cat-${t}-${i}" value="${esc(c)}"${c === sel ? " checked" : ""}><span>${esc(c)}</span></label>`;
     $("catChips").innerHTML = main.map(chip).join("") + `<button type="button" class="chipbtn" data-action="entry-newcat">+ New category</button>` + (extra.length ? `<span class="chipgroup">Money back for</span>` + extra.map((c, i) => chip(c, main.length + i)).join("") : "");
     $("entryNewCat").hidden = true; $("entryNewCatName").value = "";
@@ -5527,7 +5578,7 @@ function buildRecords(imp, existing, learned, today) {
   function fillFavs(show) {
     const row = $("favRow"), favs = show ? entryHistory().favs : [];
     row.hidden = !favs.length;
-    row.innerHTML = favs.length ? `<span class="favl">${L("Frequent", "Häufig")}</span>` + favs.map((f, i) => `<button type="button" class="fav${f.type === "ein" ? " in" : ""}" data-fav="${i}"><b>${esc(f.note)}</b><span>${f.type === "ein" ? "+" : ""}${esc(money(f.cents))} · ${esc(TR(f.cat))}</span></button>`).join("") : "";
+    row.innerHTML = favs.length ? `<span class="favl">${L("Frequent", "Häufig")}</span>` + favs.map((f, i) => `<button type="button" class="fav${f.type === "ein" ? " in" : ""}" data-fav="${i}"><b>${esc(f.note)}</b><span>${f.type === "ein" ? "+" : ""}${esc(money(f.cents))}</span></button>`).join("") : "";
   }
   $("favRow").addEventListener("click", (ev) => {
     const b = ev.target.closest(".fav"); if (!b) return;
@@ -5611,6 +5662,7 @@ function buildRecords(imp, existing, learned, today) {
     const date = $("date").value;
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) { $("entryErr").textContent = "Pick a date."; return; }
     const catInput = document.querySelector('input[name="cat"]:checked');
+    if (state.type !== "tr" && !catInput) { $("entryErr").textContent = L("Please choose a category.", "Bitte eine Kategorie wählen."); return; }
     const old = state.editingId ? state.entries.find((e) => e.id === state.editingId) : null;
     if (state.type === "tr") {
       const from = $("account").value, to = $("toAccount").value;
